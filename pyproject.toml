@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "OVAPortableText"
+version = "0.1.0a1"
+description = "Python models and builders for generating OVAPortableText report JSON."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "FENG QU" }
+]
+dependencies = [
+  "pydantic>=2.8"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/OVAPortableText"
+Repository = "https://github.com/your-org/OVAPortableText"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ova_portable_text"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
