@@ -4,33 +4,52 @@ build-backend = "hatchling.build"
 
 [project]
 name = "OVAPortableText"
-version = "0.1.0a1"
-description = "Python models and builders for generating OVAPortableText report JSON."
+version = "0.1.1"
+description = "Python builder for generating OVAPortableText / Report Profile v1 JSON documents"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
 authors = [
   { name = "FENG QU" }
 ]
 dependencies = [
-  "pydantic>=2.8"
+  "pydantic>=2.8,<3"
 ]
 classifiers = [
-  "Development Status :: 3 - Alpha",
-  "Intended Audience :: Developers",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
-  "Topic :: Software Development :: Libraries :: Python Modules"
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Typing :: Typed"
 ]
 
-[project.urls]
-Homepage = "https://github.com/your-org/OVAPortableText"
-Repository = "https://github.com/your-org/OVAPortableText"
+[project.optional-dependencies]
+dev = [
+  "build>=1.2",
+  "pytest>=8",
+  "ruff>=0.6"
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ova_portable_text"]
 
-[tool.pytest.ini_options]
-pythonpath = ["src"]
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+  "/examples",
+  "/docs",
+  "/README.md",
+  "/CHANGELOG.md",
+  "/LICENSE",
+  "/pyproject.toml"
+]
+
+[tool.ruff]
+line-length = 100
