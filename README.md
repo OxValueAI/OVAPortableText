@@ -2,7 +2,7 @@
 
 A Python package for building JSON documents that conform to the **OVAPortableText / Report Profile v1.0** protocol.
 
-OVAPortableText 的目标不是直接渲染 PDF，而是让 Python 端**以强类型、可校验、可维护**的方式，生成符合协议的 JSON；再交给 Java 侧去渲染 PDF。
+OVAPortableText 的目标不是直接渲染 PDF，而是让 Python 端**以强类型、可校验、可维护**的方式，生成符合协议的 JSON；再交给渲染器去渲染 PDF。
 
 ## Current scope / 当前实现范围
 
@@ -39,20 +39,10 @@ Step 9 currently includes:
 
 ## Install / 安装
 
-### Local development / 本地开发
+### PIP
 
 ```bash
-pip install -e .
-```
-
-### Release-style build test / 类发布方式构建测试
-
-```bash
-python -m pip install --upgrade build
-python -m build
-python -m venv .venv-test-wheel
-source .venv-test-wheel/bin/activate
-pip install dist/*.whl
+pip install OVAPortableText
 ```
 
 ## Quick start / 快速开始
@@ -174,6 +164,7 @@ print(restored.meta.title)
 
 Step 8 adds maintenance-friendly context in each issue, such as:
 第 8 步开始，每条 issue 会尽量附带更适合维护的上下文，例如：
+
 - `sectionId`
 - `sectionTitle`
 - `contextType`
@@ -218,17 +209,6 @@ print(resolver.resolve_xref(target_type="section", target_id="sec-1"))
 - `examples/save_and_load_json_demo.py`
 - `examples/patent_valuation_style_report.py`
 
-
-## Release readiness / 发布准备
-
-Step 9 adds release-oriented engineering pieces:
-
-- `LICENSE`
-- `CHANGELOG.md`
-- `py.typed`
-- GitHub Actions CI workflow
-- `docs/API_REFERENCE.md`
-- `docs/PUBLISHING_CHECKLIST.md`
 
 ## Version / 版本
 
