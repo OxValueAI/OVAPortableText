@@ -1,20 +1,21 @@
-from ova_portable_text import Document, DocumentMeta, Section
+"""Minimal example / 最小示例。"""
+
+from ova_portable_text import create_document, section
 
 
-def build_report() -> Document:
-    doc = Document(meta=DocumentMeta(title="Patent Valuation Report", language="en"))
+report = create_document(
+    title="Demo Report",
+    language="en",
+    documentType="report",
+)
 
-    section = Section(id="sec-1", level=1, title="Executive Summary")
-    section.append_paragraph("This is the opening introduction of the chapter.")
+intro = section(id="sec-intro", level=1, title="Introduction")
+intro.append_paragraph("This is the first paragraph.")
 
-    subsection = Section(id="sec-1-1", level=2, title="Background")
-    subsection.append_paragraph("This is the body text of subsection 1.1.")
-    section.append_subsection(subsection)
+background = section(id="sec-background", level=2, title="Background")
+background.append_paragraph("This is a nested subsection paragraph.")
+intro.append_subsection(background)
 
-    section.append_paragraph("This is a concluding paragraph after subsection 1.1.")
-    doc.append_section(section)
-    return doc
+report.append_section(intro)
 
-
-if __name__ == "__main__":
-    print(build_report().to_json(indent=2))
+print(report.to_json())

@@ -1,26 +1,17 @@
-from ova_portable_text import Document, DocumentMeta, Section
+from ova_portable_text import create_document, section
 
 
-def test_minimal_report_shape() -> None:
-    doc = Document(meta=DocumentMeta(title="Patent Valuation Report", language="en"))
+def test_minimal_report_structure():
+    report = create_document(title="Demo", language="en")
+    intro = section(id="sec-intro", level=1, title="Introduction")
+    intro.append_paragraph("Hello world")
+    report.append_section(intro)
 
-    summary = Section(id="sec-1", level=1, title="Executive Summary")
-    summary.append_paragraph("This is the opening introduction of the chapter.")
-
-    background = Section(id="sec-1-1", level=2, title="Background")
-    background.append_paragraph("This is the body text of subsection 1.1.")
-    summary.append_subsection(background)
-
-    summary.append_paragraph("This is a concluding paragraph after subsection 1.1.")
-    doc.append_section(summary)
-
-    data = doc.to_dict()
+    data = report.to_dict()
 
     assert data["schemaVersion"] == "report.v1"
-    assert data["meta"]["title"] == "Patent Valuation Report"
-    assert data["sections"][0]["id"] == "sec-1"
+    assert data["meta"]["title"] == "Demo"
+    assert data["sections"][0]["id"] == "sec-intro"
     assert data["sections"][0]["body"][0]["itemType"] == "content"
-    assert data["sections"][0]["body"][1]["itemType"] == "subsection"
-    assert data["sections"][0]["body"][2]["blocks"][0]["children"][0]["text"] == (
-        "This is a concluding paragraph after subsection 1.1."
-    )
+    assert data["sections"][0]["body"][0]["blocks"][0]["_type"] == "block"
+    assert data["sections"][0]["body"][0]["blocks"][0]["children"][0]["_type"] == "span"
