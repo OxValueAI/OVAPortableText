@@ -23,7 +23,7 @@ without constantly constructing nested body-item wrappers by hand.
 而不必不断手动构造嵌套 body-item 包装对象。
 """
 
-from typing import Literal
+from typing import Literal, TypeAlias
 
 from pydantic import Field, model_validator
 
@@ -31,6 +31,9 @@ from .base import OvaBaseModel
 from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .content import BlockElement, ContentItem, MarkDef, TextBlock, TextChild, TextStyle
 from .text import ListItemStyle
+
+
+NumberingMode: TypeAlias = Literal["auto", "none", "manual"]
 
 
 class SubsectionItem(OvaBaseModel):
@@ -57,7 +60,7 @@ class Section(OvaBaseModel):
     id: str
     level: int
     title: str
-    numbering: str = "auto"
+    numbering: NumberingMode = "auto"
     anchor: str | None = None
     body: list[ContentItem | SubsectionItem] = Field(default_factory=list)
 
@@ -78,6 +81,74 @@ class Section(OvaBaseModel):
         """
         self.body.append(content)
         return self
+
+    def _get_or_create_last_content(self) -> ContentItem:
+        """
+        Return the last body item when it is a `ContentItem`, otherwise create one.
+        若当前最后一个 body item 是 `ContentItem` 则直接复用，否则新建一个。
+
+        Why is this helper useful?
+        为什么这个 helper 有用？
+        The protocol says a `content` item represents one continuous reading flow.
+        In authoring code, users often want to keep appending related blocks into
+        that same flow, instead of accidentally creating many tiny one-block items.
+        协议规定 `content` 表示一段连续阅读流。在编写代码时，用户经常希望把
+        一组相关 block 继续追加到同一个 flow 中，而不是无意中拆成很多单块 item。
+        """
+        if self.body and isinstance(self.body[-1], ContentItem):
+            return self.body[-1]
+        content = ContentItem()
+        self.body.append(content)
+        return content
+
+    def append_to_last_content(self, block: BlockElement) -> "Section":
+        """
+        Append one block into the current trailing `ContentItem` when possible.
+        尽量把一个 block 追加到当前末尾的 `ContentItem` 中。
+
+        If the section currently ends with a subsection or is empty, a new
+        `ContentItem` is created automatically.
+        如果当前 section 为空，或者末尾是 subsection，则会自动新建一个
+        `ContentItem` 再追加。
+        """
+        self._get_or_create_last_content().append_block(block)
+        return self
+
+    def append_blocks_to_last_content(self, *blocks: BlockElement) -> "Section":
+        """
+        Append multiple blocks into the current trailing `ContentItem`.
+        把多个 block 追加到当前末尾的 `ContentItem` 中。
+
+        This is especially useful for preserving one continuous content flow across
+        several authoring calls.
+        这特别适合在多次 authoring 调用之间，继续保持同一个连续内容流。
+        """
+        content = self._get_or_create_last_content()
+        for block in blocks:
+            content.append_block(block)
+        return self
+
+    def append_text_block_to_last_content(self, block: TextBlock) -> "Section":
+        """
+        Append a prepared text block to the current trailing `ContentItem`.
+        把一个现成文本块追加到当前末尾的 `ContentItem` 中。
+        """
+        self._get_or_create_last_content().append_text_block(block)
+        return self
+
+    def append_paragraph_to_last_content(
+        self,
+        *parts: str | TextChild,
+        style: TextStyle = "normal",
+        mark_defs: list[MarkDef] | None = None,
+    ) -> "Section":
+        """
+        Append one paragraph-style text block to the current trailing `ContentItem`.
+        把一个段落型文本块追加到当前末尾的 `ContentItem` 中。
+        """
+        return self.append_text_block_to_last_content(
+            TextBlock.from_parts(*parts, style=style, mark_defs=mark_defs)
+        )
 
     def append_block(self, block: BlockElement) -> "Section":
         """
@@ -388,7 +459,7 @@ class Section(OvaBaseModel):
         *,
         id: str,
         title: str,
-        numbering: str = "auto",
+        numbering: NumberingMode = "auto",
         anchor: str | None = None,
         append: bool = True,
     ) -> "Section":

@@ -22,11 +22,14 @@ This file therefore contains:
 3. convenience methods for append-style authoring / 便于 append 风格写作的快捷方法
 """
 
-from typing import Any
+from collections import Counter
+from typing import Any, Iterable
 
 from pydantic import ConfigDict, Field
 
 from .base import OvaBaseModel
+from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
+from .content import ContentItem
 from .numbering import DocumentNumbering, NumberingConfig
 from .registry import (
     AssetsRegistry,
@@ -43,7 +46,7 @@ from .registry import (
     PieChartDataset,
     TableDataset,
 )
-from .section import Section
+from .section import NumberingMode, Section, SubsectionItem
 from .theme import ThemeConfig
 
 
@@ -102,6 +105,7 @@ class Document(OvaBaseModel):
     """
 
     schemaVersion: str = "report.v1"
+    strict_ids: bool = Field(default=False, exclude=True, repr=False)
     meta: DocumentMeta = Field(default_factory=DocumentMeta)
     theme: ThemeConfig = Field(default_factory=ThemeConfig)
     assets: AssetsRegistry = Field(default_factory=AssetsRegistry)
@@ -111,11 +115,92 @@ class Document(OvaBaseModel):
     glossary: list[GlossaryEntry] = Field(default_factory=list)
     sections: list[Section] = Field(default_factory=list)
 
+    def _iter_section_target_ids(self, section: Section) -> Iterable[str]:
+        """
+        Yield all globally-resolvable target IDs inside one section subtree.
+        产出一个 section 子树内部所有“全局可解析目标”的 ID。
+
+        The scope intentionally mirrors the resolver's duplicate-id coverage:
+        这个范围刻意与 resolver 的 duplicate-id 覆盖保持一致：
+        - section ids
+        - block object ids currently indexed by the resolver
+        - nested subsection targets recursively
+        """
+        yield section.id
+        for item in section.body:
+            if isinstance(item, ContentItem):
+                for block in item.blocks:
+                    if isinstance(block, (ImageBlock, ChartBlock, TableBlock, MathBlock, CalloutBlock)):
+                        yield block.id
+            elif isinstance(item, SubsectionItem):
+                yield from self._iter_section_target_ids(item.section)
+
+    def _iter_global_target_ids(self) -> Iterable[str]:
+        """
+        Yield all currently registered global target IDs in the document.
+        产出当前 document 中所有已注册的全局目标 ID。
+        """
+        for section in self.sections:
+            yield from self._iter_section_target_ids(section)
+
+        for asset in self.assets.images:
+            yield asset.id
+        for asset in self.assets.logos:
+            yield asset.id
+        for asset in self.assets.backgrounds:
+            yield asset.id
+        for asset in self.assets.icons:
+            yield asset.id
+        for asset in self.assets.attachments:
+            yield asset.id
+
+        for chart in self.datasets.charts:
+            yield chart.id
+        for table in self.datasets.tables:
+            yield table.id
+        for metric in self.datasets.metrics:
+            yield metric.id
+
+        for item in self.bibliography:
+            yield item.id
+        for item in self.footnotes:
+            yield item.id
+        for item in self.glossary:
+            yield item.id
+
+    def _ensure_ids_are_available(self, ids: Iterable[str], *, context: str) -> None:
+        """
+        Fail early when `strict_ids=True` and incoming IDs are not globally unique.
+        当 `strict_ids=True` 时，若即将加入的 ID 不是全局唯一，则尽早失败。
+        """
+        if not self.strict_ids:
+            return
+
+        incoming_ids = list(ids)
+        incoming_counts = Counter(incoming_ids)
+        duplicate_incoming = [id_value for id_value, count in incoming_counts.items() if count > 1]
+        if duplicate_incoming:
+            rendered = ", ".join(repr(id_value) for id_value in duplicate_incoming)
+            raise ValueError(f"Duplicate id(s) inside {context}: {rendered}")
+
+        existing_ids = set(self._iter_global_target_ids())
+        conflicts = [id_value for id_value in incoming_ids if id_value in existing_ids]
+        if conflicts:
+            rendered = ", ".join(repr(id_value) for id_value in dict.fromkeys(conflicts))
+            raise ValueError(
+                f"Duplicate global id(s) detected while appending {context}: {rendered}. "
+                "Disable strict_ids to defer this to document validation."
+            )
+
     def append_section(self, section: Section) -> "Document":
         """
         Append one top-level section.
         追加一个顶层 section。
         """
+        self._ensure_ids_are_available(
+            self._iter_section_target_ids(section),
+            context=f"section {section.id!r}",
+        )
         self.sections.append(section)
         return self
 
@@ -124,7 +209,8 @@ class Document(OvaBaseModel):
         Append multiple top-level sections in one call.
         一次追加多个顶层 section。
         """
-        self.sections.extend(sections)
+        for section in sections:
+            self.append_section(section)
         return self
 
     def new_section(
@@ -133,7 +219,7 @@ class Document(OvaBaseModel):
         id: str,
         level: int,
         title: str,
-        numbering: str = "auto",
+        numbering: NumberingMode = "auto",
         anchor: str | None = None,
         append: bool = True,
     ) -> Section:
@@ -162,6 +248,7 @@ class Document(OvaBaseModel):
         Append an `assets.images` entry.
         追加一个 `assets.images` 条目。
         """
+        self._ensure_ids_are_available([asset.id], context=f"image asset {asset.id!r}")
         self.assets.append_image(asset)
         return self
 
@@ -170,6 +257,7 @@ class Document(OvaBaseModel):
         Append an `assets.logos` entry.
         追加一个 `assets.logos` 条目。
         """
+        self._ensure_ids_are_available([asset.id], context=f"logo asset {asset.id!r}")
         self.assets.append_logo(asset)
         return self
 
@@ -178,6 +266,7 @@ class Document(OvaBaseModel):
         Append an `assets.backgrounds` entry.
         追加一个 `assets.backgrounds` 条目。
         """
+        self._ensure_ids_are_available([asset.id], context=f"background asset {asset.id!r}")
         self.assets.append_background(asset)
         return self
 
@@ -186,6 +275,7 @@ class Document(OvaBaseModel):
         Append an `assets.icons` entry.
         追加一个 `assets.icons` 条目。
         """
+        self._ensure_ids_are_available([asset.id], context=f"icon asset {asset.id!r}")
         self.assets.append_icon(asset)
         return self
 
@@ -194,6 +284,7 @@ class Document(OvaBaseModel):
         Append an `assets.attachments` entry.
         追加一个 `assets.attachments` 条目。
         """
+        self._ensure_ids_are_available([asset.id], context=f"attachment asset {asset.id!r}")
         self.assets.append_attachment(asset)
         return self
 
@@ -205,6 +296,7 @@ class Document(OvaBaseModel):
         Append a `datasets.tables` entry.
         追加一个 `datasets.tables` 条目。
         """
+        self._ensure_ids_are_available([table.id], context=f"table dataset {table.id!r}")
         self.datasets.append_table(table)
         return self
 
@@ -213,6 +305,7 @@ class Document(OvaBaseModel):
         Append a `datasets.charts` entry.
         追加一个 `datasets.charts` 条目。
         """
+        self._ensure_ids_are_available([chart.id], context=f"chart dataset {chart.id!r}")
         self.datasets.append_chart(chart)
         return self
 
@@ -221,6 +314,7 @@ class Document(OvaBaseModel):
         Append a `datasets.metrics` entry.
         追加一个 `datasets.metrics` 条目。
         """
+        self._ensure_ids_are_available([metric.id], context=f"metric dataset {metric.id!r}")
         self.datasets.append_metric(metric)
         return self
 
@@ -232,6 +326,7 @@ class Document(OvaBaseModel):
         Append one bibliography entry.
         追加一个 bibliography 条目。
         """
+        self._ensure_ids_are_available([entry.id], context=f"bibliography entry {entry.id!r}")
         self.bibliography.append(entry)
         return self
 
@@ -240,6 +335,7 @@ class Document(OvaBaseModel):
         Append one footnote entry.
         追加一个 footnote 条目。
         """
+        self._ensure_ids_are_available([entry.id], context=f"footnote {entry.id!r}")
         self.footnotes.append(entry)
         return self
 
@@ -248,6 +344,7 @@ class Document(OvaBaseModel):
         Append one glossary entry.
         追加一个 glossary 条目。
         """
+        self._ensure_ids_are_available([entry.id], context=f"glossary entry {entry.id!r}")
         self.glossary.append(entry)
         return self
 
@@ -293,6 +390,7 @@ class Document(OvaBaseModel):
         cls,
         *,
         theme: ThemeConfig | dict[str, Any] | None = None,
+        strict_ids: bool = False,
         **meta_fields: Any,
     ) -> "Document":
         """
@@ -300,4 +398,4 @@ class Document(OvaBaseModel):
         一个备用构造器：直接从 metadata 字段创建 document。
         """
         theme_value = theme if isinstance(theme, ThemeConfig) else ThemeConfig(**(theme or {}))
-        return cls(meta=DocumentMeta(**meta_fields), theme=theme_value)
+        return cls(meta=DocumentMeta(**meta_fields), theme=theme_value, strict_ids=strict_ids)
