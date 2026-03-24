@@ -85,7 +85,7 @@ from .registry import (
     TableDataset,
 )
 from .resolver import DocumentResolver, ResolvedTarget
-from .section import Section
+from .section import NumberingMode, Section
 from .theme import ThemeConfig
 from .validator import assert_valid_document, validate_document
 from .version import __version__
