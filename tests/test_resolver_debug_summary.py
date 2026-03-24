@@ -1,9 +1,9 @@
-from ova_portable_text import create_document, image_asset, image_block, section
+from ova_portable_text import create_document, image_asset_url, image_block, section
 
 
 def test_resolver_debug_summary_and_counts() -> None:
     report = create_document(title="Resolver Demo", language="en")
-    report.add_image_asset(image_asset(id="img-1", src="https://example.com/a.png"))
+    report.add_image_asset(image_asset_url(id="img-1", url="https://example.com/a.png"))
 
     sec = section(id="sec-1", level=1, title="Intro")
     sec.append_block(image_block(id="fig-1", image_ref="img-1"))

@@ -141,6 +141,16 @@ Important notes:
 - it does **not** serialize into final JSON
 - full validation is still available through `validate()` / `assert_valid()`
 
+## Image helpers / 图片 helper
+
+- `image_asset(...)`
+- `image_asset_url(...)`
+- `image_asset_embedded(...)`
+- `image_asset_from_file(...)`
+
+Image assets now use the protocol-native `imageSource` field.
+图片资源现在使用协议原生的 `imageSource` 字段。
+
 ## Compatibility helpers / 兼容性 helper
 
 - `pie_chart_from_parallel_arrays(...)`

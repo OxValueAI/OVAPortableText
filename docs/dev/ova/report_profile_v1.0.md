@@ -36,7 +36,7 @@
    - `footnotes`
    - `glossary`
    - `sections`
-4. 最后看第 15～18 章，理解统一引用模型、回退策略、校验要求与非目标。
+4. 最后看第 15～20 章，理解统一引用模型、回退策略、校验要求与非目标。
 
 ### 1.2 协议范围
 
@@ -664,7 +664,7 @@ Portable Text 负责提供通用富文本骨架。
 
 `schemaVersion` 表示当前文档所遵循的协议版本。渲染器必须按该值分发解析逻辑。
 
-当前版本固定值：
+当前版本固定值： `report.v1.0`
 
 ### 6.3 渲染器要求
 
@@ -736,20 +736,7 @@ Portable Text 负责提供通用富文本骨架。
 
 - 当前版本中，除了明确指定的格式与枚举值需要校验，其余字符串字段不做格式约束
 
-### 7.5 与 py 包当前实现的对齐关系
 
-当前 `OVAPortableText` 已对本节列出的字段提供正式模型字段支持。但当前 py 包尚未对以下内容做强校验：
-
-- `language` / `locale` 的标准格式校验
-- `date` 的日期格式校验
-- `generatedAt` 的时间格式校验
-- `documentType` / `confidentiality` / `reportType` 的枚举值校验
-
-因此，当前版本的协议应将这些字段视为：
-
-- 字段名已正式商定
-- 值类型已正式定义
-- 具体枚举暂未商定
 
 ---
 
@@ -1127,21 +1114,7 @@ Portable Text 负责提供通用富文本骨架。
 * 渲染器可以忽略 `attachments`
 * 校验器只需检查其顶层值类型为数组
 
-### 9.10 与 py 包当前实现的对齐关系
 
-当前 `OVAPortableText` 已正式支持：
-
-* `assets.images`
-* `imageSource.kind = "url"`
-* `imageSource.kind = "embedded"`
-* 通过 helper 创建 URL 型与 embedded 型图片资源
-
-当前 `OVAPortableText` 尚未对以下内容做进一步强约束：
-
-* `mimeType` 的完整 MIME 合法性校验
-* `checksum` 格式的强校验
-* `width / height` 是否为正整数的更严格约束
-* `logos / backgrounds / icons / attachments` 的独立专用 helper 体系
 
 ---
 
@@ -1351,7 +1324,7 @@ Portable Text 负责提供通用富文本骨架。
 
 规则：
 
-* `label` 当前版本建议采用语言对象，而不是单一字符串
+* `label` 当前版本采用多语言对象，而不是简单字符串，若仅提供单语言，也应至少保证存在一个可展示值
 * 渲染器可按以下顺序选择显示值：
 
 1. `meta.language`
@@ -1373,7 +1346,7 @@ Portable Text 负责提供通用富文本骨架。
 
 规则：
 
-* `description` 当前版本建议采用语言对象
+* `description` 当前版本采用多语言对象，而不是简单字符串，若仅提供单语言，也应至少保证存在一个可展示值
 * 若未提供，渲染器不应报错
 * 若提供，渲染器可以用于：
 * 图下注释
@@ -1604,15 +1577,15 @@ Portable Text 负责提供通用富文本骨架。
 ##### 10.5.6.2 正式字段表
 
 
-| 字段名        | 类型    | 是否必须 | 含义                               | 值格式 / 说明      |
-| ------------- | ------- | -------- | ---------------------------------- | ------------------ |
-| `id`          | string  | 是       | 表格数据唯一标识                   | 文档内全局唯一     |
-| `anchor`      | string  | 否       | 表格数据锚点                       | 省略时可回退为`id` |
-| `label`       | string  | 否       | 人类可读标签                       | 普通字符串         |
-| `meta`        | object  | 否       | 附加元信息                         | 当前不商定内部字段 |
-| `tableType`   | string  | 是       | 表格模式                           | `grid`             |
-| `columnCount` | integer | 是       | 表格逻辑列数（所有行中最大的列数） | 便于渲染器计算布局 |
-| `rows`        | array   | 是       | 行数据数组                         | 见 10.5.6.4        |
+| 字段名        | 类型    | 是否必须 | 含义                                               | 值格式 / 说明      |
+| ------------- | ------- | -------- | -------------------------------------------------- | ------------------ |
+| `id`          | string  | 是       | 表格数据唯一标识                                   | 文档内全局唯一     |
+| `anchor`      | string  | 否       | 表格数据锚点                                       | 省略时可回退为`id` |
+| `label`       | string  | 否       | 人类可读标签                                       | 普通字符串         |
+| `meta`        | object  | 否       | 附加元信息                                         | 当前不商定内部字段 |
+| `tableType`   | string  | 是       | 表格模式                                           | `grid`             |
+| `columnCount` | integer | 是       | 表格逻辑列数（不存在横跨多列的单元格时应有的列数） | 便于渲染器计算布局 |
+| `rows`        | array   | 是       | 行数据数组                                         | 见 10.5.6.4        |
 
 ##### 10.5.6.3 正式结构
 
@@ -1679,16 +1652,16 @@ Portable Text 负责提供通用富文本骨架。
 **单元格字段表**
 
 
-| 字段名          | 类型    | 是否必须 | 含义                                        | 值格式 / 说明                       |
-| --------------- | ------- | -------- | ------------------------------------------- | ----------------------------------- |
-| `text`          | string  | 否       | 单元格纯文本内容                            | 与`blocks` 二选一                   |
-| `blocks`        | array   | 否       | 单元格富文本内容，Portable Text blocks 数组 | 与`text` 二选一                     |
-| `header`        | boolean | 否       | 是否为表头单元格                            | 默认`false`                         |
-| `colSpan`       | integer | 否       | 跨列数                                      | 默认`1`                             |
-| `rowSpan`       | integer | 否       | 跨行数                                      | 默认`1`                             |
-| `align`         | string  | 否       | 水平对齐方式                                | 当前建议值：`left`/`center`/`right` |
-| `verticalAlign` | string  | 否       | 垂直对齐方式                                | 当前建议值：`top`/`middle`/`bottom` |
-| `meta`          | object  | 否       | 单元格附加元信息                            | 当前不商定内部字段                  |
+| 字段名          | 类型    | 是否必须 | 含义                                     | 值格式 / 说明                       |
+| --------------- | ------- | -------- | ---------------------------------------- | ----------------------------------- |
+| `text`          | string  | 否       | 单元格纯文本内容                         | 与`blocks` 二选一                   |
+| `blocks`        | array   | 否       | 单元格富文本内容，文本块数组，规则见14.7 | 与`text` 二选一                     |
+| `header`        | boolean | 否       | 是否为表头单元格                         | 默认`false`                         |
+| `colSpan`       | integer | 否       | 跨列数                                   | 默认`1`                             |
+| `rowSpan`       | integer | 否       | 跨行数                                   | 默认`1`                             |
+| `align`         | string  | 否       | 水平对齐方式                             | 当前建议值：`left`/`center`/`right` |
+| `verticalAlign` | string  | 否       | 垂直对齐方式                             | 当前建议值：`top`/`middle`/`bottom` |
+| `meta`          | object  | 否       | 单元格附加元信息                         | 当前不商定内部字段                  |
 
 **规则**
 
@@ -1751,6 +1724,7 @@ Portable Text 负责提供通用富文本骨架。
 
 ```json
 {
+  "_key": "m1",
   "_type": "citation_ref",
   "targetId": "cite-fu-2026"
 }
@@ -1765,28 +1739,28 @@ Portable Text 负责提供通用富文本骨架。
 ### 11.3 正式字段表
 
 
-| 字段名        | 类型    | 是否必须 | 含义             | 值格式 / 说明                        |
-| ------------- | ------- | -------- | ---------------- | ------------------------------------ |
-| `id`          | string  | 是       | 参考文献唯一标识 | 文档内全局唯一                       |
-| `displayText` | string  | 是       | 完整展示文本     | 拼接好的完整引用文本，可直接用于展示 |
-| `anchor`      | string  | 否       | 文献锚点         | 省略时可回退为`id`                   |
-| `label`       | string  | 否       | 人类可读标签     | 普通字符串                           |
-| `meta`        | object  | 否       | 附加元信息       | 当前不商定内部字段                   |
-| `type`        | string  | 否       | 文献类型         | 见 11.4                              |
-| `title`       | string  | 否       | 文献标题         | 普通字符串                           |
-| `authors`     | array   | 否       | 作者列表         | 元素类型为 string                    |
-| `year`        | integer | 否       | 出版 / 发布年份  | 四位年份为宜                         |
-| `journal`     | string  | 否       | 期刊名称         | 适用于 article                       |
-| `publisher`   | string  | 否       | 出版社           | 适用于 book / report                 |
-| `volume`      | string  | 否       | 卷号             | 普通字符串                           |
-| `issue`       | string  | 否       | 期号             | 普通字符串                           |
-| `pages`       | string  | 否       | 页码范围         | 如`12-18`                            |
-| `doi`         | string  | 否       | DOI              | 普通字符串                           |
-| `url`         | string  | 否       | 访问地址         | URL 字符串                           |
-| `accessedAt`  | string  | 否       | 访问时间         | 建议使用 RFC 3339 / ISO 8601         |
-| `edition`     | string  | 否       | 版本 / 版次      | 普通字符串                           |
-| `institution` | string  | 否       | 机构名称         | 适用于 report / dataset              |
-| `language`    | string  | 否       | 文献语言         | 建议使用 BCP 47 语言标记             |
+| 字段名        | 类型    | 是否必须 | 含义             | 值格式 / 说明                                      |
+| ------------- | ------- | -------- | ---------------- | -------------------------------------------------- |
+| `id`          | string  | 是       | 参考文献唯一标识 | 文档内全局唯一                                     |
+| `displayText` | string  | 是       | 完整展示文本     | 拼接好的完整引用文本，渲染器可直接优先将其用于展示 |
+| `anchor`      | string  | 否       | 文献锚点         | 省略时可回退为`id`                                 |
+| `label`       | string  | 否       | 人类可读标签     | 普通字符串                                         |
+| `meta`        | object  | 否       | 附加元信息       | 当前不商定内部字段                                 |
+| `type`        | string  | 否       | 文献类型         | 见 11.4                                            |
+| `title`       | string  | 否       | 文献标题         | 普通字符串                                         |
+| `authors`     | array   | 否       | 作者列表         | 元素类型为 string                                  |
+| `year`        | integer | 否       | 出版 / 发布年份  | 四位年份为宜                                       |
+| `journal`     | string  | 否       | 期刊名称         | 适用于 article                                     |
+| `publisher`   | string  | 否       | 出版社           | 适用于 book / report                               |
+| `volume`      | string  | 否       | 卷号             | 普通字符串                                         |
+| `issue`       | string  | 否       | 期号             | 普通字符串                                         |
+| `pages`       | string  | 否       | 页码范围         | 如`12-18`                                          |
+| `doi`         | string  | 否       | DOI              | 普通字符串                                         |
+| `url`         | string  | 否       | 访问地址         | URL 字符串                                         |
+| `accessedAt`  | string  | 否       | 访问时间         | 建议使用 RFC 3339 / ISO 8601                       |
+| `edition`     | string  | 否       | 版本 / 版次      | 普通字符串                                         |
+| `institution` | string  | 否       | 机构名称         | 适用于 report / dataset                            |
+| `language`    | string  | 否       | 文献语言         | 建议使用 BCP 47 语言标记                           |
 
 ### 11.4 `type` 正式枚举
 
@@ -1881,6 +1855,7 @@ Portable Text 负责提供通用富文本骨架。
 
 ```json
 {
+  "_key": "m1",
   "_type": "footnote_ref",
   "targetId": "fn-1"
 }
@@ -1905,7 +1880,7 @@ Portable Text 负责提供通用富文本骨架。
 
 ### 12.4 `blocks` 的解释
 
-`footnotes[].blocks` 复用正文文本层规则的 **受限子集** 。
+`footnotes[].blocks` 复用正文文本块规则的 **受限子集** 。文本块规则见14.7。
 
 当前版本建议允许：
 
@@ -1915,7 +1890,6 @@ Portable Text 负责提供通用富文本骨架。
 * `citation_ref`
 * `glossary_term`
 * `xref`
-* `hard_break`
 
 当前版本不允许：
 
@@ -1948,6 +1922,7 @@ Portable Text 负责提供通用富文本骨架。
 
 ```json
 {
+  "_key": "m1",
   "_type": "footnote_ref",
   "targetId": "fn-1"
 }
@@ -1996,6 +1971,7 @@ Portable Text 负责提供通用富文本骨架。
 
 ```json
 {
+  "_key": "m1",
   "_type": "glossary_term",
   "targetId": "term-dcf"
 }
@@ -2043,6 +2019,7 @@ Portable Text 负责提供通用富文本骨架。
 
 ```json
 {
+  "_key": "m1",
   "_type": "glossary_term",
   "targetId": "term-dcf"
 }
@@ -2199,8 +2176,10 @@ Portable Text 负责提供通用富文本骨架。
 
 约束：
 
-* `blocks` 必须表示一组阅读顺序连续的块
+* `blocks` 必须表示一组**阅读顺序连续的块**
 * 不应把不连续的多段正文（比如两个段落之间间隔一个子章节）硬塞进同一个 `content`
+* `blocks` 中的单个`blocks` 文本块代表一个**段落**，段落内不换行
+* `blocks` 中两个`blocks` 文本块之间需要换行
 
 #### 14.5.2 `subsection`
 
@@ -2369,7 +2348,7 @@ Portable Text 负责提供通用富文本骨架。
 * `strong`：加粗
 * `em`：斜体
 * `underline`：下划线
-* `code`：代码块
+* `code`：行内代码块
 
 说明：
 
@@ -2383,7 +2362,7 @@ Portable Text 负责提供通用富文本骨架。
 当前版本要求渲染器至少识别以下行内引用 / 注解类型：
 
 * `link`：超链接
-* `xref`：外部引用
+* `xref`：交叉引用
 * `citation_ref`：文献引用
 * `footnote_ref`：脚注引用
 * `glossary_term`：术语引用
@@ -2833,7 +2812,7 @@ Portable Text 负责提供通用富文本骨架。
 
 - 未知 `block.style` → 回退为 `normal`
 - 未知 `numbering` → 回退为 `none`
-- 未知 `imageSource.kind` → 若存在 `src`，尝试回退解析 `src`
+- 未知 `imageSource.kind` → 视为该图片资源无效，并记录兼容日志
 
 ### 16.3 缺失可选字段
 
@@ -2860,12 +2839,16 @@ Portable Text 负责提供通用富文本骨架。
 7. `image.imageRef` / `chart.chartRef` / `table.tableRef` 可解析
 8. `math_block.latex` 非空
 9. `callout.blocks` 为数组
-10. `assets.images` 至少满足 `imageSource` 或 `src` 其一可用
+10. `assets.images` 必须满足 `imageSource` 存在且合法
 11. `imageSource.kind` 合法
 12. `embedded` 模式下 `encoding = base64`
-13. `datasets.tables.columns` / `rows` 结构合法
+13. `record` 模式校验 `columns + rows`
+14. `grid` 模式校验 `rows[].cells[]`
+15. `columnCount`、`colSpan`、`rowSpan` 的基本合法性
 14. `datasets.charts` 中 `pie.slices` 结构合法
-15. bibliography / footnotes / glossary 的 `id` 可解析
+15. `citation_ref.targetId` 可解析到 `bibliography[].id`
+18. `footnote_ref.targetId` 可解析到 `footnotes[].id`
+19. `glossary_term.targetId` 可解析到 `glossary[].id`
 
 ---
 
@@ -2892,7 +2875,7 @@ Portable Text 负责提供通用富文本骨架。
 
 以下内容明确不在当前协议范围内：
 
-- Java PDF 渲染字号
+- PDF 渲染字号
 - 字体
 - 颜色
 - 页边距
@@ -2908,7 +2891,7 @@ Portable Text 负责提供通用富文本骨架。
 
 ```json
 {
-  "schemaVersion": "report.v1",
+  "schemaVersion": "report.v1.0",
   "meta": {
     "title": "Patent Valuation Report",
     "language": "en"
@@ -2923,7 +2906,6 @@ Portable Text 负责提供通用富文本骨架。
         "meta": {},
         "alt": "Cover image",
         "mimeType": "image/png",
-        "src": "https://example.com/cover.png",
         "imageSource": {
           "kind": "url",
           "url": "https://example.com/cover.png"
@@ -2945,8 +2927,20 @@ Portable Text 负责提供通用富文本骨架。
         "chartType": "pie",
         "valueUnit": "percent",
         "slices": [
-          { "name": "Technology", "value": 60 },
-          { "name": "Finance", "value": 40 }
+          {
+            "key": "technology",
+            "label": {
+              "en": "Technology"
+            },
+            "value": 60
+          },
+          {
+            "key": "finance",
+            "label": {
+              "en": "Finance"
+            },
+            "value": 40
+          }
         ]
       }
     ],

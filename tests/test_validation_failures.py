@@ -3,7 +3,7 @@ import pytest
 from ova_portable_text import (
     DocumentValidationError,
     create_document,
-    image_asset,
+    image_asset_url,
     paragraph,
     section,
     xref,
@@ -15,7 +15,7 @@ from ova_portable_text import (
 
 def test_unresolved_references_are_reported():
     report = create_document(title="Broken Demo", language="en")
-    report.add_image_asset(image_asset(id="img-1", src="https://example.com/a.png"))
+    report.add_image_asset(image_asset_url(id="img-1", url="https://example.com/a.png"))
 
     intro = section(id="sec-1", level=1, title="Introduction")
     intro.append_paragraph(

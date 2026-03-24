@@ -9,7 +9,7 @@ from ova_portable_text import (
     table_column,
     table_dataset,
     xref,
-    image_asset,
+    image_asset_url,
 )
 
 
@@ -21,10 +21,10 @@ report = create_document(
 
 # Add registry entries / 追加顶层 registry 条目
 report.add_image_asset(
-    image_asset(
+    image_asset_url(
         id="img-pipeline-overview",
         label="Pipeline overview image",
-        src="https://example.com/pipeline-overview.png",
+        url="https://example.com/pipeline-overview.png",
         alt="Pipeline overview",
     )
 )

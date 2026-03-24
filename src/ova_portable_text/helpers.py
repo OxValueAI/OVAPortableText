@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import base64
+import mimetypes
+from pathlib import Path
 from typing import Any, Iterable
 
 from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
@@ -13,6 +16,8 @@ from .registry import (
     GlossaryEntry,
     IconAsset,
     ImageAsset,
+    ImageSourceEmbedded,
+    ImageSourceUrl,
     LogoAsset,
     MetricDataset,
     MetricValue,
@@ -147,8 +152,119 @@ def callout(*, id: str, blocks: list[TextBlock] | None = None, anchor: str | Non
     return CalloutBlock(id=id, anchor=anchor, blocks=blocks or [])
 
 
-def image_asset(*, id: str, src: str, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> ImageAsset:
-    return ImageAsset(id=id, src=src, alt=alt, label=label, anchor=anchor, meta=meta or {}, **extra)
+def image_asset(
+    *,
+    id: str,
+    image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any],
+    alt: str | None = None,
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    **extra,
+) -> ImageAsset:
+    if isinstance(image_source, dict):
+        kind = image_source.get("kind")
+        if kind == "url":
+            image_source = ImageSourceUrl(**image_source)
+        elif kind == "embedded":
+            image_source = ImageSourceEmbedded(**image_source)
+        else:
+            raise ValueError("`image_source.kind` must be 'url' or 'embedded'.")
+    return ImageAsset(
+        id=id,
+        imageSource=image_source,
+        alt=alt,
+        label=label,
+        anchor=anchor,
+        meta=meta or {},
+        **extra,
+    )
+
+
+def image_asset_url(
+    *,
+    id: str,
+    url: str,
+    alt: str | None = None,
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    **extra,
+) -> ImageAsset:
+    return image_asset(
+        id=id,
+        image_source=ImageSourceUrl(kind="url", url=url),
+        alt=alt,
+        label=label,
+        anchor=anchor,
+        meta=meta,
+        **extra,
+    )
+
+
+def image_asset_embedded(
+    *,
+    id: str,
+    data_base64: str,
+    mime_type: str,
+    alt: str | None = None,
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    **extra,
+) -> ImageAsset:
+    return image_asset(
+        id=id,
+        image_source=ImageSourceEmbedded(kind="embedded", encoding="base64", data=data_base64),
+        alt=alt,
+        label=label,
+        anchor=anchor,
+        meta=meta,
+        mimeType=mime_type,
+        **extra,
+    )
+
+
+def image_asset_from_file(
+    *,
+    id: str,
+    path: str | Path,
+    alt: str | None = None,
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    mime_type: str | None = None,
+    embed: bool = True,
+    url: str | None = None,
+    **extra,
+) -> ImageAsset:
+    file_path = Path(path)
+    final_mime = mime_type or mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
+
+    if embed:
+        data_base64 = base64.b64encode(file_path.read_bytes()).decode("ascii")
+        return image_asset_embedded(
+            id=id,
+            data_base64=data_base64,
+            mime_type=final_mime,
+            alt=alt,
+            label=label,
+            anchor=anchor,
+            meta=meta,
+            **extra,
+        )
+
+    final_url = url or str(file_path)
+    return image_asset_url(
+        id=id,
+        url=final_url,
+        alt=alt,
+        label=label,
+        anchor=anchor,
+        meta=meta,
+        mimeType=final_mime,
+        **extra,
+    )
 
 
 def logo_asset(*, id: str, src: str, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> LogoAsset:

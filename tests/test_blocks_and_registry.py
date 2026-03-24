@@ -3,7 +3,7 @@ from ova_portable_text import (
     create_document,
     footnote_entry,
     glossary_entry,
-    image_asset,
+    image_asset_url,
     pie_chart_from_parallel_arrays,
     paragraph,
     section,
@@ -16,9 +16,9 @@ def test_document_can_hold_registry_entries_and_block_objects():
     report = create_document(title="Demo", language="en")
 
     report.add_image_asset(
-        image_asset(
+        image_asset_url(
             id="img-1",
-            src="https://example.com/a.png",
+            url="https://example.com/a.png",
             alt="Example image",
         )
     )

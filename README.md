@@ -107,7 +107,7 @@ sec.append_bullet_item("Point B")
 ```python
 from ova_portable_text import (
     create_document,
-    image_asset,
+    image_asset_url,
     pie_chart_from_parallel_arrays,
     table_column,
     table_dataset,
@@ -116,9 +116,9 @@ from ova_portable_text import (
 report = create_document(title="Data Demo", language="en")
 
 report.add_image_asset(
-    image_asset(
+    image_asset_url(
         id="img-cover",
-        src="https://example.com/cover.png",
+        url="https://example.com/cover.png",
         alt="Cover image",
     )
 )
@@ -146,6 +146,17 @@ report.add_chart_dataset(
     )
 )
 ```
+
+
+### Image assets / 图片资源
+
+Images now follow the pure `imageSource` protocol. Use one of:
+
+- `image_asset_url(...)` for URL/path-backed images
+- `image_asset_embedded(...)` for JSON-embedded base64 images
+- `image_asset_from_file(...)` to build either form from a local file
+
+Legacy `src` is no longer the formal image field in this package.
 
 ### 3) Fail duplicate IDs earlier when needed / 需要时尽早拦截重复 ID
 

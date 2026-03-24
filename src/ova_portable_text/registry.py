@@ -25,7 +25,7 @@ So we provide small typed cores with extension-friendly behaviour.
 因此这里采用“最小强类型核心 + 允许扩展”的方式。
 """
 
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
@@ -93,23 +93,81 @@ class StaticAssetBase(RegistryEntryBase):
     language: str | None = None
 
 
-class ImageAsset(StaticAssetBase):
+class ImageSourceUrl(OvaBaseModel):
+    """
+    URL/path-backed image source descriptor.
+    基于 URL / 路径的图片来源描述对象。
+
+    Use this for referenced image assets such as:
+    适用于引用型图片资源，例如：
+    - https://... / 远程地址
+    - file://... / 文件 URI
+    - relative/local paths handed to the renderer / 交给渲染器解析的相对或本地路径
+    """
+
+    kind: Literal["url"] = "url"
+    url: str
+
+
+class ImageSourceEmbedded(OvaBaseModel):
+    """
+    Embedded image source descriptor.
+    内嵌图片来源描述对象。
+
+    Current protocol decision / 当前协议决策：
+    only `encoding="base64"` is formally supported.
+    当前仅正式支持 `encoding="base64"`。
+    """
+
+    kind: Literal["embedded"] = "embedded"
+    encoding: Literal["base64"] = "base64"
+    data: str
+
+
+ImageSource = Annotated[ImageSourceUrl | ImageSourceEmbedded, Field(discriminator="kind")]
+
+
+class ImageAsset(RegistryEntryBase):
     """
     Entry in `assets.images`.
     `assets.images` 中的图片资源条目。
 
+    New protocol rule / 新协议规则：
+    - `src` is no longer the formal image field
+      `src` 不再是正式图片字段
+    - `imageSource` is the single source of truth
+      `imageSource` 是唯一正式真源
+
     Notes / 说明：
-    - `src` is the actual image location.
-      `src` 是图片资源实际位置。
     - `alt` is not the caption.
       `alt` 不是图片题注。
     - caption should still prefer adjacent `figure_caption` text blocks.
       图片题注仍然优先由相邻 `figure_caption` 文本块承载。
     """
 
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+    imageSource: ImageSource
     alt: str | None = None
+    mimeType: str | None = None
+    checksum: str | None = None
+    source: str | None = None
+    copyright: str | None = None
+    language: str | None = None
     width: int | None = None
     height: int | None = None
+
+    @model_validator(mode="after")
+    def validate_image_source_requirements(self) -> "ImageAsset":
+        """
+        Enforce the pure-`imageSource` protocol contract.
+        强制执行纯 `imageSource` 协议约束。
+        """
+        if self.model_extra and "src" in self.model_extra:
+            raise ValueError("Legacy `src` is not allowed on ImageAsset; use `imageSource` instead.")
+        if self.imageSource.kind == "embedded" and not self.mimeType:
+            raise ValueError("Embedded image assets require `mimeType`.")
+        return self
 
 
 class LogoAsset(StaticAssetBase):

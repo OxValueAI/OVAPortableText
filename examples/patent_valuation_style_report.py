@@ -13,7 +13,7 @@ from ova_portable_text import (
     create_document,
     footnote_entry,
     glossary_entry,
-    image_asset,
+    image_asset_url,
     paragraph,
     pie_chart_from_parallel_arrays,
     table_column,
@@ -33,9 +33,9 @@ def main() -> None:
     )
 
     report.add_image_asset(
-        image_asset(
+        image_asset_url(
             id="img-market-map",
-            src="https://example.com/market-map.png",
+            url="https://example.com/market-map.png",
             alt="Market landscape image",
             label="Market landscape",
         )

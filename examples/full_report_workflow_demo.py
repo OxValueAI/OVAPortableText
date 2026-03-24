@@ -5,7 +5,7 @@ from ova_portable_text import (
     footnote_ref,
     glossary_entry,
     glossary_term,
-    image_asset,
+    image_asset_url,
     image_block,
     link_def,
     paragraph,
@@ -27,9 +27,9 @@ report = create_document(
 )
 
 report.add_image_asset(
-    image_asset(
+    image_asset_url(
         id="img-overview",
-        src="https://example.com/overview.png",
+        url="https://example.com/overview.png",
         alt="Overview diagram",
     )
 )

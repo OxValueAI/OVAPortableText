@@ -3,7 +3,7 @@ from ova_portable_text import (
     create_document,
     footnote_entry,
     glossary_entry,
-    image_asset,
+    image_asset_url,
     paragraph,
     pie_chart_from_parallel_arrays,
     section,
@@ -22,7 +22,7 @@ report = create_document(
     documentType="report",
 )
 
-report.add_image_asset(image_asset(id="img-overview", src="https://example.com/overview.png", alt="Overview"))
+report.add_image_asset(image_asset_url(id="img-overview", url="https://example.com/overview.png", alt="Overview"))
 report.add_table_dataset(
     table_dataset(
         id="table-summary",
