@@ -1,3 +1,7 @@
+from pydantic import ValidationError
+
+import pytest
+
 from ova_portable_text import NumberingConfig, create_document
 
 
@@ -33,3 +37,32 @@ def test_section_mode_numbering_resets_within_each_section():
 
     assert numbering.get_display_number("fig-a") == "1-1"
     assert numbering.get_display_number("fig-b") == "2-1"
+
+
+def test_section_numbering_accepts_protocol_enum_values():
+    report = create_document(title="Numbering Modes", language="en")
+
+    sec_none = report.new_section(id="sec-none", level=1, title="No Number", numbering="none")
+    sec_manual = report.new_section(id="sec-manual", level=1, title="Manual Number", numbering="manual")
+
+    numbering = report.build_numbering()
+
+    assert sec_none.numbering == "none"
+    assert sec_manual.numbering == "manual"
+    assert numbering.get_display_number("sec-none") is None
+    assert numbering.get_display_number("sec-manual") is None
+
+
+def test_section_numbering_rejects_invalid_value_early():
+    report = create_document(title="Invalid Numbering", language="en")
+
+    with pytest.raises(ValidationError):
+        report.new_section(id="sec-bad", level=1, title="Bad", numbering="invalid")
+
+
+def test_subsection_numbering_rejects_invalid_value_early():
+    report = create_document(title="Invalid Subsection Numbering", language="en")
+    sec = report.new_section(id="sec-1", level=1, title="Parent")
+
+    with pytest.raises(ValidationError):
+        sec.new_subsection(id="sec-1-1", title="Child", numbering="invalid")

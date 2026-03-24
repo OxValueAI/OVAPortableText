@@ -21,7 +21,7 @@ from .registry import (
     TableColumn,
     TableDataset,
 )
-from .section import Section
+from .section import NumberingMode, Section
 from .theme import ThemeConfig
 from .text import (
     AnnotationMarkDef,
@@ -35,16 +35,23 @@ from .text import (
 )
 
 
-def create_document(*, title: str | None = None, language: str | None = None, theme: ThemeConfig | dict[str, Any] | None = None, **meta_fields) -> Document:
+def create_document(
+    *,
+    title: str | None = None,
+    language: str | None = None,
+    theme: ThemeConfig | dict[str, Any] | None = None,
+    strict_ids: bool = False,
+    **meta_fields,
+) -> Document:
     meta = DocumentMeta(title=title, language=language, **meta_fields)
     theme_value = theme if isinstance(theme, ThemeConfig) else ThemeConfig(**(theme or {}))
-    return Document(meta=meta, theme=theme_value)
+    return Document(meta=meta, theme=theme_value, strict_ids=strict_ids)
 
 
 document = create_document
 
 
-def section(*, id: str, level: int, title: str, numbering: str = "auto", anchor: str | None = None) -> Section:
+def section(*, id: str, level: int, title: str, numbering: NumberingMode = "auto", anchor: str | None = None) -> Section:
     return Section(id=id, level=level, title=title, numbering=numbering, anchor=anchor)
 
 
