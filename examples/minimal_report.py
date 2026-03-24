@@ -6,7 +6,7 @@ from ova_portable_text import create_document, section
 report = create_document(
     title="Demo Report",
     language="en",
-    documentType="report",
+    documentType="valuationReport",
 )
 
 intro = section(id="sec-intro", level=1, title="Introduction")

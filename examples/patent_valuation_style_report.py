@@ -27,7 +27,7 @@ def main() -> None:
         title="Patent Valuation Report",
         subtitle="Illustrative protocol example",
         language="en",
-        documentType="report",
+        documentType="valuationReport",
         author="OVA Demo",
         confidentiality="internal",
     )
@@ -81,11 +81,11 @@ def main() -> None:
     report.add_bibliography_entry(
         bibliography_entry(
             id="bib-market-2025",
+            display_text="Research Team. Global Patent Market Review. 2025.",
             title="Global Patent Market Review",
             authors=["Research Team"],
             year=2025,
             type="report",
-            text="Internal research summary.",
         )
     )
     report.add_footnote(footnote_entry(id="fn-1", blocks=[paragraph("Illustrative footnote only.")]))

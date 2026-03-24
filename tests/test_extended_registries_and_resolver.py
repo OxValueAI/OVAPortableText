@@ -11,11 +11,11 @@ from ova_portable_text import (
 
 def test_extended_registries_are_serialized_and_resolvable():
     report = create_document(title="Registry Demo", language="en")
-    report.add_logo_asset(logo_asset(id="logo-main", src="https://example.com/logo.svg", alt="Main Logo"))
-    report.add_background_asset(background_asset(id="bg-cover", src="https://example.com/cover.png"))
-    report.add_icon_asset(icon_asset(id="icon-star", src="https://example.com/star.svg", alt="Star"))
+    report.add_logo_asset(logo_asset(id="logo-main", url="https://example.com/logo.svg", alt="Main Logo"))
+    report.add_background_asset(background_asset(id="bg-cover", url="https://example.com/cover.png"))
+    report.add_icon_asset(icon_asset(id="icon-star", url="https://example.com/star.svg", alt="Star"))
     report.add_attachment_asset(
-        attachment_asset(id="att-appendix", src="https://example.com/appendix.pdf", file_name="appendix.pdf")
+        attachment_asset(id="att-appendix", url="https://example.com/appendix.pdf", file_name="appendix.pdf")
     )
     report.add_metric_dataset(
         metric_dataset(

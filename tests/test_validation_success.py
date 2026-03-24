@@ -35,7 +35,7 @@ def test_document_validate_success_for_resolvable_document():
             value=[60, 40],
         )
     )
-    report.add_bibliography_entry(bibliography_entry(id="cite-1", title="Reference 1", authors=["Smith"], year=2024))
+    report.add_bibliography_entry(bibliography_entry(id="cite-1", display_text="Smith (2024). Reference 1.", title="Reference 1", authors=["Smith"], year=2024))
     report.add_footnote(footnote_entry(id="fn-1", blocks=[paragraph("Footnote 1")]))
     report.add_glossary_entry(glossary_entry(id="term-1", term="EBITDA", definition="A metric"))
 

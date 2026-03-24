@@ -16,7 +16,7 @@ from ova_portable_text import (
 report = create_document(
     title="OVAPortableText Step 3 Demo",
     language="en",
-    documentType="report",
+    documentType="valuationReport",
 )
 
 # Add registry entries / 追加顶层 registry 条目
@@ -67,7 +67,7 @@ report.add_chart_dataset(
 )
 
 report.add_bibliography_entry(
-    bibliography_entry(id="cite-smith-2024", text="Smith (2024). Valuation methodology overview.")
+    bibliography_entry(id="cite-smith-2024", display_text="Smith (2024). Valuation methodology overview.")
 )
 report.add_footnote(
     footnote_entry(id="fn-1", blocks=[paragraph("Adjusted EBITDA excludes certain non-recurring items.")])

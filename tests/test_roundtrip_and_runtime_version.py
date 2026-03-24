@@ -10,12 +10,12 @@ def test_document_from_json_roundtrip_with_extra_meta_fields():
     report = create_document(
         title="Roundtrip Demo",
         language="en",
-        locale="en-GB",
+        locale="en",
         clientName="OxValue",
     )
     report.new_section(id="sec-1", level=1, title="Intro").append_paragraph("hello")
 
     restored = Document.from_json(report.to_json())
-    assert restored.meta.locale == "en-GB"
+    assert restored.meta.locale == "en"
     assert restored.meta.clientName == "OxValue"
     assert restored.sections[0].title == "Intro"

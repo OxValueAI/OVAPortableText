@@ -5,7 +5,7 @@ def test_meta_theme_and_roundtrip_helpers_work():
     report = create_document(
         title="Roundtrip Demo",
         language="en",
-        reportType="valuation",
+        reportType="patent",
         clientName="OpenAI",
         theme={
             "name": "corporate-blue",
@@ -21,7 +21,7 @@ def test_meta_theme_and_roundtrip_helpers_work():
     rebuilt_from_dict = Document.from_dict(data)
     rebuilt_from_json = Document.from_json(report.to_json())
 
-    assert data["meta"]["reportType"] == "valuation"
+    assert data["meta"]["reportType"] == "patent"
     assert data["theme"]["name"] == "corporate-blue"
     assert data["theme"]["customBrandColor"] == "#123456"
     assert rebuilt_from_dict.meta.clientName == "OpenAI"

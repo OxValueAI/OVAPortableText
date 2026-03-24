@@ -10,14 +10,19 @@ from .content import (
     ALLOWED_TEXT_STYLES,
     AnnotationMarkDef,
     BlockElement,
+    CitationRefMarkDef,
     ContentItem,
     DecoratorMark,
+    FootnoteRefMarkDef,
+    GlossaryTermMarkDef,
+    InlineMathMarkDef,
     LinkMarkDef,
     ListItemStyle,
     MarkDef,
     Span,
     TextBlock,
     TextStyle,
+    XRefMarkDef,
 )
 from .document import Document, DocumentMeta
 from .exceptions import DocumentValidationError, ValidationIssue, ValidationReport
@@ -31,17 +36,25 @@ from .helpers import (
     callout,
     chart_block,
     citation_ref,
+    citation_ref_def,
     code_span,
     create_document,
     document,
     em,
     footnote_entry,
     footnote_ref,
+    footnote_ref_def,
     glossary_entry,
     glossary_term,
+    glossary_term_def,
+    grid_table_cell,
+    grid_table_dataset,
+    grid_table_row,
     hard_break,
     icon_asset,
     image_asset,
+    inline_math,
+    inline_math_def,
     image_asset_embedded,
     image_asset_from_file,
     image_asset_url,
@@ -65,8 +78,9 @@ from .helpers import (
     table_dataset,
     underline,
     xref,
+    xref_def,
 )
-from .inline import CitationRef, FootnoteRef, GlossaryTerm, HardBreak, InlineObject, XRef
+from .inline import CitationRef, FootnoteRef, GlossaryTerm, HardBreak, InlineMath, InlineObject, XRef
 from .numbering import DocumentNumbering, NumberingConfig, NumberedTarget
 from .registry import (
     AssetsRegistry,
@@ -76,6 +90,9 @@ from .registry import (
     DatasetsRegistry,
     FootnoteEntry,
     GlossaryEntry,
+    GridTableCell,
+    GridTableDataset,
+    GridTableRow,
     IconAsset,
     ImageAsset,
     ImageSource,
@@ -86,10 +103,12 @@ from .registry import (
     MetricValue,
     PieChartDataset,
     PieSlice,
+    RecordTableDataset,
     RegistryEntryBase,
     TableColumn,
     TableDataset,
 )
+
 from .resolver import DocumentResolver, ResolvedTarget
 from .section import NumberingMode, Section
 from .theme import ThemeConfig

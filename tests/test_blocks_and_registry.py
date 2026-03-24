@@ -37,7 +37,7 @@ def test_document_can_hold_registry_entries_and_block_objects():
             value=[60, 40],
         )
     )
-    report.add_bibliography_entry(bibliography_entry(id="cite-1", text="Demo Reference"))
+    report.add_bibliography_entry(bibliography_entry(id="cite-1", display_text="Demo Reference"))
     report.add_footnote(footnote_entry(id="fn-1", blocks=[paragraph("Footnote content")]))
     report.add_glossary_entry(glossary_entry(id="term-1", term="EBITDA", definition="Demo definition"))
 

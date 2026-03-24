@@ -13,7 +13,7 @@ from ova_portable_text import (
 report = create_document(
     title="Inline Object Demo",
     language="en",
-    documentType="report",
+    documentType="valuationReport",
 )
 
 intro = section(id="sec-intro", level=1, title="Introduction")
@@ -31,7 +31,7 @@ intro.append_paragraph(
 )
 intro.append_paragraph(
     "Evidence is provided in ",
-    citation_ref("cite-smith-2024", "cite-jones-2025", mode="parenthetical"),
+    citation_ref("cite-smith-2024"),
     ".",
 )
 intro.append_paragraph(

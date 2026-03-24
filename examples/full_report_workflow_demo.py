@@ -23,7 +23,7 @@ report = create_document(
     title="Full Workflow Demo",
     language="en",
     subtitle="Step 8 end-to-end example",
-    documentType="report",
+    documentType="valuationReport",
 )
 
 report.add_image_asset(
@@ -60,10 +60,11 @@ report.add_chart_dataset(
 report.add_bibliography_entry(
     bibliography_entry(
         id="bib-pt",
+        display_text="Portable Text Authors. Portable Text Specification. 2026.",
         title="Portable Text Specification",
         authors=["Portable Text Authors"],
         year=2026,
-        type="specification",
+        type="other",
     )
 )
 
