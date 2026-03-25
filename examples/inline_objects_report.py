@@ -13,7 +13,7 @@ from ova_portable_text import (
 report = create_document(
     title="Inline Object Demo",
     language="en",
-    documentType="valuationReport",
+    documentType="report",
 )
 
 intro = section(id="sec-intro", level=1, title="Introduction")

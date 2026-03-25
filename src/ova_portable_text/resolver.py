@@ -212,8 +212,10 @@ class DocumentResolver(OvaBaseModel):
                 sectionTitle=target.sectionTitle,
             )
 
-            if canonical in {"image", "chart"}:
+            if canonical in {"image", "chart", "image_asset"}:
                 add_type_alias(alias_type="figure", target=target)
+            if canonical in {"image_asset", "logo_asset", "background_asset", "icon_asset", "attachment_asset"}:
+                add_type_alias(alias_type="asset", target=target)
             if canonical == "math_block":
                 add_type_alias(alias_type="equation", target=target)
 
@@ -327,6 +329,7 @@ class DocumentResolver(OvaBaseModel):
             "glossary": "glossary_term",
             "glossary_term": "glossary_term",
             "term": "glossary_term",
+            "asset": "asset",
             "image_asset": "image_asset",
             "logo_asset": "logo_asset",
             "background_asset": "background_asset",

@@ -16,7 +16,7 @@ from ova_portable_text import (
 report = create_document(
     title="OVAPortableText Step 3 Demo",
     language="en",
-    documentType="valuationReport",
+    documentType="report",
 )
 
 # Add registry entries / 追加顶层 registry 条目

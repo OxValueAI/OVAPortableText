@@ -1,9 +1,9 @@
 from ova_portable_text import (
     attachment_asset,
-    background_asset,
+    background_asset_url,
     create_document,
-    icon_asset,
-    logo_asset,
+    icon_asset_url,
+    logo_asset_url,
     metric_dataset,
     metric_value,
 )
@@ -11,11 +11,11 @@ from ova_portable_text import (
 
 def test_extended_registries_are_serialized_and_resolvable():
     report = create_document(title="Registry Demo", language="en")
-    report.add_logo_asset(logo_asset(id="logo-main", url="https://example.com/logo.svg", alt="Main Logo"))
-    report.add_background_asset(background_asset(id="bg-cover", url="https://example.com/cover.png"))
-    report.add_icon_asset(icon_asset(id="icon-star", url="https://example.com/star.svg", alt="Star"))
+    report.add_logo_asset(logo_asset_url(id="logo-main", url="https://example.com/logo.svg", alt="Main Logo"))
+    report.add_background_asset(background_asset_url(id="bg-cover", url="https://example.com/cover.png"))
+    report.add_icon_asset(icon_asset_url(id="icon-star", url="https://example.com/star.svg", alt="Star"))
     report.add_attachment_asset(
-        attachment_asset(id="att-appendix", url="https://example.com/appendix.pdf", file_name="appendix.pdf")
+        attachment_asset(id="att-appendix", src="https://example.com/appendix.pdf", file_name="appendix.pdf")
     )
     report.add_metric_dataset(
         metric_dataset(
@@ -36,4 +36,5 @@ def test_extended_registries_are_serialized_and_resolvable():
     assert resolver.resolve_xref(target_type="logo_asset", target_id="logo-main") is not None
     assert resolver.resolve_xref(target_type="attachment", target_id="att-appendix") is not None
     assert resolver.resolve_xref(target_type="metric", target_id="metric-overview") is not None
+    assert resolver.resolve_xref(target_type="asset", target_id="logo-main") is not None
     assert resolver.get_by_anchor("logo-main") is not None
