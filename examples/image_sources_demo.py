@@ -43,7 +43,11 @@ def main() -> None:
     report.add_logo_asset(
         logo_asset(
             id="logo-main",
-            data_base64=TINY_PNG_BASE64,
+            image_source={
+                "kind": "embedded",
+                "encoding": "base64",
+                "data": TINY_PNG_BASE64,
+            },
             alt="Main logo",
             mimeType="image/png",
             width=32,
@@ -54,7 +58,10 @@ def main() -> None:
     report.add_background_asset(
         background_asset(
             id="bg-cover",
-            url="https://example.com/assets/cover-bg.png",
+            image_source={
+                "kind": "url",
+                "url": "https://example.com/assets/cover-bg.png",
+            },
             mimeType="image/png",
             width=1600,
             height=900,
@@ -64,7 +71,11 @@ def main() -> None:
     report.add_icon_asset(
         icon_asset(
             id="icon-growth",
-            data_base64=TINY_PNG_BASE64,
+            image_source={
+                "kind": "embedded",
+                "encoding": "base64",
+                "data": TINY_PNG_BASE64,
+            },
             alt="Growth icon",
             mimeType="image/png",
             width=16,

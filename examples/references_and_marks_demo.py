@@ -3,18 +3,14 @@
 from __future__ import annotations
 
 from ova_portable_text import (
+    annotation_def,
     bibliography_entry,
-    citation_ref_def,
     create_document,
     footnote_entry,
-    footnote_ref_def,
     glossary_entry,
-    glossary_term_def,
-    inline_math_def,
     link_def,
     paragraph,
     span,
-    xref_def,
 )
 
 
@@ -70,11 +66,11 @@ def main() -> None:
         ".",
         mark_defs=[
             link_def(key="m-link", href="https://example.com"),
-            xref_def(key="m-xref", target_id="sec-method", target_type="section"),
-            citation_ref_def(key="m-cite", target_id="cite-fu-2026"),
-            footnote_ref_def(key="m-footnote", target_id="fn-1"),
-            glossary_term_def(key="m-term", target_id="term-dcf"),
-            inline_math_def(key="m-math", latex="E = mc^2"),
+            annotation_def(key="m-xref", type="xref", data={"targetId": "sec-method", "targetType": "section"}),
+            annotation_def(key="m-cite", type="citation_ref", data={"targetId": "cite-fu-2026"}),
+            annotation_def(key="m-footnote", type="footnote_ref", data={"targetId": "fn-1"}),
+            annotation_def(key="m-term", type="glossary_term", data={"targetId": "term-dcf"}),
+            annotation_def(key="m-math", type="inline_math", data={"latex": "E = mc^2"}),
         ],
     )
 
