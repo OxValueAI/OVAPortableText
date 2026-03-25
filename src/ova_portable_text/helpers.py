@@ -12,6 +12,7 @@ from .registry import (
     AttachmentAsset,
     BackgroundAsset,
     BibliographyEntry,
+    GenericChartDataset,
     FootnoteEntry,
     GlossaryEntry,
     GridTableCell,
@@ -19,6 +20,7 @@ from .registry import (
     GridTableRow,
     IconAsset,
     ImageAsset,
+    ImageLikeAssetBase,
     ImageSourceEmbedded,
     ImageSourceUrl,
     LogoAsset,
@@ -33,10 +35,6 @@ from .section import NumberingMode, Section
 from .theme import ThemeConfig
 from .text import (
     AnnotationMarkDef,
-    CitationRefMarkDef,
-    FootnoteRefMarkDef,
-    GlossaryTermMarkDef,
-    InlineMathMarkDef,
     LinkMarkDef,
     ListItemStyle,
     MarkDef,
@@ -44,18 +42,10 @@ from .text import (
     TextBlock,
     TextChild,
     TextStyle,
-    XRefMarkDef,
 )
 
 
-def create_document(
-    *,
-    title: str | None = None,
-    language: str | None = None,
-    theme: ThemeConfig | dict[str, Any] | None = None,
-    strict_ids: bool = False,
-    **meta_fields,
-) -> Document:
+def create_document(*, title: str | None = None, language: str | None = None, theme: ThemeConfig | dict[str, Any] | None = None, strict_ids: bool = False, **meta_fields) -> Document:
     meta = DocumentMeta(title=title, language=language, **meta_fields)
     theme_value = theme if isinstance(theme, ThemeConfig) else ThemeConfig(**(theme or {}))
     return Document(meta=meta, theme=theme_value, strict_ids=strict_ids)
@@ -96,26 +86,6 @@ def link_def(*, key: str, href: str, title: str | None = None, open_in_new_tab: 
     return LinkMarkDef(_key=key, href=href, title=title, openInNewTab=open_in_new_tab, rel=rel)
 
 
-def xref_def(*, key: str, target_id: str, target_type: str | None = None) -> XRefMarkDef:
-    return XRefMarkDef(_key=key, targetId=target_id, targetType=target_type)
-
-
-def citation_ref_def(*, key: str, target_id: str) -> CitationRefMarkDef:
-    return CitationRefMarkDef(_key=key, targetId=target_id)
-
-
-def footnote_ref_def(*, key: str, target_id: str) -> FootnoteRefMarkDef:
-    return FootnoteRefMarkDef(_key=key, targetId=target_id)
-
-
-def glossary_term_def(*, key: str, target_id: str) -> GlossaryTermMarkDef:
-    return GlossaryTermMarkDef(_key=key, targetId=target_id)
-
-
-def inline_math_def(*, key: str, latex: str) -> InlineMathMarkDef:
-    return InlineMathMarkDef(_key=key, latex=latex)
-
-
 def annotation_def(*, key: str, type: str, data: dict[str, Any] | None = None) -> AnnotationMarkDef:
     return AnnotationMarkDef(_key=key, _type=type, data=data or {})
 
@@ -144,7 +114,7 @@ def hard_break() -> HardBreak:
     return HardBreak()
 
 
-def xref(*, target_type: str | None = None, target_id: str) -> XRef:
+def xref(*, target_type: str, target_id: str) -> XRef:
     return XRef(targetType=target_type, targetId=target_id)
 
 
@@ -184,87 +154,122 @@ def callout(*, id: str, blocks: list[TextBlock] | None = None, anchor: str | Non
     return CalloutBlock(id=id, anchor=anchor, blocks=blocks or [])
 
 
-def image_asset(
-    *,
-    id: str,
-    image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any],
-    alt: str | None = None,
-    label: str | None = None,
-    anchor: str | None = None,
-    meta: dict[str, Any] | None = None,
-    **extra,
-) -> ImageAsset:
+def _coerce_image_source(image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any]) -> ImageSourceUrl | ImageSourceEmbedded:
     if isinstance(image_source, dict):
         kind = image_source.get("kind")
         if kind == "url":
-            image_source = ImageSourceUrl(**image_source)
-        elif kind == "embedded":
-            image_source = ImageSourceEmbedded(**image_source)
-        else:
-            raise ValueError("`image_source.kind` must be 'url' or 'embedded'.")
-    return ImageAsset(id=id, imageSource=image_source, alt=alt, label=label, anchor=anchor, meta=meta or {}, **extra)
+            return ImageSourceUrl(**image_source)
+        if kind == "embedded":
+            return ImageSourceEmbedded(**image_source)
+        raise ValueError("`image_source.kind` must be 'url' or 'embedded'.")
+    return image_source
+
+
+def _image_like_asset(cls: type[ImageLikeAssetBase], *, id: str, image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any], alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra):
+    return cls(id=id, imageSource=_coerce_image_source(image_source), alt=alt, label=label, anchor=anchor, meta=meta or {}, **extra)
+
+
+def image_asset(*, id: str, image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any], alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> ImageAsset:
+    return _image_like_asset(ImageAsset, id=id, image_source=image_source, alt=alt, label=label, anchor=anchor, meta=meta, **extra)
+
+
+def logo_asset(*, id: str, image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any], alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> LogoAsset:
+    return _image_like_asset(LogoAsset, id=id, image_source=image_source, alt=alt, label=label, anchor=anchor, meta=meta, **extra)
+
+
+def background_asset(*, id: str, image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any], alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> BackgroundAsset:
+    return _image_like_asset(BackgroundAsset, id=id, image_source=image_source, alt=alt, label=label, anchor=anchor, meta=meta, **extra)
+
+
+def icon_asset(*, id: str, image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any], alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> IconAsset:
+    return _image_like_asset(IconAsset, id=id, image_source=image_source, alt=alt, label=label, anchor=anchor, meta=meta, **extra)
 
 
 def image_asset_url(*, id: str, url: str, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> ImageAsset:
     return image_asset(id=id, image_source=ImageSourceUrl(kind="url", url=url), alt=alt, label=label, anchor=anchor, meta=meta, **extra)
 
 
+def logo_asset_url(*, id: str, url: str, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> LogoAsset:
+    return logo_asset(id=id, image_source=ImageSourceUrl(kind="url", url=url), alt=alt, label=label, anchor=anchor, meta=meta, **extra)
+
+
+def background_asset_url(*, id: str, url: str, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> BackgroundAsset:
+    return background_asset(id=id, image_source=ImageSourceUrl(kind="url", url=url), alt=alt, label=label, anchor=anchor, meta=meta, **extra)
+
+
+def icon_asset_url(*, id: str, url: str, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> IconAsset:
+    return icon_asset(id=id, image_source=ImageSourceUrl(kind="url", url=url), alt=alt, label=label, anchor=anchor, meta=meta, **extra)
+
+
 def image_asset_embedded(*, id: str, data_base64: str, mime_type: str, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> ImageAsset:
     return image_asset(id=id, image_source=ImageSourceEmbedded(kind="embedded", encoding="base64", data=data_base64), alt=alt, label=label, anchor=anchor, meta=meta, mimeType=mime_type, **extra)
+
+
+def logo_asset_embedded(*, id: str, data_base64: str, mime_type: str, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> LogoAsset:
+    return logo_asset(id=id, image_source=ImageSourceEmbedded(kind="embedded", encoding="base64", data=data_base64), alt=alt, label=label, anchor=anchor, meta=meta, mimeType=mime_type, **extra)
+
+
+def background_asset_embedded(*, id: str, data_base64: str, mime_type: str, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> BackgroundAsset:
+    return background_asset(id=id, image_source=ImageSourceEmbedded(kind="embedded", encoding="base64", data=data_base64), alt=alt, label=label, anchor=anchor, meta=meta, mimeType=mime_type, **extra)
+
+
+def icon_asset_embedded(*, id: str, data_base64: str, mime_type: str, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> IconAsset:
+    return icon_asset(id=id, image_source=ImageSourceEmbedded(kind="embedded", encoding="base64", data=data_base64), alt=alt, label=label, anchor=anchor, meta=meta, mimeType=mime_type, **extra)
+
+
+def _embedded_source_from_file(path: str | Path) -> str:
+    return base64.b64encode(Path(path).read_bytes()).decode("ascii")
 
 
 def image_asset_from_file(*, id: str, path: str | Path, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, mime_type: str | None = None, embed: bool = True, url: str | None = None, **extra) -> ImageAsset:
     file_path = Path(path)
     final_mime = mime_type or mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
     if embed:
-        data_base64 = base64.b64encode(file_path.read_bytes()).decode("ascii")
-        return image_asset_embedded(id=id, data_base64=data_base64, mime_type=final_mime, alt=alt, label=label, anchor=anchor, meta=meta, **extra)
-    final_url = url or str(file_path)
-    return image_asset_url(id=id, url=final_url, alt=alt, label=label, anchor=anchor, meta=meta, mimeType=final_mime, **extra)
+        return image_asset_embedded(id=id, data_base64=_embedded_source_from_file(file_path), mime_type=final_mime, alt=alt, label=label, anchor=anchor, meta=meta, **extra)
+    return image_asset_url(id=id, url=url or str(file_path), alt=alt, label=label, anchor=anchor, meta=meta, mimeType=final_mime, **extra)
 
 
-def _coerce_image_source(*, url: str | None = None, data_base64: str | None = None, image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any] | None = None) -> ImageSourceUrl | ImageSourceEmbedded:
-    if image_source is not None:
-        if isinstance(image_source, dict):
-            kind = image_source.get("kind")
-            if kind == "url":
-                return ImageSourceUrl(**image_source)
-            if kind == "embedded":
-                return ImageSourceEmbedded(**image_source)
-            raise ValueError("`image_source.kind` must be 'url' or 'embedded'.")
-        return image_source
-    if url is not None:
-        return ImageSourceUrl(url=url)
-    if data_base64 is not None:
-        return ImageSourceEmbedded(data=data_base64)
-    raise ValueError("Provide `image_source`, `url`, or `data_base64`.")
+def logo_asset_from_file(*, id: str, path: str | Path, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, mime_type: str | None = None, embed: bool = True, url: str | None = None, **extra) -> LogoAsset:
+    file_path = Path(path)
+    final_mime = mime_type or mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
+    if embed:
+        return logo_asset_embedded(id=id, data_base64=_embedded_source_from_file(file_path), mime_type=final_mime, alt=alt, label=label, anchor=anchor, meta=meta, **extra)
+    return logo_asset_url(id=id, url=url or str(file_path), alt=alt, label=label, anchor=anchor, meta=meta, mimeType=final_mime, **extra)
 
 
-def logo_asset(*, id: str, url: str | None = None, data_base64: str | None = None, image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any] | None = None, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> LogoAsset:
-    return LogoAsset(id=id, imageSource=_coerce_image_source(url=url, data_base64=data_base64, image_source=image_source), alt=alt, label=label, anchor=anchor, meta=meta or {}, **extra)
+def background_asset_from_file(*, id: str, path: str | Path, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, mime_type: str | None = None, embed: bool = True, url: str | None = None, **extra) -> BackgroundAsset:
+    file_path = Path(path)
+    final_mime = mime_type or mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
+    if embed:
+        return background_asset_embedded(id=id, data_base64=_embedded_source_from_file(file_path), mime_type=final_mime, alt=alt, label=label, anchor=anchor, meta=meta, **extra)
+    return background_asset_url(id=id, url=url or str(file_path), alt=alt, label=label, anchor=anchor, meta=meta, mimeType=final_mime, **extra)
 
 
-def background_asset(*, id: str, url: str | None = None, data_base64: str | None = None, image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any] | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> BackgroundAsset:
-    return BackgroundAsset(id=id, imageSource=_coerce_image_source(url=url, data_base64=data_base64, image_source=image_source), label=label, anchor=anchor, meta=meta or {}, **extra)
+def icon_asset_from_file(*, id: str, path: str | Path, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, mime_type: str | None = None, embed: bool = True, url: str | None = None, **extra) -> IconAsset:
+    file_path = Path(path)
+    final_mime = mime_type or mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
+    if embed:
+        return icon_asset_embedded(id=id, data_base64=_embedded_source_from_file(file_path), mime_type=final_mime, alt=alt, label=label, anchor=anchor, meta=meta, **extra)
+    return icon_asset_url(id=id, url=url or str(file_path), alt=alt, label=label, anchor=anchor, meta=meta, mimeType=final_mime, **extra)
 
 
-def icon_asset(*, id: str, url: str | None = None, data_base64: str | None = None, image_source: ImageSourceUrl | ImageSourceEmbedded | dict[str, Any] | None = None, alt: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> IconAsset:
-    return IconAsset(id=id, imageSource=_coerce_image_source(url=url, data_base64=data_base64, image_source=image_source), alt=alt, label=label, anchor=anchor, meta=meta or {}, **extra)
-
-
-def attachment_asset(*, id: str, url: str | None = None, file_name: str | None = None, description: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> AttachmentAsset:
-    return AttachmentAsset(id=id, url=url, fileName=file_name, description=description, label=label, anchor=anchor, meta=meta or {}, **extra)
+def attachment_asset(*, id: str, src: str | None = None, file_name: str | None = None, description: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> AttachmentAsset:
+    return AttachmentAsset(id=id, src=src, fileName=file_name, description=description, label=label, anchor=anchor, meta=meta or {}, **extra)
 
 
 def table_column(*, key: str, header: str) -> TableColumn:
     return TableColumn(key=key, header=header)
 
 
-def table_dataset(*, id: str, columns: list[TableColumn], rows: list[dict], label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> RecordTableDataset:
+def record_table_dataset(*, id: str, columns: list[TableColumn], rows: list[dict], label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> RecordTableDataset:
     return RecordTableDataset(id=id, columns=columns, rows=rows, label=label, anchor=anchor, meta=meta or {}, **extra)
 
 
-def grid_table_cell(*, text: str | None = None, blocks: list[TextBlock] | None = None, header: bool | None = None, col_span: int | None = None, row_span: int | None = None, align: str | None = None, vertical_align: str | None = None, meta: dict[str, Any] | None = None) -> GridTableCell:
+def table_dataset(*, id: str, columns: list[TableColumn], rows: list[dict], label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> RecordTableDataset:
+    return record_table_dataset(id=id, columns=columns, rows=rows, label=label, anchor=anchor, meta=meta, **extra)
+
+
+def grid_table_cell(*, text: str | None = None, blocks: list[TextBlock] | None = None, header: bool = False, col_span: int = 1, row_span: int = 1, align: str | None = None, vertical_align: str | None = None, meta: dict[str, Any] | None = None) -> GridTableCell:
     return GridTableCell(text=text, blocks=blocks, header=header, colSpan=col_span, rowSpan=row_span, align=align, verticalAlign=vertical_align, meta=meta or {})
 
 
@@ -272,8 +277,8 @@ def grid_table_row(*cells: GridTableCell) -> GridTableRow:
     return GridTableRow(cells=list(cells))
 
 
-def grid_table_dataset(*, id: str, column_count: int, rows: list[GridTableRow], label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> GridTableDataset:
-    return GridTableDataset(id=id, columnCount=column_count, rows=rows, label=label, anchor=anchor, meta=meta or {}, **extra)
+def grid_table_dataset(*, id: str, rows: list[GridTableRow], column_count: int | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> GridTableDataset:
+    return GridTableDataset(id=id, rows=rows, columnCount=column_count, label=label, anchor=anchor, meta=meta or {}, **extra)
 
 
 def metric_value(*, key: str, value: str | int | float | bool | None, label: str | None = None, unit: str | None = None) -> MetricValue:
@@ -292,6 +297,10 @@ def pie_chart_dataset(*, id: str, slices: list[PieSlice], label: str | None = No
     return PieChartDataset(id=id, slices=slices, label=label, anchor=anchor, meta=meta or {}, valueUnit=value_unit)
 
 
+def chart_dataset(*, id: str, chart_type: str, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> GenericChartDataset:
+    return GenericChartDataset(id=id, chartType=chart_type, label=label, anchor=anchor, meta=meta or {}, **extra)
+
+
 def pie_chart_from_parallel_arrays(*, id: str, area_en: list[str], area_zh: list[str] | None, value: list[int | float], description_en: list[str] | None = None, description_zh: list[str] | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, value_unit: str | None = None, sort_desc: bool = True) -> PieChartDataset:
     return PieChartDataset.from_parallel_arrays(id=id, area_en=area_en, area_zh=area_zh, value=value, description_en=description_en, description_zh=description_zh, label=label, anchor=anchor, meta=meta, valueUnit=value_unit, sort_desc=sort_desc)
 
@@ -304,5 +313,5 @@ def footnote_entry(*, id: str, blocks: list[TextBlock], label: str | None = None
     return FootnoteEntry(id=id, blocks=blocks, label=label, anchor=anchor, meta=meta or {})
 
 
-def glossary_entry(*, id: str, term: str, definition: str, aliases: list[str] | None = None, short: str | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> GlossaryEntry:
-    return GlossaryEntry(id=id, term=term, definition=definition, aliases=aliases, short=short, label=label, anchor=anchor, meta=meta or {}, **extra)
+def glossary_entry(*, id: str, term: str, definition: str, aliases: list[str] | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> GlossaryEntry:
+    return GlossaryEntry(id=id, term=term, definition=definition, aliases=aliases, label=label, anchor=anchor, meta=meta or {}, **extra)

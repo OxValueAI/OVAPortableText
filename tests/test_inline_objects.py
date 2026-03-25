@@ -25,5 +25,7 @@ def test_inline_objects_output():
     assert second_children[1]["_type"] == "glossary_term"
     assert second_children[1]["targetId"] == "term-ebitda"
     assert second_children[2]["_type"] == "footnote_ref"
+    assert second_children[2]["targetId"] == "fn-1"
     assert second_children[3]["_type"] == "citation_ref"
+    assert second_children[3]["targetId"] == "cite-smith-2024"
     assert second_children[4]["_type"] == "hard_break"
