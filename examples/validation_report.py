@@ -3,7 +3,7 @@ from ova_portable_text import (
     create_document,
     footnote_entry,
     glossary_entry,
-    image_asset,
+    image_asset_url,
     paragraph,
     pie_chart_from_parallel_arrays,
     section,
@@ -19,10 +19,10 @@ from ova_portable_text import (
 report = create_document(
     title="OVAPortableText Step 4 Demo",
     language="en",
-    documentType="report",
+    documentType="valuationReport",
 )
 
-report.add_image_asset(image_asset(id="img-overview", src="https://example.com/overview.png", alt="Overview"))
+report.add_image_asset(image_asset_url(id="img-overview", url="https://example.com/overview.png", alt="Overview"))
 report.add_table_dataset(
     table_dataset(
         id="table-summary",
@@ -44,7 +44,7 @@ report.add_chart_dataset(
         value=[45, 30, 25],
     )
 )
-report.add_bibliography_entry(bibliography_entry(id="cite-1", text="Smith (2024). Demo reference."))
+report.add_bibliography_entry(bibliography_entry(id="cite-1", display_text="Smith (2024). Demo reference."))
 report.add_footnote(footnote_entry(id="fn-1", blocks=[paragraph("Footnote content goes here.")]))
 report.add_glossary_entry(glossary_entry(id="term-1", term="EBITDA", definition="A common financial metric."))
 

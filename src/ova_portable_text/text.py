@@ -30,7 +30,7 @@ from typing import Any, Literal, TypeAlias
 from pydantic import Field, field_validator, model_validator
 
 from .base import OvaBaseModel
-from .inline import CitationRef, FootnoteRef, GlossaryTerm, HardBreak, InlineObject, XRef
+from .inline import CitationRef, FootnoteRef, GlossaryTerm, HardBreak, InlineMath, InlineObject, XRef
 
 # ---------------------------------------------------------------------------
 # Text styles / 文本样式
@@ -143,7 +143,33 @@ class AnnotationMarkDef(MarkDefBase):
     data: dict[str, Any] = Field(default_factory=dict)
 
 
-MarkDef: TypeAlias = LinkMarkDef | AnnotationMarkDef
+class XRefMarkDef(MarkDefBase):
+    type_: Literal["xref"] = Field(default="xref", alias="_type", serialization_alias="_type")
+    targetType: str | None = None
+    targetId: str
+
+
+class CitationRefMarkDef(MarkDefBase):
+    type_: Literal["citation_ref"] = Field(default="citation_ref", alias="_type", serialization_alias="_type")
+    targetId: str
+
+
+class FootnoteRefMarkDef(MarkDefBase):
+    type_: Literal["footnote_ref"] = Field(default="footnote_ref", alias="_type", serialization_alias="_type")
+    targetId: str
+
+
+class GlossaryTermMarkDef(MarkDefBase):
+    type_: Literal["glossary_term"] = Field(default="glossary_term", alias="_type", serialization_alias="_type")
+    targetId: str
+
+
+class InlineMathMarkDef(MarkDefBase):
+    type_: Literal["inline_math"] = Field(default="inline_math", alias="_type", serialization_alias="_type")
+    latex: str
+
+
+MarkDef: TypeAlias = LinkMarkDef | XRefMarkDef | CitationRefMarkDef | FootnoteRefMarkDef | GlossaryTermMarkDef | InlineMathMarkDef | AnnotationMarkDef
 """
 Union of currently supported mark-definition models.
 当前支持的 mark-definition 模型联合类型。
@@ -182,7 +208,7 @@ class Span(OvaBaseModel):
         return self
 
 
-TextChild: TypeAlias = Span | HardBreak | XRef | CitationRef | FootnoteRef | GlossaryTerm
+TextChild: TypeAlias = Span | HardBreak | XRef | CitationRef | FootnoteRef | GlossaryTerm | InlineMath
 """
 All currently supported child elements inside `block.children[]`.
 当前 `block.children[]` 支持的全部子元素类型。

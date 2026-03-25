@@ -12,7 +12,7 @@ from ova_portable_text import Document, create_document
 
 
 def main() -> None:
-    report = create_document(title="Save Load Demo", language="en", documentType="report")
+    report = create_document(title="Save Load Demo", language="en", documentType="valuationReport")
     report.new_section(id="sec-1", level=1, title="Introduction").append_paragraph(
         "This JSON file will be written to disk and loaded back."
     )

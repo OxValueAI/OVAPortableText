@@ -1,6 +1,6 @@
 import pytest
 
-from ova_portable_text import create_document, image_asset, paragraph, section
+from ova_portable_text import create_document, image_asset_url, paragraph, section
 
 
 def test_strict_ids_reject_duplicate_top_level_section_immediately():
@@ -17,7 +17,7 @@ def test_strict_ids_reject_cross_registry_conflict_with_existing_section():
     report.new_section(id="dup-1", level=1, title="Intro")
 
     with pytest.raises(ValueError, match="Duplicate global id"):
-        report.add_image_asset(image_asset(id="dup-1", src="https://example.com/a.png"))
+        report.add_image_asset(image_asset_url(id="dup-1", url="https://example.com/a.png"))
 
 
 def test_strict_ids_reject_duplicate_ids_inside_pending_section_subtree():
