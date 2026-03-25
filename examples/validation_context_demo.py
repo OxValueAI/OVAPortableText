@@ -4,7 +4,7 @@ from ova_portable_text import create_document, section, xref
 report = create_document(
     title="Validation Context Demo",
     language="en",
-    documentType="demo",
+    documentType="valuationReport",
 )
 
 sec = section(id="sec-ctx", level=1, title="Context Aware Validation")

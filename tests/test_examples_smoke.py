@@ -11,6 +11,9 @@ EXAMPLES = [
     ROOT / "examples" / "save_and_load_json_demo.py",
     ROOT / "examples" / "patent_valuation_style_report.py",
     ROOT / "examples" / "full_report_workflow_demo.py",
+    ROOT / "examples" / "image_sources_demo.py",
+    ROOT / "examples" / "grid_table_demo.py",
+    ROOT / "examples" / "references_and_marks_demo.py",
 ]
 
 

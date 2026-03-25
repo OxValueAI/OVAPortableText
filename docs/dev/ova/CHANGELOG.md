@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.3]
+
+### Added
+- formal image-source helpers: `image_asset_url(...)`, `image_asset_embedded(...)`, and `image_asset_from_file(...)`
+- typed image source models: `ImageSourceUrl`, `ImageSourceEmbedded`, and discriminated `ImageSource`
+
+### Changed
+- `assets.images` now follows the pure `imageSource` protocol and no longer depends on legacy `src`
+- image-related examples, tests, and docs now use the new protocol-native image helpers
+
 ## [0.1.2]
 
 ### Added

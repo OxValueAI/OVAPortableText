@@ -1,64 +1,121 @@
 {
-  "schemaVersion": "report.v1",
+  "schemaVersion": "report.v1.0",
   "meta": {
-    "title": "专利估值分析报告",
-    "subtitle": "协议能力展示样例",
+    "title": "专利估值分析报告（协议样例）",
+    "subtitle": "基于样例1.docx 改写，并补充协议能力展示区",
     "language": "zh-CN",
-    "author": "OxValue.AI / OVAPortableText Demo",
-    "date": "20260209",
+    "author": "OVAPortableText Sample Generator",
+    "reportNumber": "SAMPLE-2026-02-09",
     "documentType": "report",
-    "confidentiality": "internal-demo",
-    "generatedBy": "OVAPortableText 0.1.2",
-    "generatedAt": "2026-02-09T00:00:00Z",
-    "reportType": "patent-valuation",
-    "clientName": "Demo Client",
+    "confidentiality": "internal",
+    "generatedBy": "OVAPortableText v0.1.3 demo script",
+    "generatedAt": "2026-02-09T12:00:00Z",
+    "projectId": "demo-patent-report-sample1",
+    "reportType": "valuation",
+    "clientName": "斑马智行网络(香港)有限公司",
     "locale": "zh-CN",
-    "source": "样例.docx"
+    "source": "样例1.docx"
   },
-  "theme": {},
+  "theme": {
+    "name": "oxvalue-report",
+    "styleTemplate": "formal-report",
+    "pageTemplateFamily": "valuation-report",
+    "brandAssetRefs": [
+      "logo-primary",
+      "icon-accent"
+    ],
+    "coverTemplateRef": "bg-cover"
+  },
   "assets": {
     "images": [
       {
         "id": "img-model-system",
         "anchor": "img-model-system",
-        "label": "专利价值评估系统图示",
+        "label": "Valuation system diagram",
         "meta": {},
-        "src": "assets/images/model-system.png",
-        "alt": "牛津智能专利价值评估系统示意图",
-        "mimeType": "image/png",
         "imageSource": {
           "kind": "url",
           "url": "assets/images/model-system.png"
-        }
+        },
+        "alt": "牛津智能专利价值评估系统示意图",
+        "mimeType": "image/png",
+        "checksum": "sha256:demo-model-system",
+        "width": 1200,
+        "height": 675
       },
       {
         "id": "img-company-qr",
         "anchor": "img-company-qr",
-        "label": "公司公众号二维码(src内容仅为样例，非正式图片)",
+        "label": "Company QR placeholder",
         "meta": {},
-        "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABDElEQVR42u3bsRGAMAwEQfffNDRhjaT3XuwEb/QDnCNJkiRJzX3FuWEAAAQAgAAAEIC+C5oGsAYYAAAAAAAAAAAAAIBBANXnuwBunQcAAAAAAAAAAAAAIBHAEAMAAAAAAAAAAAAAIBdg+9ATAAACAEAAAAhA/eDa8sKk67kAAAAAAAAAAAAAAHgJIPWiAQAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAACGGAAAAAAAAAAAAAAAkwFe+3EDAAAAAAAAAAAAAAAA9QNt2lACAAAAAAAAAAAAAABA7iACAAAAAAAAAAAAAACAIQYAAAAAAAAAAAAAAIC5H2ABAAAAAAAAAAAAAAAgF0CSJElSeT/Rw6WSLgiUgQAAAABJRU5ErkJggg==",
-        "alt": "公司公众号二维码",
-        "mimeType": "image/png",
-        "width": 128,
-        "height": 128,
-        "checksum": "sha256:7a1b787fc95e1b9e8c00093f45c551d01f396ae1dbb08af60b888c669eb3ba15",
         "imageSource": {
           "kind": "embedded",
           "encoding": "base64",
-          "data": "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABDElEQVR42u3bsRGAMAwEQfffNDRhjaT3XuwEb/QDnCNJkiRJzX3FuWEAAAQAgAAAEIC+C5oGsAYYAAAAAAAAAAAAAIBBANXnuwBunQcAAAAAAAAAAAAAIBHAEAMAAAAAAAAAAAAAIBdg+9ATAAACAEAAAAhA/eDa8sKk67kAAAAAAAAAAAAAAHgJIPWiAQAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAACGGAAAAAAAAAAAAAAAkwFe+3EDAAAAAAAAAAAAAAAA9QNt2lACAAAAAAAAAAAAAABA7iACAAAAAAAAAAAAAACAIQYAAAAAAAAAAAAAAIC5H2ABAAAAAAAAAAAAAAAgF0CSJElSeT/Rw6WSLgiUgQAAAABJRU5ErkJggg=="
+          "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jrR0AAAAASUVORK5CYII="
+        },
+        "alt": "公司公众号二维码占位图",
+        "mimeType": "image/png",
+        "checksum": "sha256:demo-qr-placeholder",
+        "width": 128,
+        "height": 128
+      }
+    ],
+    "logos": [
+      {
+        "id": "logo-primary",
+        "anchor": "logo-primary",
+        "label": "Primary logo",
+        "meta": {},
+        "alt": "OxValue.AI 主 Logo",
+        "mimeType": "image/png",
+        "width": 320,
+        "height": 96,
+        "imageSource": {
+          "kind": "url",
+          "url": "assets/images/logo-primary.png"
         }
       }
     ],
-    "logos": [],
-    "backgrounds": [],
-    "icons": [],
+    "backgrounds": [
+      {
+        "id": "bg-cover",
+        "anchor": "bg-cover",
+        "label": "Cover background",
+        "meta": {},
+        "alt": "封面背景图",
+        "mimeType": "image/png",
+        "width": 1600,
+        "height": 900,
+        "imageSource": {
+          "kind": "url",
+          "url": "assets/images/cover-bg.png"
+        }
+      }
+    ],
+    "icons": [
+      {
+        "id": "icon-accent",
+        "anchor": "icon-accent",
+        "label": "Accent icon",
+        "meta": {},
+        "alt": "强调图标占位图",
+        "mimeType": "image/png",
+        "width": 32,
+        "height": 32,
+        "imageSource": {
+          "kind": "embedded",
+          "encoding": "base64",
+          "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jrR0AAAAASUVORK5CYII="
+        }
+      }
+    ],
     "attachments": []
   },
   "datasets": {
     "charts": [
       {
-        "id": "chart-driver-summary",
-        "anchor": "chart-driver-summary",
+        "id": "chart-factor-overall",
+        "anchor": "chart-factor-overall",
         "label": "专利价值驱动因素总体特征",
         "meta": {},
         "chartType": "pie",
@@ -67,107 +124,107 @@
           {
             "key": "novelty",
             "label": {
-              "en": "Novelty",
+              "en": "Technical novelty",
               "zh": "技术新颖性"
             },
-            "value": 38.0,
+            "value": 34,
             "description": {
-              "en": "Novelty is the largest contributor.",
-              "zh": "技术新颖性是占比最高的驱动维度。"
+              "en": "Highest contribution",
+              "zh": "整体贡献最高"
             }
           },
           {
             "key": "lifecycle",
             "label": {
-              "en": "Lifecycle",
+              "en": "Technology lifecycle",
               "zh": "技术生命周期"
             },
-            "value": 24.0,
+            "value": 27,
             "description": {
-              "en": "Lifecycle remains important.",
-              "zh": "技术生命周期仍然具有重要影响。"
+              "en": "Second highest",
+              "zh": "贡献次高"
             }
           },
           {
             "key": "market",
             "label": {
-              "en": "Market",
-              "zh": "市场与运营"
+              "en": "Market and team",
+              "zh": "市场与团队"
             },
-            "value": 22.0,
+            "value": 22,
             "description": {
-              "en": "Market factors contribute a meaningful but smaller share.",
-              "zh": "市场与运营因素贡献次之。"
+              "en": "Medium contribution",
+              "zh": "中等贡献"
             }
           },
           {
-            "key": "legal-risk",
+            "key": "legal",
             "label": {
-              "en": "Legal & Risk",
+              "en": "Legal value and risk",
               "zh": "法律价值与风险"
             },
-            "value": 16.0,
+            "value": 17,
             "description": {
-              "en": "Legal and risk factors are relevant but not dominant.",
-              "zh": "法律价值与风险具有辅助但不可忽视的影响。"
+              "en": "Relatively lower contribution",
+              "zh": "相对较低"
             }
           }
         ]
       },
       {
-        "id": "chart-novelty-breakdown",
-        "anchor": "chart-novelty-breakdown",
-        "label": "技术新颖性内部拆解",
+        "id": "chart-overview-driver",
+        "anchor": "chart-overview-driver",
+        "label": "估值概要中的价值驱动因素",
         "meta": {},
         "chartType": "pie",
         "valueUnit": "percent",
         "slices": [
           {
-            "key": "originality",
+            "key": "novelty",
             "label": {
-              "en": "Originality",
-              "zh": "原创性"
+              "en": "Technical novelty",
+              "zh": "技术新颖性"
             },
-            "value": 34.0,
+            "value": 38,
             "description": {
-              "en": "Originality drives the novelty factor most strongly.",
-              "zh": "原创性是技术新颖性中贡献最大的分项。"
+              "en": "Core driver",
+              "zh": "核心贡献来源"
             }
           },
           {
-            "key": "applicability",
+            "key": "lifecycle",
             "label": {
-              "en": "Applicability",
-              "zh": "适用范围"
+              "en": "Technology lifecycle",
+              "zh": "技术生命周期"
             },
-            "value": 26.0,
+            "value": 24,
             "description": {
-              "en": "Applicability breadth remains important.",
-              "zh": "适用范围广度仍是核心观察维度。"
+              "en": "Important secondary factor",
+              "zh": "重要辅助因素"
             }
           },
           {
-            "key": "portfolio-scope",
+            "key": "market",
             "label": {
-              "en": "Portfolio Scope",
-              "zh": "专利布局"
+              "en": "Market and team",
+              "zh": "市场与团队"
             },
-            "value": 22.0,
+            "value": 21,
             "description": {
-              "en": "Portfolio scope reflects strategic protection breadth.",
-              "zh": "专利布局反映战略保护范围。"
+              "en": "Commercialization related",
+              "zh": "与商业落地相关"
             }
           },
           {
-            "key": "influence",
+            "key": "legal",
             "label": {
-              "en": "Influence",
-              "zh": "技术影响力"
+              "en": "Legal value and risk",
+              "zh": "法律价值与风险"
             },
-            "value": 18.0,
+            "value": 17,
             "description": {
-              "en": "Influence supports but does not dominate the score.",
-              "zh": "技术影响力具有支撑作用但不是主导来源。"
+              "en": "Risk adjustment",
+              "zh": "风险调节项"
             }
           }
         ]
@@ -175,237 +232,13 @@
     ],
     "tables": [
       {
-        "id": "table-data-rules",
-        "anchor": "table-data-rules",
-        "label": "数据调用及计算规则示例",
-        "meta": {},
-        "columns": [
-          {
-            "key": "display_name",
-            "header": "展示字段"
-          },
-          {
-            "key": "section",
-            "header": "章节路径"
-          },
-          {
-            "key": "field_name",
-            "header": "字段名"
-          },
-          {
-            "key": "source_field",
-            "header": "源字段"
-          }
-        ],
-        "rows": [
-          {
-            "display_name": "专利号",
-            "section": "1 - 著录项 / 1.1 - 著录项",
-            "field_name": "申请号",
-            "source_field": "an"
-          },
-          {
-            "display_name": "专利名称",
-            "section": "1 - 著录项 / 1.1 - 著录项",
-            "field_name": "标题中文",
-            "source_field": "ti-cn"
-          },
-          {
-            "display_name": "报告生成日期",
-            "section": "系统自动生成",
-            "field_name": "评估基准日",
-            "source_field": "YYYYMMDD"
-          }
-        ]
-      },
-      {
-        "id": "table-summary-overview",
-        "anchor": "table-summary-overview",
-        "label": "估值概要关键字段",
-        "meta": {},
-        "columns": [
-          {
-            "key": "field",
-            "header": "字段"
-          },
-          {
-            "key": "value",
-            "header": "值"
-          }
-        ],
-        "rows": [
-          {
-            "field": "被评专利",
-            "value": "CN201410234381.X"
-          },
-          {
-            "field": "专利名称",
-            "value": "一种呼叫请求处理的方法和装置"
-          },
-          {
-            "field": "专利类型",
-            "value": "发明专利"
-          },
-          {
-            "field": "当前法律状态",
-            "value": "有效"
-          },
-          {
-            "field": "申请日",
-            "value": "20140529"
-          },
-          {
-            "field": "申请号",
-            "value": "CN201410234381.X"
-          },
-          {
-            "field": "首次公开日",
-            "value": "20151223"
-          },
-          {
-            "field": "申请公布号",
-            "value": "CN105187676A"
-          },
-          {
-            "field": "授权公告日",
-            "value": "20210507"
-          },
-          {
-            "field": "授权公告号",
-            "value": "CN105187676B"
-          },
-          {
-            "field": "预估到期日",
-            "value": "20340529"
-          },
-          {
-            "field": "剩余保护年限",
-            "value": "8年"
-          },
-          {
-            "field": "申请人",
-            "value": "斑马智行网络(香港)有限公司"
-          },
-          {
-            "field": "当前权利人",
-            "value": "斑马智行网络(香港)有限公司"
-          },
-          {
-            "field": "主分类号",
-            "value": "H04M3/487"
-          },
-          {
-            "field": "估计总价值",
-            "value": "1809918 CNY — 2448713 CNY"
-          }
-        ]
-      },
-      {
-        "id": "table-bibliographic-info",
-        "anchor": "table-bibliographic-info",
-        "label": "著录项目信息表",
-        "meta": {},
-        "columns": [
-          {
-            "key": "field",
-            "header": "字段"
-          },
-          {
-            "key": "value",
-            "header": "内容"
-          }
-        ],
-        "rows": [
-          {
-            "field": "被评专利",
-            "value": "CN201410234381.X / 一种呼叫请求处理的方法和装置"
-          },
-          {
-            "field": "专利类型",
-            "value": "发明专利"
-          },
-          {
-            "field": "当前法律状态",
-            "value": "有效"
-          },
-          {
-            "field": "申请日",
-            "value": "20140529"
-          },
-          {
-            "field": "申请号",
-            "value": "CN201410234381.X"
-          },
-          {
-            "field": "首次公开日",
-            "value": "20151223"
-          },
-          {
-            "field": "申请公布号",
-            "value": "CN105187676A"
-          },
-          {
-            "field": "授权公告日",
-            "value": "20210507"
-          },
-          {
-            "field": "授权公告号",
-            "value": "CN105187676B"
-          },
-          {
-            "field": "预估到期日",
-            "value": "20340529"
-          },
-          {
-            "field": "剩余保护年限",
-            "value": "8年"
-          },
-          {
-            "field": "申请人",
-            "value": "斑马智行网络(香港)有限公司"
-          },
-          {
-            "field": "申请人地址",
-            "value": "中国香港九龙长沙湾道788号罗氏商业广场6楼603室"
-          },
-          {
-            "field": "当前权利人",
-            "value": "斑马智行网络(香港)有限公司"
-          },
-          {
-            "field": "当前权利人地址",
-            "value": "中国香港九龙长沙湾道788号罗氏商业广场6楼603室"
-          },
-          {
-            "field": "发明人",
-            "value": "李丽鸿"
-          },
-          {
-            "field": "分类号",
-            "value": "H04M3/487"
-          },
-          {
-            "field": "主分类号",
-            "value": "H04M3/487"
-          },
-          {
-            "field": "代理机构",
-            "value": "北京三友知识产权代理有限公司 11127"
-          },
-          {
-            "field": "代理人",
-            "value": "李辉"
-          }
-        ]
-      },
-      {
         "id": "table-legal-status",
         "anchor": "table-legal-status",
-        "label": "法律状态信息表",
+        "label": "法律状态信息",
         "meta": {},
         "columns": [
           {
-            "key": "announcement_date",
+            "key": "date",
             "header": "法律状态公告日"
           },
           {
@@ -413,290 +246,629 @@
             "header": "法律状态"
           },
           {
-            "key": "detail",
+            "key": "details",
             "header": "详细信息"
           }
         ],
         "rows": [
           {
-            "announcement_date": "20151223",
+            "date": "20151223",
             "status": "公开",
-            "detail": "公开"
+            "details": "公开"
           },
           {
-            "announcement_date": "20160120",
+            "date": "20160120",
             "status": "实质审查的生效",
-            "detail": "实质审查的生效IPC(主分类):H04M 3/487; 申请日:20140529"
+            "details": "实质审查的生效 IPC(主分类): H04M 3/487；申请日：20140529"
           },
           {
-            "announcement_date": "20201211",
+            "date": "20201211",
             "status": "专利申请权、专利权的转移",
-            "detail": "登记生效日:20201130；变更前申请人:阿里巴巴集团控股有限公司；变更后申请人:斑马智行网络(香港)有限公司"
+            "details": "登记生效日：20201130；变更前申请人：阿里巴巴集团控股有限公司；变更后申请人：斑马智行网络(香港)有限公司。"
           },
           {
-            "announcement_date": "20210507",
+            "date": "20210507",
             "status": "授权",
-            "detail": "授权"
-          }
-        ]
-      },
-      {
-        "id": "table-classification-info",
-        "anchor": "table-classification-info",
-        "label": "专利分类信息表",
-        "meta": {},
-        "columns": [
-          {
-            "key": "category",
-            "header": "类别"
-          },
-          {
-            "key": "code",
-            "header": "分类号"
-          },
-          {
-            "key": "name",
-            "header": "类名"
+            "details": "授权"
           }
         ],
-        "rows": [
-          {
-            "category": "IPC分类",
-            "code": "H04N19/42",
-            "name": "视频编码相关分类"
-          },
-          {
-            "category": "IPC分类",
-            "code": "H04N19/20",
-            "name": "视频信号处理相关分类"
-          },
-          {
-            "category": "IPC分类",
-            "code": "H04N19/172",
-            "name": "编码方法相关分类"
-          },
-          {
-            "category": "战略性新兴产业分类",
-            "code": "1.1",
-            "name": "下一代信息网络产业"
-          }
-        ]
+        "tableType": "record"
       },
       {
         "id": "table-forward-citations",
         "anchor": "table-forward-citations",
-        "label": "引证信息表",
+        "label": "引证信息",
         "meta": {},
         "columns": [
           {
-            "key": "seq",
+            "key": "index",
             "header": "序号"
           },
           {
-            "key": "type",
-            "header": "引证类别"
-          },
-          {
-            "key": "publication_number",
-            "header": "公开(公告)号"
-          },
-          {
-            "key": "publication_date",
-            "header": "公开(公告)日"
-          },
-          {
-            "key": "application_number",
-            "header": "申请号"
-          },
-          {
-            "key": "application_date",
-            "header": "申请日"
-          },
-          {
-            "key": "title",
-            "header": "标题(中文)"
-          },
-          {
-            "key": "applicants",
-            "header": "申请人"
-          },
-          {
-            "key": "ipc",
-            "header": "IPC分类号"
+            "key": "content",
+            "header": "引用被评专利的后续专利"
           }
         ],
         "rows": [
           {
-            "seq": 1,
-            "type": "A",
-            "publication_number": "CN119247024A",
-            "publication_date": "20250103",
-            "application_number": "CN202411223548.2",
-            "application_date": "20240903",
-            "title": "基于分解降噪和新型卷积神经网络的故障测距方法和系统",
-            "applicants": "国网吉林省电力有限公司电力科学研究院; 吉林省电力科学研究院有限公司; 北京交通大学; 国网吉林省电力有限公司; 国网吉林省电力有限公司长春供电公司",
-            "ipc": "G01R31/08; G06N3/0464; G06N3/08"
+            "index": 1,
+            "content": "引证类别：A；公开(公告)号：CN119247024A；公开(公告)日：20250103；申请号：CN202411223548.2；申请日：20240903；标题：基于分解降噪和新型卷积神经网络的故障测距方法和系统；申请人：国网吉林省电力有限公司电力科学研究院等；IPC：G01R31/08; G06N3/0464; G06N3/08。"
           },
           {
-            "seq": 2,
-            "type": "A",
-            "publication_number": "CN119247024A",
-            "publication_date": "20250103",
-            "application_number": "CN202411223548.2",
-            "application_date": "20240903",
-            "title": "基于分解降噪和新型卷积神经网络的故障测距方法和系统",
-            "applicants": "国网吉林省电力有限公司电力科学研究院; 吉林省电力科学研究院有限公司; 北京交通大学; 国网吉林省电力有限公司; 国网吉林省电力有限公司长春供电公司",
-            "ipc": "G01R31/08; G06N3/0464; G06N3/08"
+            "index": 2,
+            "content": "引证类别：A；公开(公告)号：CN119247024A；公开(公告)日：20250103；申请号：CN202411223548.2；申请日：20240903；标题：基于分解降噪和新型卷积神经网络的故障测距方法和系统；申请人：国网吉林省电力有限公司电力科学研究院等；IPC：G01R31/08; G06N3/0464; G06N3/08。"
           }
-        ]
+        ],
+        "tableType": "record"
       },
       {
         "id": "table-backward-citations",
         "anchor": "table-backward-citations",
-        "label": "被引证信息表",
+        "label": "被引证信息",
         "meta": {},
         "columns": [
           {
-            "key": "seq",
+            "key": "index",
             "header": "序号"
           },
           {
-            "key": "type",
-            "header": "引证类别"
-          },
-          {
-            "key": "publication_number",
-            "header": "公开(公告)号"
-          },
-          {
-            "key": "publication_date",
-            "header": "公开(公告)日"
-          },
-          {
-            "key": "application_number",
-            "header": "申请号"
-          },
-          {
-            "key": "application_date",
-            "header": "申请日"
-          },
-          {
-            "key": "title",
-            "header": "标题(中文)"
-          },
-          {
-            "key": "applicants",
-            "header": "申请人"
-          },
-          {
-            "key": "ipc",
-            "header": "IPC分类号"
+            "key": "content",
+            "header": "被引证专利"
           }
         ],
         "rows": [
           {
-            "seq": 1,
-            "type": "A",
-            "publication_number": "CN119247024A",
-            "publication_date": "20250103",
-            "application_number": "CN202411223548.2",
-            "application_date": "20240903",
-            "title": "基于分解降噪和新型卷积神经网络的故障测距方法和系统",
-            "applicants": "国网吉林省电力有限公司电力科学研究院; 吉林省电力科学研究院有限公司; 北京交通大学; 国网吉林省电力有限公司; 国网吉林省电力有限公司长春供电公司",
-            "ipc": "G01R31/08; G06N3/0464; G06N3/08"
+            "index": 1,
+            "content": "引证类别：A；公开(公告)号：CN119247024A；公开(公告)日：20250103；申请号：CN202411223548.2；申请日：20240903；标题：基于分解降噪和新型卷积神经网络的故障测距方法和系统；申请人：国网吉林省电力有限公司电力科学研究院等；IPC：G01R31/08; G06N3/0464; G06N3/08。"
           },
           {
-            "seq": 2,
-            "type": "A",
-            "publication_number": "CN119247024A",
-            "publication_date": "20250103",
-            "application_number": "CN202411223548.2",
-            "application_date": "20240903",
-            "title": "基于分解降噪和新型卷积神经网络的故障测距方法和系统",
-            "applicants": "国网吉林省电力有限公司电力科学研究院; 吉林省电力科学研究院有限公司; 北京交通大学; 国网吉林省电力有限公司; 国网吉林省电力有限公司长春供电公司",
-            "ipc": "G01R31/08; G06N3/0464; G06N3/08"
+            "index": 2,
+            "content": "引证类别：A；公开(公告)号：CN119247024A；公开(公告)日：20250103；申请号：CN202411223548.2；申请日：20240903；标题：基于分解降噪和新型卷积神经网络的故障测距方法和系统；申请人：国网吉林省电力有限公司电力科学研究院等；IPC：G01R31/08; G06N3/0464; G06N3/08。"
+          }
+        ],
+        "tableType": "record"
+      },
+      {
+        "id": "table-summary-overview",
+        "anchor": "table-summary-overview",
+        "label": "估值概要",
+        "meta": {},
+        "tableType": "grid",
+        "columnCount": 4,
+        "rows": [
+          {
+            "cells": [
+              {
+                "text": "被评专利",
+                "header": true
+              },
+              {
+                "text": "CN201410234381.X\n一种呼叫请求处理的方法和装置",
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "专利类型",
+                "header": true
+              },
+              {
+                "text": "发明专利"
+              },
+              {
+                "text": "当前法律状态",
+                "header": true
+              },
+              {
+                "text": "有效"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "申请日",
+                "header": true
+              },
+              {
+                "text": "20140529"
+              },
+              {
+                "text": "申请号",
+                "header": true
+              },
+              {
+                "text": "CN201410234381.X"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "首次公开日",
+                "header": true
+              },
+              {
+                "text": "20151223"
+              },
+              {
+                "text": "申请公布号",
+                "header": true
+              },
+              {
+                "text": "CN105187676A"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "授权公告日",
+                "header": true
+              },
+              {
+                "text": "20210507"
+              },
+              {
+                "text": "授权公告号",
+                "header": true
+              },
+              {
+                "text": "CN105187676B"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "预估到期日",
+                "header": true
+              },
+              {
+                "text": "20340529"
+              },
+              {
+                "text": "剩余保护年限",
+                "header": true
+              },
+              {
+                "text": "8年"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "申请人",
+                "header": true
+              },
+              {
+                "text": "斑马智行网络(香港)有限公司"
+              },
+              {
+                "text": "申请人地址",
+                "header": true
+              },
+              {
+                "text": "中国香港九龙长沙湾道788号罗氏商业广场6楼603室"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "当前权利人",
+                "header": true
+              },
+              {
+                "text": "斑马智行网络(香港)有限公司"
+              },
+              {
+                "text": "当前权利人地址",
+                "header": true
+              },
+              {
+                "text": "中国香港九龙长沙湾道788号罗氏商业广场6楼603室"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "发明人",
+                "header": true
+              },
+              {
+                "text": "李丽鸿",
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "主分类号",
+                "header": true
+              },
+              {
+                "text": "H04M3/487",
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "估计总价值",
+                "header": true
+              },
+              {
+                "text": "根据国家有关评估的法律法规，本着客观、独立、公正、科学的原则，按照 OxValue.AI 估值方法，被评专利价值估算结果为：\n1809918 CNY — 2448713 CNY\n（评估基准日 2026年2月23日）",
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "专利价值驱动因素",
+                "header": true
+              },
+              {
+                "text": "图表见下方 figure；此处保留与原文档一致的版面占位含义。",
+                "colSpan": 3
+              }
+            ]
           }
         ]
       },
       {
-        "id": "table-claims-outline",
-        "anchor": "table-claims-outline",
-        "label": "权利要求摘要表",
+        "id": "table-biblio-info",
+        "anchor": "table-biblio-info",
+        "label": "著录项目信息",
         "meta": {},
-        "columns": [
-          {
-            "key": "claim_no",
-            "header": "权利要求"
-          },
-          {
-            "key": "type",
-            "header": "类型"
-          },
-          {
-            "key": "summary",
-            "header": "摘要"
-          }
-        ],
+        "tableType": "grid",
+        "columnCount": 4,
         "rows": [
           {
-            "claim_no": "1",
-            "type": "独立权利要求",
-            "summary": "网络侧接收查询请求、查询订单/物流信息并返回给终端显示。"
+            "cells": [
+              {
+                "text": "被评专利",
+                "header": true
+              },
+              {
+                "text": "CN201410234381.X\n一种呼叫请求处理的方法和装置",
+                "colSpan": 3
+              }
+            ]
           },
           {
-            "claim_no": "2",
-            "type": "从属权利要求",
-            "summary": "根据物流信息匹配号码并返回对应物流或订单信息。"
+            "cells": [
+              {
+                "text": "专利类型",
+                "header": true
+              },
+              {
+                "text": "发明专利"
+              },
+              {
+                "text": "当前法律状态",
+                "header": true
+              },
+              {
+                "text": "有效"
+              }
+            ]
           },
           {
-            "claim_no": "3",
-            "type": "从属权利要求",
-            "summary": "依据用户ID查询订单号，再从第三数据库查询订单内容。"
+            "cells": [
+              {
+                "text": "申请日",
+                "header": true
+              },
+              {
+                "text": "20140529"
+              },
+              {
+                "text": "申请号",
+                "header": true
+              },
+              {
+                "text": "CN201410234381.X"
+              }
+            ]
           },
           {
-            "claim_no": "4",
-            "type": "独立权利要求",
-            "summary": "终端侧发送查询请求、接收响应并在来电界面显示关联信息。"
+            "cells": [
+              {
+                "text": "首次公开日",
+                "header": true
+              },
+              {
+                "text": "20151223"
+              },
+              {
+                "text": "申请公布号",
+                "header": true
+              },
+              {
+                "text": "CN105187676A"
+              }
+            ]
           },
           {
-            "claim_no": "6",
-            "type": "独立权利要求",
-            "summary": "网络设备实现接收、查询、发送等模块化能力。"
+            "cells": [
+              {
+                "text": "授权公告日",
+                "header": true
+              },
+              {
+                "text": "20210507"
+              },
+              {
+                "text": "授权公告号",
+                "header": true
+              },
+              {
+                "text": "CN105187676B"
+              }
+            ]
           },
           {
-            "claim_no": "9",
-            "type": "独立权利要求",
-            "summary": "终端实现发送、接收、显示模块化能力。"
+            "cells": [
+              {
+                "text": "预估到期日",
+                "header": true
+              },
+              {
+                "text": "20340529"
+              },
+              {
+                "text": "剩余保护年限",
+                "header": true
+              },
+              {
+                "text": "8年"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "申请人",
+                "header": true
+              },
+              {
+                "text": "斑马智行网络(香港)有限公司"
+              },
+              {
+                "text": "申请人地址",
+                "header": true
+              },
+              {
+                "text": "中国香港九龙长沙湾道788号罗氏商业广场6楼603室"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "当前权利人",
+                "header": true
+              },
+              {
+                "text": "斑马智行网络(香港)有限公司"
+              },
+              {
+                "text": "当前权利人地址",
+                "header": true
+              },
+              {
+                "text": "中国香港九龙长沙湾道788号罗氏商业广场6楼603室"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "发明人",
+                "header": true
+              },
+              {
+                "text": "李丽鸿",
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "分类号",
+                "header": true
+              },
+              {
+                "text": "H04M3/487",
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "主分类号",
+                "header": true
+              },
+              {
+                "text": "H04M3/487",
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "代理机构",
+                "header": true
+              },
+              {
+                "text": "北京三友知识产权代理有限公司 11127",
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "代理人",
+                "header": true
+              },
+              {
+                "text": "李辉",
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "摘要",
+                "header": true
+              },
+              {
+                "text": "本发明实施例涉及通信领域，可在来电显示界面中展示与用户 ID 相关的订单信息和/或物流信息。",
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "摘要附图",
+                "header": true
+              },
+              {
+                "text": "—",
+                "colSpan": 3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "table-classification",
+        "anchor": "table-classification",
+        "label": "专利分类信息",
+        "meta": {},
+        "tableType": "grid",
+        "columnCount": 3,
+        "rows": [
+          {
+            "cells": [
+              {
+                "text": "被评专利：CN201410234381.X 一种呼叫请求处理的方法和装置",
+                "header": true,
+                "colSpan": 3
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "类别",
+                "header": true
+              },
+              {
+                "text": "分类号",
+                "header": true
+              },
+              {
+                "text": "类名",
+                "header": true
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "IPC分类",
+                "header": true,
+                "rowSpan": 3
+              },
+              {
+                "text": "H04N19/42"
+              },
+              {
+                "text": ""
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "H04N19/20"
+              },
+              {
+                "text": ""
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "H04N19/172"
+              },
+              {
+                "text": ""
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "战略性新兴产业分类",
+                "header": true
+              },
+              {
+                "text": "1.1"
+              },
+              {
+                "text": "下一代信息网络产业"
+              }
+            ]
           }
         ]
       }
     ],
-    "metrics": []
+    "metrics": [
+      {
+        "id": "metric-demo-overview",
+        "anchor": "metric-demo-overview",
+        "label": "展示用指标集",
+        "meta": {},
+        "values": [
+          {
+            "key": "remaining_life_years",
+            "label": "剩余保护年限",
+            "value": 8,
+            "unit": "year"
+          },
+          {
+            "key": "legal_status",
+            "label": "法律状态",
+            "value": "有效"
+          },
+          {
+            "key": "family_scope",
+            "label": "同族布局",
+            "value": "CN only"
+          }
+        ]
+      }
+    ]
   },
   "bibliography": [
-    {
-      "id": "cite-bessen-2008",
-      "anchor": "cite-bessen-2008",
-      "meta": {},
-      "type": "article",
-      "title": "The Value of U.S. Patents by Owner and Patent Characteristics",
-      "authors": [
-        "Bessen, J."
-      ],
-      "year": 2008
-    },
-    {
-      "id": "cite-fischer-2014",
-      "anchor": "cite-fischer-2014",
-      "meta": {},
-      "type": "article",
-      "title": "Testing Patent Value Indicators on Directly Observed Patent Value—an Empirical Analysis of Ocean Tomo Patent Auctions",
-      "authors": [
-        "Fischer, T.",
-        "Leidinger, J."
-      ],
-      "year": 2014
-    },
     {
       "id": "cite-fu-2026",
       "anchor": "cite-fu-2026",
@@ -709,79 +881,100 @@
         "Ai, C.",
         "Fu, X."
       ],
-      "year": 2026
+      "year": 2026,
+      "journal": "World Economy",
+      "displayText": "Fu et al. (2026). Digitalization of International Trade in Intellectual Properties. World Economy, forthcoming."
     },
     {
-      "id": "cite-gans-2008",
-      "anchor": "cite-gans-2008",
+      "id": "cite-bessen-2008",
+      "anchor": "cite-bessen-2008",
       "meta": {},
       "type": "article",
-      "title": "The Impact of Uncertain Intellectual Property Rights on the Market for Ideas: Evidence from Patent Grant Delays",
+      "title": "The Value of U.S. Patents by Owner and Patent Characteristics",
       "authors": [
-        "Gans, J. S.",
-        "Hsu, D. H.",
-        "Stern, S."
+        "Bessen, J."
       ],
-      "year": 2008
+      "year": 2008,
+      "journal": "Research Policy",
+      "volume": "37",
+      "issue": "5",
+      "pages": "932-945",
+      "displayText": "Bessen, J. (2008). The Value of U.S. Patents by Owner and Patent Characteristics. Research Policy, 37(5), 932-945."
     },
     {
-      "id": "cite-kalcheva-2018",
-      "anchor": "cite-kalcheva-2018",
+      "id": "cite-gb-42728-2023",
+      "anchor": "cite-gb-42728-2023",
       "meta": {},
-      "type": "article",
-      "title": "Innovation: The Interplay between Demand-Side Shock and Supply-Side Environment",
+      "type": "report",
+      "title": "专利评估指引（GB/T 42728-2023）",
       "authors": [
-        "Kalcheva, I.",
-        "McLemore, P.",
-        "Pant, S."
+        "国家市场监督管理总局",
+        "国家标准化管理委员会"
       ],
-      "year": 2018
+      "year": 2023,
+      "institution": "中国国家标准",
+      "displayText": "《专利评估指引》（GB/T 42728-2023）。"
     },
     {
-      "id": "cite-taylor-2012",
-      "anchor": "cite-taylor-2012",
+      "id": "cite-wipo-dataset",
+      "anchor": "cite-wipo-dataset",
       "meta": {},
-      "type": "article",
-      "title": "The technology life cycle: Conceptualization and managerial implications",
+      "type": "dataset",
+      "title": "WIPO Patent Data Collections",
       "authors": [
-        "Taylor, M.",
-        "Taylor, A."
+        "WIPO"
       ],
-      "year": 2012
+      "year": 2026,
+      "url": "https://www.wipo.int",
+      "displayText": "WIPO Patent Data Collections."
     },
     {
-      "id": "cite-tipping-1995",
-      "anchor": "cite-tipping-1995",
+      "id": "cite-oxvalue-site",
+      "anchor": "cite-oxvalue-site",
       "meta": {},
-      "type": "article",
-      "title": "Assessing the value of your technology",
+      "type": "webpage",
+      "title": "OxValue.AI Official Website",
+      "authors": [
+        "OxValue.AI"
+      ],
+      "year": 2026,
+      "url": "https://www.oxvalue.ai/",
+      "accessedAt": "2026-02-09T12:00:00Z",
+      "displayText": "OxValue.AI Official Website."
+    },
+    {
+      "id": "cite-tech-valuation-book",
+      "anchor": "cite-tech-valuation-book",
+      "meta": {},
+      "type": "book",
+      "title": "Assessing the Value of Your Technology",
       "authors": [
         "Tipping, J. W.",
         "Zeffren, E.",
         "Fusfeld, A. R."
       ],
-      "year": 1995
+      "year": 1995,
+      "publisher": "Research-Technology Management",
+      "displayText": "Tipping, Zeffren & Fusfeld (1995). Assessing the Value of Your Technology."
     },
     {
-      "id": "cite-vega-2010",
-      "anchor": "cite-vega-2010",
+      "id": "cite-other-demo",
+      "anchor": "cite-other-demo",
       "meta": {},
-      "type": "article",
-      "title": "Technology Valuation of a Scanning Probe Microscope Developed at a University in a Developing Country",
+      "type": "other",
+      "title": "Internal modeling note",
       "authors": [
-        "Vega-González, L. R.",
-        "Qureshi, N.",
-        "Kolokoltsev, O. V.",
-        "Ortega-Martinez, R.",
-        "Saniger Blesa, J. M."
+        "OVAPortableText Demo"
       ],
-      "year": 2010
+      "year": 2026,
+      "displayText": "OVAPortableText Demo (2026). Internal modeling note."
     }
   ],
   "footnotes": [
     {
-      "id": "fn-remaining-years",
-      "anchor": "fn-remaining-years",
+      "id": "fn-report-scope",
+      "anchor": "fn-report-scope",
+      "label": "Footnote 1",
       "meta": {},
       "blocks": [
         {
@@ -790,7 +983,19 @@
           "children": [
             {
               "_type": "span",
-              "text": "剩余保护年限为演示值；真实渲染中可按评估基准日动态计算，并可保留一位小数。",
+              "text": "本样例中的数值、图表与表格内容仅用于协议演示，不构成真实估值结论。",
+              "marks": []
+            }
+          ],
+          "markDefs": []
+        },
+        {
+          "_type": "block",
+          "style": "smallprint",
+          "children": [
+            {
+              "_type": "span",
+              "text": "表格中的 grid / record 双模式用于展示协议能力边界。",
               "marks": []
             }
           ],
@@ -799,8 +1004,9 @@
       ]
     },
     {
-      "id": "fn-demo-chart",
-      "anchor": "fn-demo-chart",
+      "id": "fn-caption-policy",
+      "anchor": "fn-caption-policy",
+      "label": "Footnote 2",
       "meta": {},
       "blocks": [
         {
@@ -809,7 +1015,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "本样例中的饼图比例用于展示协议与渲染能力，不代表真实估值模型输出。",
+              "text": "当前协议推荐图题注、表题注、公式题注作为相邻文本块表达，而不是内嵌到对象字段中。",
               "marks": []
             }
           ],
@@ -820,28 +1026,26 @@
   ],
   "glossary": [
     {
+      "id": "term-dcf",
+      "anchor": "term-dcf",
+      "label": "DCF",
+      "meta": {},
+      "term": "DCF",
+      "definition": "Discounted Cash Flow",
+      "aliases": [
+        "Discounted Cash Flow"
+      ]
+    },
+    {
       "id": "term-pct",
       "anchor": "term-pct",
+      "label": "PCT",
       "meta": {},
       "term": "PCT",
-      "definition": "专利合作条约（Patent Cooperation Treaty）",
-      "short": "PCT"
-    },
-    {
-      "id": "term-ipc",
-      "anchor": "term-ipc",
-      "meta": {},
-      "term": "IPC",
-      "definition": "国际专利分类（International Patent Classification）",
-      "short": "IPC"
-    },
-    {
-      "id": "term-nlp",
-      "anchor": "term-nlp",
-      "meta": {},
-      "term": "NLP",
-      "definition": "自然语言处理（Natural Language Processing）",
-      "short": "NLP"
+      "definition": "Patent Cooperation Treaty",
+      "aliases": [
+        "专利合作条约"
+      ]
     }
   ],
   "sections": [
@@ -862,32 +1066,6 @@
                 {
                   "_type": "span",
                   "text": "专利估值分析报告",
-                  "marks": [
-                    "strong"
-                  ]
-                }
-              ],
-              "markDefs": []
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "专利号：",
-                  "marks": [
-                    "underline"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": "CN201410234381.X",
                   "marks": []
                 }
               ],
@@ -904,14 +1082,7 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "专利名称：",
-                  "marks": [
-                    "underline"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": "一种呼叫请求处理的方法和装置",
+                  "text": "专利号：CN201410234381.X",
                   "marks": []
                 }
               ],
@@ -928,14 +1099,7 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "报告生成日期（评估基准日）：",
-                  "marks": [
-                    "underline"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": "20260209",
+                  "text": "专利名称：一种呼叫请求处理的方法和装置",
                   "marks": []
                 }
               ],
@@ -948,11 +1112,11 @@
           "blocks": [
             {
               "_type": "block",
-              "style": "subheading",
+              "style": "normal",
               "children": [
                 {
                   "_type": "span",
-                  "text": "数据调用及计算规则【示例】",
+                  "text": "报告生成日期（评估基准日）：2026-02-09",
                   "marks": []
                 }
               ],
@@ -964,47 +1128,18 @@
           "itemType": "content",
           "blocks": [
             {
-              "id": "tbl-data-rules-instance",
-              "anchor": "tbl-data-rules-instance",
-              "_type": "table",
-              "tableRef": "table-data-rules"
+              "id": "fig-cover-system",
+              "anchor": "fig-cover-system",
+              "_type": "image",
+              "imageRef": "img-model-system"
             },
             {
               "_type": "block",
-              "style": "table_caption",
+              "style": "figure_caption",
               "children": [
                 {
                   "_type": "span",
-                  "text": "表A-1 数据调用及计算规则示例。",
-                  "marks": []
-                }
-              ],
-              "markDefs": []
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "smallprint",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "本页作为封面与数据映射演示页，展示了 ",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "text": "front matter",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": " 与普通正文 section 的统一表达方式。",
+                  "text": "图：牛津智能专利价值评估系统（封面展示图）",
                   "marks": []
                 }
               ],
@@ -1026,11 +1161,11 @@
           "blocks": [
             {
               "_type": "block",
-              "style": "lead",
+              "style": "smallprint",
               "children": [
                 {
                   "_type": "span",
-                  "text": "以下内容用于演示 front matter、表格、饼图、题注、脚注与行内样式的组合表达。",
+                  "text": "本节根据样例文档中的概要页生成。表格采用 grid 模式以保留跨列排布；饼图作为相邻 figure 呈现。",
                   "marks": []
                 }
               ],
@@ -1042,8 +1177,8 @@
           "itemType": "content",
           "blocks": [
             {
-              "id": "tbl-summary-overview-instance",
-              "anchor": "tbl-summary-overview-instance",
+              "id": "tbl-summary-overview",
+              "anchor": "tbl-summary-overview",
               "_type": "table",
               "tableRef": "table-summary-overview"
             },
@@ -1053,56 +1188,17 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "表S-1 估值概要关键字段。",
+                  "text": "表：估值概要（grid 示例，含跨列单元格）",
                   "marks": []
                 }
               ],
               "markDefs": []
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
+            },
             {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "估计总价值：",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": "1809918 CNY — 2448713 CNY。",
-                  "marks": []
-                },
-                {
-                  "_type": "hard_break"
-                },
-                {
-                  "_type": "span",
-                  "text": "评估基准日：2026年2月23日。",
-                  "marks": [
-                    "em"
-                  ]
-                }
-              ],
-              "markDefs": []
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "id": "fig-driver-summary-front",
-              "anchor": "fig-driver-summary-front",
+              "id": "fig-overview-driver",
+              "anchor": "fig-overview-driver",
               "_type": "chart",
-              "chartRef": "chart-driver-summary"
+              "chartRef": "chart-overview-driver"
             },
             {
               "_type": "block",
@@ -1110,60 +1206,11 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "图S-1 专利价值驱动因素总体特征（示意）。",
+                  "text": "图：估值概要中的价值驱动因素分布",
                   "marks": []
                 }
               ],
               "markDefs": []
-            },
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "该饼图用于展示协议当前正式支持的 ",
-                  "marks": []
-                },
-                {
-                  "_type": "glossary_term",
-                  "termId": "term-ipc"
-                },
-                {
-                  "_type": "span",
-                  "text": " 之外的另一类 registry 数据引用能力，即 `datasets.charts` 中的 pie chart。",
-                  "marks": []
-                },
-                {
-                  "_type": "footnote_ref",
-                  "refId": "fn-demo-chart"
-                }
-              ],
-              "markDefs": []
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "id": "callout-summary-note",
-              "anchor": "callout-summary-note",
-              "_type": "callout",
-              "blocks": [
-                {
-                  "_type": "block",
-                  "style": "normal",
-                  "children": [
-                    {
-                      "_type": "span",
-                      "text": "渲染建议：估值区间可在 PDF 端使用更大字号或强调色，但内容 JSON 不直接写死视觉样式。",
-                      "marks": []
-                    }
-                  ],
-                  "markDefs": []
-                }
-              ]
             }
           ]
         }
@@ -1185,13 +1232,11 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "封面",
+                  "text": "封面 …… 1",
                   "marks": []
                 }
               ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
+              "markDefs": []
             }
           ]
         },
@@ -1204,13 +1249,11 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "估值概要",
+                  "text": "估值概要 …… 2",
                   "marks": []
                 }
               ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
+              "markDefs": []
             }
           ]
         },
@@ -1223,13 +1266,11 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "目录",
+                  "text": "目录 …… 3",
                   "marks": []
                 }
               ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
+              "markDefs": []
             }
           ]
         },
@@ -1242,13 +1283,11 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "1. 专利价值评估方法",
+                  "text": "1. 专利价值评估方法 …… 4",
                   "marks": []
                 }
               ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
+              "markDefs": []
             }
           ]
         },
@@ -1261,13 +1300,11 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "2. 专利基本信息",
+                  "text": "2. 专利基本信息 …… 5",
                   "marks": []
                 }
               ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
+              "markDefs": []
             }
           ]
         },
@@ -1280,13 +1317,11 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "2.1. 著录项目信息",
+                  "text": "3. 专利价值驱动因素总体特征 …… 9",
                   "marks": []
                 }
               ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
+              "markDefs": []
             }
           ]
         },
@@ -1299,13 +1334,11 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "2.2. 法律状态信息",
+                  "text": "4. 专利价值驱动因素——技术新颖性 …… 10",
                   "marks": []
                 }
               ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
+              "markDefs": []
             }
           ]
         },
@@ -1318,311 +1351,7 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "2.3. 专利分类信息",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "2.4. 专利引证信息",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "2.4.1. 引证信息",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "2.4.2. 被引证信息",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "2.5. 权利要求信息",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "3. 专利价值驱动因素总体特征",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "4. 专利价值驱动因素——技术新颖性",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "4.1. 评价结果及解读",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "4.2. 技术先进性",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "4.2.1. 技术问题重要性",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "附录",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "模型介绍（傅、张）",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "数据来源说明（武）",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "免责条款与使用限制声明（武）",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "知识产权与版权声明（武）",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "封底（武）",
-                  "marks": []
-                }
-              ],
-              "markDefs": [],
-              "listItem": "bullet",
-              "level": 1
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "smallprint",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "说明：当前样例使用普通 section + 列表来表达目录页；后续若包实现专用 `toc_placeholder`，可无缝替换。",
+                  "text": "附录 …… 11",
                   "marks": []
                 }
               ],
@@ -1648,17 +1377,7 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "本次专利价值评估基于牛津智能自主研发的专利价值评估系统（见 ",
-                  "marks": []
-                },
-                {
-                  "_type": "xref",
-                  "targetType": "figure",
-                  "targetId": "fig-model-system"
-                },
-                {
-                  "_type": "span",
-                  "text": "）。",
+                  "text": "本次专利价值评估基于牛津智能自主研发的专利价值评估系统。",
                   "marks": []
                 }
               ],
@@ -1675,79 +1394,7 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "该系统以团队提出的技术价值效用理论为理论基础，综合考量 ",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "text": "技术新颖性",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": "、",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "text": "技术生命周期阶段",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": "、",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "text": "技术效用规模",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": " 以及 ",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "text": "法律价值与风险",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": " 四个核心维度。",
-                  "marks": []
-                },
-                {
-                  "_type": "citation_ref",
-                  "refIds": [
-                    "cite-fu-2026"
-                  ],
-                  "mode": "parenthetical"
-                }
-              ],
-              "markDefs": []
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "技术新颖性：重点评估新颖性、先进性、原创性及技术影响力等指标。",
+                  "text": "技术新颖性：重点评估原创性、先进性、适用范围与影响力。",
                   "marks": []
                 }
               ],
@@ -1766,7 +1413,7 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "技术生命周期阶段：分析技术所处的发展阶段、成熟度及未来发展态势。",
+                  "text": "技术生命周期阶段：分析技术所处阶段、成熟度与未来发展态势。",
                   "marks": []
                 }
               ],
@@ -1785,7 +1432,7 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "技术效用规模：评估技术在潜在市场中的应用空间、竞争格局以及专利运营情况。",
+                  "text": "技术效用规模：评估市场应用空间、竞争格局以及专利运营情况。",
                   "marks": []
                 }
               ],
@@ -1804,7 +1451,7 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "法律价值与风险：分析权利稳定性、保护范围、侵权可判定性及潜在风险。",
+                  "text": "法律价值与风险：分析权利稳定性、保护范围及潜在风险。",
                   "marks": []
                 }
               ],
@@ -1823,7 +1470,7 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "上述指标体系与国家知识产权局发布的《专利评估指引》（GB/T 42728-2023）保持一致，并与附录中的参考文献形成呼应。",
+                  "text": "上述指标体系与《专利评估指引》（GB/T 42728-2023）保持一致，从而确保评估方法的规范性与合规性。",
                   "marks": []
                 }
               ],
@@ -1835,79 +1482,8 @@
           "itemType": "content",
           "blocks": [
             {
-              "id": "eq-valuation-core",
-              "anchor": "eq-valuation-core",
-              "_type": "math_block",
-              "latex": "V = f(X_{novelty}, X_{lifecycle}, X_{utility}, X_{legal}; \\theta)"
-            },
-            {
-              "_type": "block",
-              "style": "equation_caption",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "公式1 专利估值模型示意。",
-                  "marks": []
-                }
-              ],
-              "markDefs": []
-            },
-            {
-              "_type": "block",
-              "style": "normal",
-              "children": [
-                {
-                  "_type": "span",
-                  "text": "其中，",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "text": "X",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": " 表示四个核心维度下的一系列特征指标；",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "text": "V",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": " 表示模型预测的专利技术内在价值水平；",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "text": "θ",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": " 表示通过数据训练得到的模型参数。",
-                  "marks": []
-                }
-              ],
-              "markDefs": []
-            }
-          ]
-        },
-        {
-          "itemType": "content",
-          "blocks": [
-            {
-              "id": "fig-model-system",
-              "anchor": "fig-model-system",
+              "id": "fig-system-overview",
+              "anchor": "fig-system-overview",
               "_type": "image",
               "imageRef": "img-model-system"
             },
@@ -1917,7 +1493,7 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "图1 牛津智能专利价值评估系统（占位图）。",
+                  "text": "图1 牛津智能专利价值评估系统",
                   "marks": []
                 }
               ],
@@ -1930,11 +1506,11 @@
           "blocks": [
             {
               "_type": "block",
-              "style": "blockquote",
+              "style": "normal",
               "children": [
                 {
                   "_type": "span",
-                  "text": "相较于成本法、收益法、市场法以及基于专家经验的单一方法，本评估体系更强调系统性、数据驱动、可重复性与合规性。",
+                  "text": "专利估值模型可表示为：",
                   "marks": []
                 }
               ],
@@ -1946,8 +1522,31 @@
           "itemType": "content",
           "blocks": [
             {
-              "id": "callout-method-note",
-              "anchor": "callout-method-note",
+              "id": "eq-core-model",
+              "anchor": "eq-core-model",
+              "_type": "math_block",
+              "latex": "V = f(X; \\theta)"
+            },
+            {
+              "_type": "block",
+              "style": "equation_caption",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "式1 估值模型示意表达",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        },
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "id": "callout-method-highlights",
+              "anchor": "callout-method-highlights",
               "_type": "callout",
               "blocks": [
                 {
@@ -1956,7 +1555,19 @@
                   "children": [
                     {
                       "_type": "span",
-                      "text": "“评估结果不构成对实际交易价格的保证”更适合在免责条款中再次明确呈现。",
+                      "text": "相较于传统成本法、收益法、市场法，本评估体系具有系统性、数据驱动与可重复性优势。",
+                      "marks": []
+                    }
+                  ],
+                  "markDefs": []
+                },
+                {
+                  "_type": "block",
+                  "style": "smallprint",
+                  "children": [
+                    {
+                      "_type": "span",
+                      "text": "该结果用于商业参考与内部研判，不构成交易价格承诺。",
                       "marks": []
                     }
                   ],
@@ -1969,29 +1580,29 @@
       ]
     },
     {
-      "id": "sec-basic-info",
+      "id": "sec-basic",
       "level": 1,
       "title": "专利基本信息",
       "numbering": "auto",
-      "anchor": "sec-basic-info",
+      "anchor": "sec-basic",
       "body": [
         {
           "itemType": "subsection",
           "section": {
-            "id": "sec-basic-info-biblio",
+            "id": "sec-basic-biblio",
             "level": 2,
             "title": "著录项目信息",
             "numbering": "auto",
-            "anchor": "sec-basic-info-biblio",
+            "anchor": "sec-basic-biblio",
             "body": [
               {
                 "itemType": "content",
                 "blocks": [
                   {
-                    "id": "tbl-biblio-info-instance",
-                    "anchor": "tbl-biblio-info-instance",
+                    "id": "tbl-biblio-grid",
+                    "anchor": "tbl-biblio-grid",
                     "_type": "table",
-                    "tableRef": "table-bibliographic-info"
+                    "tableRef": "table-biblio-info"
                   },
                   {
                     "_type": "block",
@@ -1999,11 +1610,194 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "表2-1 被评专利著录项目信息。",
+                        "text": "表：著录项目信息（grid 示例，含多处跨列）",
                         "marks": []
                       }
                     ],
                     "markDefs": []
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "itemType": "subsection",
+          "section": {
+            "id": "sec-basic-legal",
+            "level": 2,
+            "title": "法律状态信息",
+            "numbering": "auto",
+            "anchor": "sec-basic-legal",
+            "body": [
+              {
+                "itemType": "content",
+                "blocks": [
+                  {
+                    "id": "tbl-legal-status",
+                    "anchor": "tbl-legal-status",
+                    "_type": "table",
+                    "tableRef": "table-legal-status"
+                  },
+                  {
+                    "_type": "block",
+                    "style": "table_caption",
+                    "children": [
+                      {
+                        "_type": "span",
+                        "text": "表：法律状态信息（record 示例）",
+                        "marks": []
+                      }
+                    ],
+                    "markDefs": []
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "itemType": "subsection",
+          "section": {
+            "id": "sec-basic-classification",
+            "level": 2,
+            "title": "专利分类信息",
+            "numbering": "auto",
+            "anchor": "sec-basic-classification",
+            "body": [
+              {
+                "itemType": "content",
+                "blocks": [
+                  {
+                    "id": "tbl-classification-grid",
+                    "anchor": "tbl-classification-grid",
+                    "_type": "table",
+                    "tableRef": "table-classification"
+                  },
+                  {
+                    "_type": "block",
+                    "style": "table_caption",
+                    "children": [
+                      {
+                        "_type": "span",
+                        "text": "表：专利分类信息（grid 示例，含 rowSpan）",
+                        "marks": []
+                      }
+                    ],
+                    "markDefs": []
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "itemType": "subsection",
+          "section": {
+            "id": "sec-basic-citations",
+            "level": 2,
+            "title": "专利引证信息",
+            "numbering": "auto",
+            "anchor": "sec-basic-citations",
+            "body": [
+              {
+                "itemType": "subsection",
+                "section": {
+                  "id": "sec-basic-citations-forward",
+                  "level": 3,
+                  "title": "引证信息",
+                  "numbering": "auto",
+                  "anchor": "sec-basic-citations-forward",
+                  "body": [
+                    {
+                      "itemType": "content",
+                      "blocks": [
+                        {
+                          "id": "tbl-forward-citations",
+                          "anchor": "tbl-forward-citations",
+                          "_type": "table",
+                          "tableRef": "table-forward-citations"
+                        },
+                        {
+                          "_type": "block",
+                          "style": "table_caption",
+                          "children": [
+                            {
+                              "_type": "span",
+                              "text": "表：引证信息（record 示例）",
+                              "marks": []
+                            }
+                          ],
+                          "markDefs": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "itemType": "subsection",
+                "section": {
+                  "id": "sec-basic-citations-backward",
+                  "level": 3,
+                  "title": "被引证信息",
+                  "numbering": "auto",
+                  "anchor": "sec-basic-citations-backward",
+                  "body": [
+                    {
+                      "itemType": "content",
+                      "blocks": [
+                        {
+                          "id": "tbl-backward-citations",
+                          "anchor": "tbl-backward-citations",
+                          "_type": "table",
+                          "tableRef": "table-backward-citations"
+                        },
+                        {
+                          "_type": "block",
+                          "style": "table_caption",
+                          "children": [
+                            {
+                              "_type": "span",
+                              "text": "表：被引证信息（record 示例）",
+                              "marks": []
+                            }
+                          ],
+                          "markDefs": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "itemType": "subsection",
+          "section": {
+            "id": "sec-basic-claims",
+            "level": 2,
+            "title": "权利要求信息",
+            "numbering": "auto",
+            "anchor": "sec-basic-claims",
+            "body": [
+              {
+                "itemType": "content",
+                "blocks": [
+                  {
+                    "_type": "block",
+                    "style": "normal",
+                    "children": [
+                      {
+                        "_type": "span",
+                        "text": "一种呼叫请求处理的方法，其特征在于，包括接收查询请求、依据用户ID查询订单信息和/或物流信息，并将查询响应发送给终端。",
+                        "marks": []
+                      }
+                    ],
+                    "markDefs": [],
+                    "listItem": "number",
+                    "level": 1
                   }
                 ]
               },
@@ -2016,18 +1810,32 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "摘要：",
-                        "marks": [
-                          "strong"
-                        ]
-                      },
-                      {
-                        "_type": "span",
-                        "text": "本发明实施例涉及通信领域，尤其涉及一种呼叫请求处理的方法和装置，用以解决目前移动终端在接收到呼叫请求的情况下，终端显示信息不全的问题……",
+                        "text": "如权利要求1所述的方法，其特征在于，还包括根据物流信息进一步匹配电话号码并返回关联信息。",
                         "marks": []
                       }
                     ],
-                    "markDefs": []
+                    "markDefs": [],
+                    "listItem": "number",
+                    "level": 1
+                  }
+                ]
+              },
+              {
+                "itemType": "content",
+                "blocks": [
+                  {
+                    "_type": "block",
+                    "style": "normal",
+                    "children": [
+                      {
+                        "_type": "span",
+                        "text": "如权利要求2所述的方法，其特征在于，订单信息查询由多数据库联合完成。",
+                        "marks": []
+                      }
+                    ],
+                    "markDefs": [],
+                    "listItem": "number",
+                    "level": 1
                   }
                 ]
               },
@@ -2040,366 +1848,7 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "摘要附图：—。若真实数据存在摘要附图，可在 `assets.images` 中注册图片资源并在此处以 `image` 实例引用。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": []
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "剩余保护年限示例值为 8 年",
-                        "marks": []
-                      },
-                      {
-                        "_type": "footnote_ref",
-                        "refId": "fn-remaining-years"
-                      },
-                      {
-                        "_type": "span",
-                        "text": "。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": []
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "itemType": "subsection",
-          "section": {
-            "id": "sec-basic-info-legal",
-            "level": 2,
-            "title": "法律状态信息",
-            "numbering": "auto",
-            "anchor": "sec-basic-info-legal",
-            "body": [
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "id": "tbl-legal-status-instance",
-                    "anchor": "tbl-legal-status-instance",
-                    "_type": "table",
-                    "tableRef": "table-legal-status"
-                  },
-                  {
-                    "_type": "block",
-                    "style": "table_caption",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "表2-2 法律状态信息。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": []
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "从法律状态沿革看，该专利经历了公开、实审生效、申请权/专利权转移以及授权等关键节点，当前呈现为 ",
-                        "marks": []
-                      },
-                      {
-                        "_type": "span",
-                        "text": "有效",
-                        "marks": [
-                          "strong"
-                        ]
-                      },
-                      {
-                        "_type": "span",
-                        "text": " 状态。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": []
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "itemType": "subsection",
-          "section": {
-            "id": "sec-basic-info-classification",
-            "level": 2,
-            "title": "专利分类信息",
-            "numbering": "auto",
-            "anchor": "sec-basic-info-classification",
-            "body": [
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "id": "tbl-classification-instance",
-                    "anchor": "tbl-classification-instance",
-                    "_type": "table",
-                    "tableRef": "table-classification-info"
-                  },
-                  {
-                    "_type": "block",
-                    "style": "table_caption",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "表2-3 专利分类信息。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": []
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "分类体系同时覆盖 ",
-                        "marks": []
-                      },
-                      {
-                        "_type": "glossary_term",
-                        "termId": "term-ipc"
-                      },
-                      {
-                        "_type": "span",
-                        "text": " 与战略性新兴产业分类，用于支持技术领域识别与后续同族、引证、市场映射分析。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": []
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "itemType": "subsection",
-          "section": {
-            "id": "sec-basic-info-citations",
-            "level": 2,
-            "title": "专利引证信息",
-            "numbering": "auto",
-            "anchor": "sec-basic-info-citations",
-            "body": [
-              {
-                "itemType": "subsection",
-                "section": {
-                  "id": "sec-basic-info-citations-forward",
-                  "level": 3,
-                  "title": "引证信息",
-                  "numbering": "auto",
-                  "anchor": "sec-basic-info-citations-forward",
-                  "body": [
-                    {
-                      "itemType": "content",
-                      "blocks": [
-                        {
-                          "id": "tbl-forward-citations-instance",
-                          "anchor": "tbl-forward-citations-instance",
-                          "_type": "table",
-                          "tableRef": "table-forward-citations"
-                        },
-                        {
-                          "_type": "block",
-                          "style": "table_caption",
-                          "children": [
-                            {
-                              "_type": "span",
-                              "text": "表2-4 引证信息。",
-                              "marks": []
-                            }
-                          ],
-                          "markDefs": []
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "itemType": "subsection",
-                "section": {
-                  "id": "sec-basic-info-citations-backward",
-                  "level": 3,
-                  "title": "被引证信息",
-                  "numbering": "auto",
-                  "anchor": "sec-basic-info-citations-backward",
-                  "body": [
-                    {
-                      "itemType": "content",
-                      "blocks": [
-                        {
-                          "id": "tbl-backward-citations-instance",
-                          "anchor": "tbl-backward-citations-instance",
-                          "_type": "table",
-                          "tableRef": "table-backward-citations"
-                        },
-                        {
-                          "_type": "block",
-                          "style": "table_caption",
-                          "children": [
-                            {
-                              "_type": "span",
-                              "text": "表2-5 被引证信息。",
-                              "marks": []
-                            }
-                          ],
-                          "markDefs": []
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "itemType": "subsection",
-          "section": {
-            "id": "sec-basic-info-claims",
-            "level": 2,
-            "title": "权利要求信息",
-            "numbering": "auto",
-            "anchor": "sec-basic-info-claims",
-            "body": [
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "id": "tbl-claims-outline-instance",
-                    "anchor": "tbl-claims-outline-instance",
-                    "_type": "table",
-                    "tableRef": "table-claims-outline"
-                  },
-                  {
-                    "_type": "block",
-                    "style": "table_caption",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "表2-6 权利要求摘要表。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": []
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "subheading",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "权利要求全文（节选）",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": []
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "1. 一种呼叫请求处理的方法，其特征在于：接收来自终端的查询请求，依据用户ID查询订单信息和/或物流信息，并将查询响应发送给终端显示。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": [],
-                    "listItem": "number",
-                    "level": 1
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "2. 如权利要求1所述的方法，其特征在于：根据查询到的物流信息匹配电话号码，仅在匹配成立时返回相关物流信息和/或订单信息。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": [],
-                    "listItem": "number",
-                    "level": 1
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "3. 如权利要求2所述的方法，其特征在于：依据用户ID从第二数据库查询订单号，再从第三数据库查询订单内容。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": [],
-                    "listItem": "number",
-                    "level": 1
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "其余权利要求可继续按同样模式追加；本样例保留了“摘要表 + 节选全文”的混合呈现方式，以便渲染器同时验证表格与长文本列表。",
+                        "text": "其余权利要求从略，样例中仅保留部分内容以突出协议结构。",
                         "marks": []
                       }
                     ],
@@ -2413,22 +1862,22 @@
       ]
     },
     {
-      "id": "sec-drivers-overview",
+      "id": "sec-factor-overall",
       "level": 1,
       "title": "专利价值驱动因素总体特征",
       "numbering": "auto",
-      "anchor": "sec-drivers-overview",
+      "anchor": "sec-factor-overall",
       "body": [
         {
           "itemType": "content",
           "blocks": [
             {
               "_type": "block",
-              "style": "lead",
+              "style": "normal",
               "children": [
                 {
                   "_type": "span",
-                  "text": "被评专利估值主要由技术新颖性、技术生命周期、市场与运营以及法律价值与风险四类因素共同驱动。",
+                  "text": "被评专利估值主要由技术新颖性、技术生命周期、市场与团队因素，以及法律价值与风险共同驱动。",
                   "marks": []
                 }
               ],
@@ -2440,10 +1889,10 @@
           "itemType": "content",
           "blocks": [
             {
-              "id": "fig-driver-summary-main",
-              "anchor": "fig-driver-summary-main",
+              "id": "fig-factor-overall",
+              "anchor": "fig-factor-overall",
               "_type": "chart",
-              "chartRef": "chart-driver-summary"
+              "chartRef": "chart-factor-overall"
             },
             {
               "_type": "block",
@@ -2451,43 +1900,24 @@
               "children": [
                 {
                   "_type": "span",
-                  "text": "图3-1 专利价值驱动因素总体特征。",
+                  "text": "图：专利价值驱动因素总体特征（pie 示例）",
                   "marks": []
                 }
               ],
               "markDefs": []
-            },
+            }
+          ]
+        },
+        {
+          "itemType": "content",
+          "blocks": [
             {
               "_type": "block",
               "style": "normal",
               "children": [
                 {
                   "_type": "span",
-                  "text": "整体而言，",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "text": "技术新颖性",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": " 与 ",
-                  "marks": []
-                },
-                {
-                  "_type": "span",
-                  "text": "技术生命周期",
-                  "marks": [
-                    "strong"
-                  ]
-                },
-                {
-                  "_type": "span",
-                  "text": " 是当前样例中占比高于 20% 的主要因素；相对而言，市场与运营以及法律价值与风险仍然重要，但对整体估值波动的即时影响相对较小。",
+                  "text": "整体而言，技术新颖性与技术生命周期是最敏感的两个维度；相关指标的提升或下降都可能对未来估值产生较为明显的影响。",
                   "marks": []
                 }
               ],
@@ -2507,18 +1937,18 @@
         {
           "itemType": "subsection",
           "section": {
-            "id": "sec-novelty-result",
+            "id": "sec-novelty-interpretation",
             "level": 2,
             "title": "评价结果及解读",
             "numbering": "auto",
-            "anchor": "sec-novelty-result",
+            "anchor": "sec-novelty-interpretation",
             "body": [
               {
                 "itemType": "content",
                 "blocks": [
                   {
                     "_type": "block",
-                    "style": "lead",
+                    "style": "normal",
                     "children": [
                       {
                         "_type": "span",
@@ -2539,62 +1969,7 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "通常而言，新颖性较高、能够在学科发展和应用场景上实现突破和拓展的技术，具有更高的潜在经济和技术价值。",
-                        "marks": []
-                      },
-                      {
-                        "_type": "citation_ref",
-                        "refIds": [
-                          "cite-bessen-2008",
-                          "cite-fischer-2014"
-                        ],
-                        "mode": "parenthetical"
-                      }
-                    ],
-                    "markDefs": []
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "id": "fig-novelty-breakdown-main",
-                    "anchor": "fig-novelty-breakdown-main",
-                    "_type": "chart",
-                    "chartRef": "chart-novelty-breakdown"
-                  },
-                  {
-                    "_type": "block",
-                    "style": "figure_caption",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "图4-1 技术新颖性内部拆解。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": []
-                  },
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "对于被评专利，技术新颖性在估值中贡献比例为 ",
-                        "marks": []
-                      },
-                      {
-                        "_type": "span",
-                        "text": "38%",
-                        "marks": [
-                          "strong"
-                        ]
-                      },
-                      {
-                        "_type": "span",
-                        "text": "，说明这一因素是专利估值的重要来源之一。原创性、适用范围、专利布局或影响力的变化，都可能对整体估值产生较为显著的影响。",
+                        "text": "对于被评专利，技术新颖性在估值中贡献比例较高，说明这一因素是专利估值的核心来源。",
                         "marks": []
                       }
                     ],
@@ -2608,20 +1983,20 @@
         {
           "itemType": "subsection",
           "section": {
-            "id": "sec-novelty-advancement",
+            "id": "sec-novelty-advanced",
             "level": 2,
             "title": "技术先进性",
             "numbering": "auto",
-            "anchor": "sec-novelty-advancement",
+            "anchor": "sec-novelty-advanced",
             "body": [
               {
                 "itemType": "subsection",
                 "section": {
-                  "id": "sec-novelty-importance",
+                  "id": "sec-novelty-problem",
                   "level": 3,
                   "title": "技术问题重要性",
                   "numbering": "auto",
-                  "anchor": "sec-novelty-importance",
+                  "anchor": "sec-novelty-problem",
                   "body": [
                     {
                       "itemType": "content",
@@ -2632,7 +2007,7 @@
                           "children": [
                             {
                               "_type": "span",
-                              "text": "同族专利的地理覆盖范围可在一定程度上反映专利权人为保护相关技术所投入的研发与专利布局成本，从侧面体现该技术问题的商业价值与重要程度。",
+                              "text": "同族专利的地理覆盖范围可在一定程度上反映专利权人为保护相关技术所投入的研发与专利布局成本。",
                               "marks": []
                             }
                           ],
@@ -2649,50 +2024,7 @@
                           "children": [
                             {
                               "_type": "span",
-                              "text": "通常情况下，企业仅会针对具有明确产业应用前景或较高商业价值的核心技术问题，通过 PCT 国际申请及多国家/地区专利布局的方式进行系统性保护，因为 PCT 国际阶段及各国国家阶段的申请、审查及维持费用较高。",
-                              "marks": []
-                            }
-                          ],
-                          "markDefs": []
-                        }
-                      ]
-                    },
-                    {
-                      "itemType": "content",
-                      "blocks": [
-                        {
-                          "_type": "block",
-                          "style": "normal",
-                          "children": [
-                            {
-                              "_type": "span",
-                              "text": "相反，对于技术价值较低或仅具局部应用价值的技术问题，企业通常仅在本国进行专利布局。",
-                              "marks": []
-                            }
-                          ],
-                          "markDefs": []
-                        }
-                      ]
-                    },
-                    {
-                      "itemType": "content",
-                      "blocks": [
-                        {
-                          "_type": "block",
-                          "style": "normal",
-                          "children": [
-                            {
-                              "_type": "span",
-                              "text": "被评专利仅在中国市场进行了专利布局，未见对应的 ",
-                              "marks": []
-                            },
-                            {
-                              "_type": "glossary_term",
-                              "termId": "term-pct"
-                            },
-                            {
-                              "_type": "span",
-                              "text": " 国际申请或其他国家/地区同族专利。该布局模式表明其技术应用场景或商业化重点可能集中于本土市场，主要体现为区域性的技术重要性。",
+                              "text": "被评专利仅在中国市场进行了专利布局，未见对应的 PCT 国际申请或其他国家/地区同族专利。该布局模式表明其技术重要性目前主要体现为区域性。",
                               "marks": []
                             }
                           ],
@@ -2720,8 +2052,8 @@
           "section": {
             "id": "appendix-model",
             "level": 2,
-            "title": "模型介绍（傅、张）",
-            "numbering": "none",
+            "title": "模型介绍",
+            "numbering": "auto",
             "anchor": "appendix-model",
             "body": [
               {
@@ -2729,11 +2061,11 @@
                 "blocks": [
                   {
                     "_type": "block",
-                    "style": "normal",
+                    "style": "subheading",
                     "children": [
                       {
                         "_type": "span",
-                        "text": "本模型介绍部分兼具“关于我们”展示功能，用于说明 OxValue.AI 的方法论背景、数据积累与模型研发思路。",
+                        "text": "模型介绍部分可补充“关于我们”、方法来源与核心参考文献。",
                         "marks": []
                       }
                     ],
@@ -2750,17 +2082,8 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "在理论基础方面，本模型借鉴技术价值、技术生命周期与市场化转化的相关研究，形成数据驱动的专利估值方法。",
+                        "text": "本样例同时用 bibliography 顶层 registry 存储完整参考文献信息，并在附录中提供可读清单。",
                         "marks": []
-                      },
-                      {
-                        "_type": "citation_ref",
-                        "refIds": [
-                          "cite-fu-2026",
-                          "cite-taylor-2012",
-                          "cite-tipping-1995"
-                        ],
-                        "mode": "parenthetical"
                       }
                     ],
                     "markDefs": []
@@ -2776,7 +2099,7 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "References",
+                        "text": "参考文献：",
                         "marks": []
                       }
                     ],
@@ -2793,13 +2116,11 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "Bessen, J. (2008). The Value of U.S. Patents by Owner and Patent Characteristics.",
+                        "text": "Fu et al. (2026). Digitalization of International Trade in Intellectual Properties. World Economy, forthcoming.",
                         "marks": []
                       }
                     ],
-                    "markDefs": [],
-                    "listItem": "bullet",
-                    "level": 1
+                    "markDefs": []
                   }
                 ]
               },
@@ -2812,13 +2133,11 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "Fischer, T., & Leidinger, J. (2014). Testing Patent Value Indicators on Directly Observed Patent Value.",
+                        "text": "Bessen, J. (2008). The Value of U.S. Patents by Owner and Patent Characteristics. Research Policy, 37(5), 932-945.",
                         "marks": []
                       }
                     ],
-                    "markDefs": [],
-                    "listItem": "bullet",
-                    "level": 1
+                    "markDefs": []
                   }
                 ]
               },
@@ -2831,13 +2150,11 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "Fu, X., Zhang, J., Ai, C. & Fu, X. (2026). Digitalization of International Trade in Intellectual Properties.",
+                        "text": "《专利评估指引》（GB/T 42728-2023）。",
                         "marks": []
                       }
                     ],
-                    "markDefs": [],
-                    "listItem": "bullet",
-                    "level": 1
+                    "markDefs": []
                   }
                 ]
               },
@@ -2850,13 +2167,11 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "Gans, J. S., Hsu, D. H., & Stern, S. (2008). The Impact of Uncertain Intellectual Property Rights on the Market for Ideas.",
+                        "text": "WIPO Patent Data Collections.",
                         "marks": []
                       }
                     ],
-                    "markDefs": [],
-                    "listItem": "bullet",
-                    "level": 1
+                    "markDefs": []
                   }
                 ]
               },
@@ -2869,13 +2184,11 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "Kalcheva, I., McLemore, P., & Pant, S. (2018). Innovation: The Interplay between Demand-Side Shock and Supply-Side Environment.",
+                        "text": "OxValue.AI Official Website.",
                         "marks": []
                       }
                     ],
-                    "markDefs": [],
-                    "listItem": "bullet",
-                    "level": 1
+                    "markDefs": []
                   }
                 ]
               },
@@ -2888,51 +2201,11 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "Taylor, M., & Taylor, A. (2012). The technology life cycle: Conceptualization and managerial implications.",
+                        "text": "Tipping, Zeffren & Fusfeld (1995). Assessing the Value of Your Technology.",
                         "marks": []
                       }
                     ],
-                    "markDefs": [],
-                    "listItem": "bullet",
-                    "level": 1
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "Tipping, J. W., Zeffren, E., & Fusfeld, A. R. (1995). Assessing the value of your technology.",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": [],
-                    "listItem": "bullet",
-                    "level": 1
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "Vega-González, L. R. et al. (2010). Technology Valuation of a Scanning Probe Microscope Developed at a University in a Developing Country.",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": [],
-                    "listItem": "bullet",
-                    "level": 1
+                    "markDefs": []
                   }
                 ]
               }
@@ -2942,11 +2215,11 @@
         {
           "itemType": "subsection",
           "section": {
-            "id": "appendix-data-sources",
+            "id": "appendix-data",
             "level": 2,
-            "title": "数据来源说明（武）",
-            "numbering": "none",
-            "anchor": "appendix-data-sources",
+            "title": "数据来源说明",
+            "numbering": "auto",
+            "anchor": "appendix-data",
             "body": [
               {
                 "itemType": "content",
@@ -2957,11 +2230,13 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "本报告数据来源包括全球专利著录项目数据、法律状态数据、同族专利数据、专利引证数据、专利全文文本等，主要来源于 WIPO、USPTO、EPO、JPO、KIPO、CNIPA 等官方数据库及第三方专利数据库。",
+                        "text": "全球专利著录项目数据、法律状态数据、同族专利数据、专利引证数据、专利全文文本等，主要来源于 WIPO、USPTO、EPO、JPO、KIPO、CNIPA 等官方数据库及第三方专利数据库。",
                         "marks": []
                       }
                     ],
-                    "markDefs": []
+                    "markDefs": [],
+                    "listItem": "bullet",
+                    "level": 1
                   }
                 ]
               },
@@ -2974,11 +2249,13 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "中国专利复审无效宣告数据、中国知识产权诉讼数据、标准必要专利数据、全球专利池数据、专利密集型产品数据、知识产权海关备案数据、上市药品专利数据、专利代理机构信用数据、专利实施许可统计数据等，亦来自相关官方公开平台或第三方数据库，并经 OxValue.AI 加工整理。",
+                        "text": "中国专利复审无效宣告数据来源于国家知识产权局公开数据及第三方专利数据库。",
                         "marks": []
                       }
                     ],
-                    "markDefs": []
+                    "markDefs": [],
+                    "listItem": "bullet",
+                    "level": 1
                   }
                 ]
               },
@@ -2991,27 +2268,13 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "独家数据处理声明：",
-                        "marks": [
-                          "strong"
-                        ]
-                      },
-                      {
-                        "_type": "span",
-                        "text": "上述原始数据在接入评估模型前，均已由核心算法及数据团队完成噪音清洗、交叉校验、",
-                        "marks": []
-                      },
-                      {
-                        "_type": "glossary_term",
-                        "termId": "term-nlp"
-                      },
-                      {
-                        "_type": "span",
-                        "text": " 语义解析与结构化降维，以形成可供估值算法直接调用的标准化量化指标。",
+                        "text": "知识产权海关备案、标准必要专利、专利池、专利代理机构信用等数据，经 OxValue.AI 加工整理形成。",
                         "marks": []
                       }
                     ],
-                    "markDefs": []
+                    "markDefs": [],
+                    "listItem": "bullet",
+                    "level": 1
                   }
                 ]
               }
@@ -3023,8 +2286,8 @@
           "section": {
             "id": "appendix-disclaimer",
             "level": 2,
-            "title": "免责条款与使用限制声明（武）",
-            "numbering": "none",
+            "title": "免责条款与使用限制声明",
+            "numbering": "auto",
             "anchor": "appendix-disclaimer",
             "body": [
               {
@@ -3036,7 +2299,7 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "报告性质与使用目的：本报告仅供商业参考与内部研判，不构成正式法律意见、投资建议、财务审计结论或技术实施担保。",
+                        "text": "本报告由 OxValue.AI 基于特定估值模型与数据算法自动生成，仅供商业参考与内部研判之用。",
                         "marks": []
                       }
                     ],
@@ -3055,7 +2318,7 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "数据来源与底层技术局限性说明：OxValue.AI 已尽最大努力验证数据可靠性，但不对底层原始数据的绝对准确性、完整性或无遗漏性作出保证。",
+                        "text": "估值结果不代表被评专利在真实公开市场上的实际可变现价值、拍卖成交价或未来收益保障。",
                         "marks": []
                       }
                     ],
@@ -3074,45 +2337,7 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "估值结果的非承诺性：价值估算结果仅代表特定基准日与假设条件下的模拟预测，不代表真实市场上的实际可变现价值或未来收益保障。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": [],
-                    "listItem": "number",
-                    "level": 1
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "连带责任的免除：因依赖本报告而进行的商业决策、投资行为、许可交易或法律诉讼所产生的风险与后果，均由使用者自行承担。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": [],
-                    "listItem": "number",
-                    "level": 1
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "时效性与状态变更风险：报告仅反映评估基准日的静态数据切片，交付后相关状态变更不在持续更新义务之内。",
+                        "text": "因依赖本报告内容而作出的商业决策、投资行为、许可交易或法律诉讼，其后果由使用者自行承担。",
                         "marks": []
                       }
                     ],
@@ -3130,8 +2355,8 @@
           "section": {
             "id": "appendix-copyright",
             "level": 2,
-            "title": "知识产权与版权声明（武）",
-            "numbering": "none",
+            "title": "知识产权与版权声明",
+            "numbering": "auto",
             "anchor": "appendix-copyright",
             "body": [
               {
@@ -3143,7 +2368,7 @@
                     "children": [
                       {
                         "_type": "span",
-                        "text": "本评估报告系由 OxValue.AI（牛津智能）独立研发与编制。报告的全部内容，包括文字表述、数据指标体系、核心算法与估值模型逻辑、分析框架、图表及呈现形式，均属公司享有完整所有权及著作权的专有智力成果。",
+                        "text": "本评估报告的全部内容，包括文字表述、数据指标体系、核心算法与估值模型逻辑、分析框架、图表及呈现形式，均属 OxValue.AI 享有完整所有权及著作权的专有智力成果。",
                         "marks": []
                       }
                     ],
@@ -3156,11 +2381,11 @@
                 "blocks": [
                   {
                     "_type": "block",
-                    "style": "normal",
+                    "style": "blockquote",
                     "children": [
                       {
                         "_type": "span",
-                        "text": "未经事先书面许可，严禁任何机构或个人复制、转载、修改、传播或商业性展示本报告内容，亦不得对报告内的估值模型、数据结构进行逆向工程、拆分重组或二次衍生开发。",
+                        "text": "引用或转载必须严格遵守授权边界，并在引用处清晰注明“数据/内容来源：OxValue.AI（牛津智能）”。",
                         "marks": []
                       }
                     ],
@@ -3173,11 +2398,11 @@
                 "blocks": [
                   {
                     "_type": "block",
-                    "style": "normal",
+                    "style": "quote_source",
                     "children": [
                       {
                         "_type": "span",
-                        "text": "经正式书面授权的引用或转载，必须清晰注明“数据/内容来源：OxValue.AI（牛津智能）”，且不得对原内容作歪曲、篡改或断章取义的误导性解读。",
+                        "text": "—— OxValue.AI 法务与内容治理团队",
                         "marks": []
                       }
                     ],
@@ -3187,101 +2412,490 @@
               }
             ]
           }
+        }
+      ]
+    },
+    {
+      "id": "sec-capability-demo",
+      "level": 1,
+      "title": "协议能力展示区",
+      "numbering": "manual",
+      "anchor": "sec-capability-demo",
+      "body": [
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "lead",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "本节为样例补充，用于集中展示协议与包的主要能力。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
         },
         {
-          "itemType": "subsection",
-          "section": {
-            "id": "appendix-back-cover",
-            "level": 2,
-            "title": "封底（武）",
-            "numbering": "none",
-            "anchor": "appendix-back-cover",
-            "body": [
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "_type": "block",
-                    "style": "normal",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "公司网址：",
-                        "marks": [
-                          "strong"
-                        ]
-                      },
-                      {
-                        "_type": "hard_break"
-                      },
-                      {
-                        "_type": "span",
-                        "text": "中国版：",
-                        "marks": []
-                      },
-                      {
-                        "_type": "span",
-                        "text": "https://www.oxvalue.cn/",
-                        "marks": [
-                          "link-cn"
-                        ]
-                      },
-                      {
-                        "_type": "hard_break"
-                      },
-                      {
-                        "_type": "span",
-                        "text": "英文版：",
-                        "marks": []
-                      },
-                      {
-                        "_type": "span",
-                        "text": "https://www.oxvalue.ai/",
-                        "marks": [
-                          "link-en"
-                        ]
-                      }
-                    ],
-                    "markDefs": [
-                      {
-                        "_key": "link-cn",
-                        "_type": "link",
-                        "href": "https://www.oxvalue.cn/"
-                      },
-                      {
-                        "_key": "link-en",
-                        "_type": "link",
-                        "href": "https://www.oxvalue.ai/"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "itemType": "content",
-                "blocks": [
-                  {
-                    "id": "fig-company-qr",
-                    "anchor": "fig-company-qr",
-                    "_type": "image",
-                    "imageRef": "img-company-qr"
-                  },
-                  {
-                    "_type": "block",
-                    "style": "figure_caption",
-                    "children": [
-                      {
-                        "_type": "span",
-                        "text": "图A-1 公司公众号二维码（占位图）。",
-                        "marks": []
-                      }
-                    ],
-                    "markDefs": []
-                  }
-                ]
-              }
-            ]
-          }
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "smallprint",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "下面将额外展示 marks、markDefs、grid table、embedded image、caption 风格、callout、footnote、glossary、inline math 等能力。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        },
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "subheading",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "非正式小标题示例",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        },
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "caption",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "这是一个通用 caption 样式示例。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        },
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "本段展示文本修饰 marks：",
+                  "marks": []
+                },
+                {
+                  "_type": "span",
+                  "text": "加粗",
+                  "marks": [
+                    "strong"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "、",
+                  "marks": []
+                },
+                {
+                  "_type": "span",
+                  "text": "斜体",
+                  "marks": [
+                    "em"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "、",
+                  "marks": []
+                },
+                {
+                  "_type": "span",
+                  "text": "下划线",
+                  "marks": [
+                    "underline"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "、",
+                  "marks": []
+                },
+                {
+                  "_type": "span",
+                  "text": "inline_code()",
+                  "marks": [
+                    "code"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "本段展示 link、xref、citation、footnote、glossary 与 inline_math：官网",
+                  "marks": [
+                    "m_link"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "；参见方法章节",
+                  "marks": [
+                    "m_xref_sec"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "；图",
+                  "marks": [
+                    "m_xref_fig"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "、表",
+                  "marks": [
+                    "m_xref_tbl"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "、公式",
+                  "marks": [
+                    "m_xref_eq"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "；文献",
+                  "marks": [
+                    "m_cite"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "；脚注",
+                  "marks": [
+                    "m_fn"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "；术语",
+                  "marks": [
+                    "m_term"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "；行内公式 ",
+                  "marks": []
+                },
+                {
+                  "_type": "span",
+                  "text": "V = f(X; θ)",
+                  "marks": [
+                    "m_inline_math"
+                  ]
+                },
+                {
+                  "_type": "span",
+                  "text": "。",
+                  "marks": []
+                }
+              ],
+              "markDefs": [
+                {
+                  "_key": "m_link",
+                  "_type": "link",
+                  "href": "https://www.oxvalue.ai/"
+                },
+                {
+                  "_key": "m_xref_sec",
+                  "_type": "xref",
+                  "targetId": "sec-method",
+                  "targetType": "section"
+                },
+                {
+                  "_key": "m_xref_fig",
+                  "_type": "xref",
+                  "targetId": "fig-system-overview",
+                  "targetType": "figure"
+                },
+                {
+                  "_key": "m_xref_tbl",
+                  "_type": "xref",
+                  "targetId": "tbl-legal-status",
+                  "targetType": "table"
+                },
+                {
+                  "_key": "m_xref_eq",
+                  "_type": "xref",
+                  "targetId": "eq-core-model",
+                  "targetType": "equation"
+                },
+                {
+                  "_key": "m_cite",
+                  "_type": "citation_ref",
+                  "targetId": "cite-fu-2026"
+                },
+                {
+                  "_key": "m_fn",
+                  "_type": "footnote_ref",
+                  "targetId": "fn-report-scope"
+                },
+                {
+                  "_key": "m_term",
+                  "_type": "glossary_term",
+                  "targetId": "term-dcf"
+                },
+                {
+                  "_key": "m_inline_math",
+                  "_type": "inline_math",
+                  "latex": "V = f(X; \\\\theta)"
+                }
+              ]
+            },
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "同一段内的强制换行第一行。",
+                  "marks": []
+                },
+                {
+                  "_type": "hard_break"
+                },
+                {
+                  "_type": "span",
+                  "text": "这是通过 hard_break 产生的第二行。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "blockquote",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "高质量协议样例的核心价值，在于帮助渲染器开发者直接看到每一种节点该如何落地。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "quote_source",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "—— OVAPortableText 示例说明",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "caption",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "这是一条通用 caption 示例，用于展示非 figure/table/equation 的说明文本样式。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "smallprint",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "注：本能力展示区包含与业务正文无关的补充内容，仅用于覆盖协议中的各类节点与枚举值。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "normal",
+              "listItem": "bullet",
+              "level": 1,
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "一级 bullet 列表项",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "normal",
+              "listItem": "bullet",
+              "level": 2,
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "二级 bullet 列表项",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "normal",
+              "listItem": "number",
+              "level": 1,
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "number 列表项示例",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "callout",
+              "id": "callout-capability-extra",
+              "anchor": "callout-capability-extra",
+              "blocks": [
+                {
+                  "_type": "block",
+                  "style": "normal",
+                  "children": [
+                    {
+                      "_type": "span",
+                      "text": "这是一个额外的 callout，用于展示块级对象可嵌入受限文本子集。",
+                      "marks": []
+                    }
+                  ],
+                  "markDefs": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "back-cover",
+      "level": 1,
+      "title": "封底",
+      "numbering": "none",
+      "anchor": "back-cover",
+      "body": [
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "公司网址：",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        },
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "中国版：https://www.oxvalue.cn/",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        },
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "英文版：https://www.oxvalue.ai/",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        },
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "id": "fig-company-qr",
+              "anchor": "fig-company-qr",
+              "_type": "image",
+              "imageRef": "img-company-qr"
+            },
+            {
+              "_type": "block",
+              "style": "figure_caption",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "公司公众号二维码",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
         }
       ]
     }

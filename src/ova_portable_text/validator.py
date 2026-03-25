@@ -25,10 +25,11 @@ from .block_objects import CalloutBlock, ChartBlock, ImageBlock, TableBlock
 from .content import ALLOWED_TEXT_STYLES, ContentItem, Span, TextBlock
 from .document import Document
 from .exceptions import ValidationReport
-from .inline import CitationRef, FootnoteRef, GlossaryTerm, XRef
+from .inline import CitationRef, FootnoteRef, GlossaryTerm, InlineMath, XRef
 from .registry import BibliographyEntry, FootnoteEntry, GlossaryEntry
 from .resolver import DocumentResolver, ResolvedTarget
 from .section import Section, SubsectionItem
+from .text import CitationRefMarkDef, FootnoteRefMarkDef, GlossaryTermMarkDef, InlineMathMarkDef, XRefMarkDef
 
 ALLOWED_DECORATOR_MARKS = {"strong", "em", "underline", "code"}
 
@@ -46,7 +47,16 @@ def validate_document(document: Document) -> ValidationReport:
             message="`schemaVersion` is required.",
             path="schemaVersion",
             contextType="document",
-            suggestion="Set `schemaVersion` to `report.v1` unless you intentionally target another protocol version.",
+            suggestion="Set `schemaVersion` to `report.v1.0` unless you intentionally target another protocol version.",
+        )
+
+    elif document.schemaVersion != "report.v1.0":
+        report.add_issue(
+            code="unsupported_schema_version",
+            message=f"Unsupported `schemaVersion`: {document.schemaVersion!r}",
+            path="schemaVersion",
+            contextType="document",
+            suggestion="This package currently targets `report.v1.0`.",
         )
 
     if not isinstance(document.sections, list):
@@ -268,29 +278,18 @@ def _validate_text_block_structure(block: TextBlock, *, path: str, section: Sect
 def _validate_bibliography(entries: list[BibliographyEntry], *, report: ValidationReport) -> None:
     for index, entry in enumerate(entries):
         path = f"bibliography[{index}]"
-        if not entry.type:
+        if not entry.displayText:
             report.add_issue(
-                code="invalid_bibliography_type",
-                message="`type` is required.",
-                path=f"{path}.type",
+                code="invalid_bibliography_display_text",
+                message="`displayText` is required.",
+                path=f"{path}.displayText",
                 contextType="bibliography_item",
                 contextId=entry.id,
                 contextAnchor=entry.anchor,
-                location=f"{path}.type",
-                suggestion="Set a normalized bibliography type such as `article`, `book`, or `misc`.",
+                location=f"{path}.displayText",
+                suggestion="Provide the complete preformatted citation text.",
             )
-        if not entry.title:
-            report.add_issue(
-                code="invalid_bibliography_title",
-                message="`title` is required.",
-                path=f"{path}.title",
-                contextType="bibliography_item",
-                contextId=entry.id,
-                contextAnchor=entry.anchor,
-                location=f"{path}.title",
-                suggestion="Provide a stable human-readable title for bibliography entries.",
-            )
-        if not isinstance(entry.authors, list):
+        if entry.authors is not None and not isinstance(entry.authors, list):
             report.add_issue(
                 code="invalid_bibliography_authors",
                 message="`authors` must be a list.",
@@ -300,18 +299,6 @@ def _validate_bibliography(entries: list[BibliographyEntry], *, report: Validati
                 contextAnchor=entry.anchor,
                 location=f"{path}.authors",
                 suggestion="Use a string array, even if there is only one author.",
-            )
-        elif len(entry.authors) == 0:
-            report.add_issue(
-                code="empty_bibliography_authors",
-                message="`authors` should not be empty according to the current protocol guidance.",
-                path=f"{path}.authors",
-                severity="warning",
-                contextType="bibliography_item",
-                contextId=entry.id,
-                contextAnchor=entry.anchor,
-                location=f"{path}.authors",
-                suggestion="Prefer a non-empty author list for better citation quality.",
             )
         if entry.year is None:
             report.add_issue(
@@ -351,7 +338,7 @@ def _validate_footnotes(entries: list[FootnoteEntry], *, report: ValidationRepor
                 contextId=entry.id,
                 contextAnchor=entry.anchor,
                 location=f"{path}.blocks",
-                suggestion="Provide at least one text block for each footnote entry.",
+                suggestion="Use an empty array if the footnote is intentionally blank, or add one or more text blocks."
             )
             continue
         for block_index, block in enumerate(entry.blocks):
@@ -450,62 +437,100 @@ def _validate_section_references(section: Section, *, path: str, resolver: Docum
 
 
 def _validate_text_block_inline_references(block: TextBlock, *, path: str, section: Section, resolver: DocumentResolver, report: ValidationReport) -> None:
-    for child_index, child in enumerate(block.children):
-        child_path = f"{path}.children[{child_index}]"
-        if isinstance(child, XRef):
-            if not resolver.is_supported_target_type(child.targetType):
+    def _validate_xref_like(*, target_type: str | None, target_id: str, child_path: str) -> None:
+        if target_type:
+            if not resolver.is_supported_target_type(target_type):
                 report.add_issue(
                     code="unsupported_xref_target_type",
-                    message=f"Unsupported `xref.targetType`: {child.targetType!r}. Supported values include: {sorted(resolver.supported_target_types())}",
+                    message=f"Unsupported `xref.targetType`: {target_type!r}. Supported values include: {sorted(resolver.supported_target_types())}",
                     path=f"{child_path}.targetType",
                     **_ctx(section=section, context_type="xref", location=f"{child_path}.targetType", suggestion="Use one of the resolver-supported semantic types, such as `section`, `figure`, `table`, `equation`, `footnote`, or `bibliography`."),
                 )
-                continue
-            target = resolver.resolve_xref(target_type=child.targetType, target_id=child.targetId)
+                return
+            target = resolver.resolve_xref(target_type=target_type, target_id=target_id)
+        else:
+            target = resolver.get(target_id)
+        if target is None:
+            report.add_issue(
+                code="unresolved_xref",
+                message=f"`xref` target cannot be resolved: targetType={target_type!r}, targetId={target_id!r}",
+                path=child_path,
+                **_ctx(section=section, context_type="xref", location=child_path, suggestion="Check both `targetType` and `targetId`, and confirm that the target object exists exactly once in the document."),
+            )
+
+    for child_index, child in enumerate(block.children):
+        child_path = f"{path}.children[{child_index}]"
+        if isinstance(child, XRef):
+            _validate_xref_like(target_type=child.targetType, target_id=child.targetId, child_path=child_path)
+        elif isinstance(child, CitationRef):
+            target = resolver.resolve_xref(target_type="bibliography_item", target_id=child.targetId)
             if target is None:
                 report.add_issue(
-                    code="unresolved_xref",
-                    message=f"`xref` target cannot be resolved: targetType={child.targetType!r}, targetId={child.targetId!r}",
-                    path=child_path,
-                    **_ctx(section=section, context_type="xref", location=child_path, suggestion="Check both `targetType` and `targetId`, and confirm that the target object exists exactly once in the document."),
+                    code="unresolved_citation_ref",
+                    message=f"`citation_ref` target cannot be resolved: {child.targetId!r}",
+                    path=f"{child_path}.targetId",
+                    **_ctx(section=section, context_type="citation_ref", location=f"{child_path}.targetId", suggestion="Create a matching bibliography entry under the top-level `bibliography` registry."),
                 )
-        elif isinstance(child, CitationRef):
-            if len(child.refIds) == 0:
-                report.add_issue(
-                    code="empty_citation_ref",
-                    message="`citation_ref.refIds` must not be empty.",
-                    path=f"{child_path}.refIds",
-                    **_ctx(section=section, context_type="citation_ref", location=f"{child_path}.refIds", suggestion="Provide at least one bibliography id."),
-                )
-                continue
-            for ref_index, ref_id in enumerate(child.refIds):
-                target = resolver.resolve_xref(target_type="bibliography_item", target_id=ref_id)
-                if target is None:
-                    report.add_issue(
-                        code="unresolved_citation_ref",
-                        message=f"`citation_ref` target cannot be resolved: {ref_id!r}",
-                        path=f"{child_path}.refIds[{ref_index}]",
-                        **_ctx(section=section, context_type="citation_ref", location=f"{child_path}.refIds[{ref_index}]", suggestion="Create a matching bibliography entry under the top-level `bibliography` registry."),
-                    )
-                else:
-                    # Optional future hook: successful resolution context is now available if needed.
-                    # 这里保留成功解析的 target 上下文，方便未来继续扩展校验逻辑。
-                    _ = _ctx_from_target(target)
         elif isinstance(child, FootnoteRef):
-            target = resolver.resolve_xref(target_type="footnote", target_id=child.refId)
+            target = resolver.resolve_xref(target_type="footnote", target_id=child.targetId)
             if target is None:
                 report.add_issue(
                     code="unresolved_footnote_ref",
-                    message=f"`footnote_ref` target cannot be resolved: {child.refId!r}",
-                    path=f"{child_path}.refId",
-                    **_ctx(section=section, context_type="footnote_ref", location=f"{child_path}.refId", suggestion="Create a matching top-level footnote entry."),
+                    message=f"`footnote_ref` target cannot be resolved: {child.targetId!r}",
+                    path=f"{child_path}.targetId",
+                    **_ctx(section=section, context_type="footnote_ref", location=f"{child_path}.targetId", suggestion="Create a matching top-level footnote entry."),
                 )
         elif isinstance(child, GlossaryTerm):
-            target = resolver.resolve_xref(target_type="glossary_term", target_id=child.termId)
+            target = resolver.resolve_xref(target_type="glossary_term", target_id=child.targetId)
             if target is None:
                 report.add_issue(
                     code="unresolved_glossary_term",
-                    message=f"`glossary_term` target cannot be resolved: {child.termId!r}",
-                    path=f"{child_path}.termId",
-                    **_ctx(section=section, context_type="glossary_term_ref", location=f"{child_path}.termId", suggestion="Create a matching top-level glossary entry."),
+                    message=f"`glossary_term` target cannot be resolved: {child.targetId!r}",
+                    path=f"{child_path}.targetId",
+                    **_ctx(section=section, context_type="glossary_term_ref", location=f"{child_path}.targetId", suggestion="Create a matching top-level glossary entry."),
+                )
+        elif isinstance(child, InlineMath):
+            if not child.latex:
+                report.add_issue(
+                    code="invalid_inline_math",
+                    message="`inline_math.latex` must not be empty.",
+                    path=f"{child_path}.latex",
+                    **_ctx(section=section, context_type="inline_math", location=f"{child_path}.latex", suggestion="Provide a non-empty LaTeX string."),
+                )
+
+    for mark_def_index, mark_def in enumerate(block.markDefs):
+        mark_path = f"{path}.markDefs[{mark_def_index}]"
+        if isinstance(mark_def, XRefMarkDef):
+            _validate_xref_like(target_type=mark_def.targetType, target_id=mark_def.targetId, child_path=mark_path)
+        elif isinstance(mark_def, CitationRefMarkDef):
+            if resolver.resolve_xref(target_type="bibliography_item", target_id=mark_def.targetId) is None:
+                report.add_issue(
+                    code="unresolved_citation_ref",
+                    message=f"`citation_ref` target cannot be resolved: {mark_def.targetId!r}",
+                    path=f"{mark_path}.targetId",
+                    **_ctx(section=section, context_type="citation_ref", location=f"{mark_path}.targetId", suggestion="Create a matching bibliography entry under the top-level `bibliography` registry."),
+                )
+        elif isinstance(mark_def, FootnoteRefMarkDef):
+            if resolver.resolve_xref(target_type="footnote", target_id=mark_def.targetId) is None:
+                report.add_issue(
+                    code="unresolved_footnote_ref",
+                    message=f"`footnote_ref` target cannot be resolved: {mark_def.targetId!r}",
+                    path=f"{mark_path}.targetId",
+                    **_ctx(section=section, context_type="footnote_ref", location=f"{mark_path}.targetId", suggestion="Create a matching top-level footnote entry."),
+                )
+        elif isinstance(mark_def, GlossaryTermMarkDef):
+            if resolver.resolve_xref(target_type="glossary_term", target_id=mark_def.targetId) is None:
+                report.add_issue(
+                    code="unresolved_glossary_term",
+                    message=f"`glossary_term` target cannot be resolved: {mark_def.targetId!r}",
+                    path=f"{mark_path}.targetId",
+                    **_ctx(section=section, context_type="glossary_term_ref", location=f"{mark_path}.targetId", suggestion="Create a matching top-level glossary entry."),
+                )
+        elif isinstance(mark_def, InlineMathMarkDef):
+            if not mark_def.latex:
+                report.add_issue(
+                    code="invalid_inline_math",
+                    message="`inline_math.latex` must not be empty.",
+                    path=f"{mark_path}.latex",
+                    **_ctx(section=section, context_type="inline_math", location=f"{mark_path}.latex", suggestion="Provide a non-empty LaTeX string."),
                 )

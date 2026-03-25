@@ -3,7 +3,7 @@ from ova_portable_text import (
     create_document,
     footnote_entry,
     glossary_entry,
-    image_asset,
+    image_asset_url,
     pie_chart_from_parallel_arrays,
     paragraph,
     section,
@@ -16,9 +16,9 @@ def test_document_can_hold_registry_entries_and_block_objects():
     report = create_document(title="Demo", language="en")
 
     report.add_image_asset(
-        image_asset(
+        image_asset_url(
             id="img-1",
-            src="https://example.com/a.png",
+            url="https://example.com/a.png",
             alt="Example image",
         )
     )
@@ -37,7 +37,7 @@ def test_document_can_hold_registry_entries_and_block_objects():
             value=[60, 40],
         )
     )
-    report.add_bibliography_entry(bibliography_entry(id="cite-1", text="Demo Reference"))
+    report.add_bibliography_entry(bibliography_entry(id="cite-1", display_text="Demo Reference"))
     report.add_footnote(footnote_entry(id="fn-1", blocks=[paragraph("Footnote content")]))
     report.add_glossary_entry(glossary_entry(id="term-1", term="EBITDA", definition="Demo definition"))
 

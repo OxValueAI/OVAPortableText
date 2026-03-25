@@ -23,7 +23,7 @@ def test_inline_objects_output():
     second_children = data["sections"][0]["body"][1]["blocks"][0]["children"]
 
     assert second_children[1]["_type"] == "glossary_term"
-    assert second_children[1]["termId"] == "term-ebitda"
+    assert second_children[1]["targetId"] == "term-ebitda"
     assert second_children[2]["_type"] == "footnote_ref"
     assert second_children[3]["_type"] == "citation_ref"
     assert second_children[4]["_type"] == "hard_break"

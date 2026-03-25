@@ -9,22 +9,22 @@ from ova_portable_text import (
     table_column,
     table_dataset,
     xref,
-    image_asset,
+    image_asset_url,
 )
 
 
 report = create_document(
     title="OVAPortableText Step 3 Demo",
     language="en",
-    documentType="report",
+    documentType="valuationReport",
 )
 
 # Add registry entries / 追加顶层 registry 条目
 report.add_image_asset(
-    image_asset(
+    image_asset_url(
         id="img-pipeline-overview",
         label="Pipeline overview image",
-        src="https://example.com/pipeline-overview.png",
+        url="https://example.com/pipeline-overview.png",
         alt="Pipeline overview",
     )
 )
@@ -67,7 +67,7 @@ report.add_chart_dataset(
 )
 
 report.add_bibliography_entry(
-    bibliography_entry(id="cite-smith-2024", text="Smith (2024). Valuation methodology overview.")
+    bibliography_entry(id="cite-smith-2024", display_text="Smith (2024). Valuation methodology overview.")
 )
 report.add_footnote(
     footnote_entry(id="fn-1", blocks=[paragraph("Adjusted EBITDA excludes certain non-recurring items.")])

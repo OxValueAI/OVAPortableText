@@ -13,7 +13,7 @@ from ova_portable_text import (
     create_document,
     footnote_entry,
     glossary_entry,
-    image_asset,
+    image_asset_url,
     paragraph,
     pie_chart_from_parallel_arrays,
     table_column,
@@ -27,15 +27,15 @@ def main() -> None:
         title="Patent Valuation Report",
         subtitle="Illustrative protocol example",
         language="en",
-        documentType="report",
+        documentType="valuationReport",
         author="OVA Demo",
         confidentiality="internal",
     )
 
     report.add_image_asset(
-        image_asset(
+        image_asset_url(
             id="img-market-map",
-            src="https://example.com/market-map.png",
+            url="https://example.com/market-map.png",
             alt="Market landscape image",
             label="Market landscape",
         )
@@ -81,11 +81,11 @@ def main() -> None:
     report.add_bibliography_entry(
         bibliography_entry(
             id="bib-market-2025",
+            display_text="Research Team. Global Patent Market Review. 2025.",
             title="Global Patent Market Review",
             authors=["Research Team"],
             year=2025,
             type="report",
-            text="Internal research summary.",
         )
     )
     report.add_footnote(footnote_entry(id="fn-1", blocks=[paragraph("Illustrative footnote only.")]))

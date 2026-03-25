@@ -5,7 +5,7 @@ from ova_portable_text import (
     footnote_ref,
     glossary_entry,
     glossary_term,
-    image_asset,
+    image_asset_url,
     image_block,
     link_def,
     paragraph,
@@ -23,13 +23,13 @@ report = create_document(
     title="Full Workflow Demo",
     language="en",
     subtitle="Step 8 end-to-end example",
-    documentType="report",
+    documentType="valuationReport",
 )
 
 report.add_image_asset(
-    image_asset(
+    image_asset_url(
         id="img-overview",
-        src="https://example.com/overview.png",
+        url="https://example.com/overview.png",
         alt="Overview diagram",
     )
 )
@@ -60,10 +60,11 @@ report.add_chart_dataset(
 report.add_bibliography_entry(
     bibliography_entry(
         id="bib-pt",
+        display_text="Portable Text Authors. Portable Text Specification. 2026.",
         title="Portable Text Specification",
         authors=["Portable Text Authors"],
         year=2026,
-        type="specification",
+        type="other",
     )
 )
 
