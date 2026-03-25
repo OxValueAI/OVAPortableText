@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+"""
+Inline reference / annotation objects for OVAPortableText.
+OVAPortableText 的行内引用 / 注解对象。
+"""
+
 from typing import Literal, TypeAlias
 
 from pydantic import Field
@@ -8,12 +13,22 @@ from .base import OvaBaseModel
 
 
 class HardBreak(OvaBaseModel):
+    """
+    Soft line break within one logical paragraph.
+    单个逻辑段落内部的换行。
+
+    Note:
+    This remains supported by the package as a lightweight extension even though
+    the protocol's current formal inline-object list focuses on semantic refs.
+    即便当前协议正式列举的行内对象更侧重语义引用，包仍保留这个轻量扩展能力。
+    """
+
     type_: Literal["hard_break"] = Field(default="hard_break", alias="_type", serialization_alias="_type")
 
 
 class XRef(OvaBaseModel):
     type_: Literal["xref"] = Field(default="xref", alias="_type", serialization_alias="_type")
-    targetType: str | None = None
+    targetType: str
     targetId: str
 
 

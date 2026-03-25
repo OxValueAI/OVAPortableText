@@ -19,7 +19,7 @@ from ova_portable_text import (
 report = create_document(
     title="OVAPortableText Step 4 Demo",
     language="en",
-    documentType="valuationReport",
+    documentType="report",
 )
 
 report.add_image_asset(image_asset_url(id="img-overview", url="https://example.com/overview.png", alt="Overview"))

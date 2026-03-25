@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+"""
+Registry-entry models for OVAPortableText.
+OVAPortableText 的 registry 条目模型。
+"""
+
 from typing import Annotated, Any, Literal, TypeAlias
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
@@ -9,8 +14,6 @@ from .text import TextBlock
 
 
 class RegistryEntryBase(OvaBaseModel):
-    """Common base for top-level registry entries."""
-
     id: str
     anchor: str | None = None
     label: str | None = None
@@ -37,56 +40,56 @@ class ImageSourceEmbedded(OvaBaseModel):
 ImageSource = Annotated[ImageSourceUrl | ImageSourceEmbedded, Field(discriminator="kind")]
 
 
-class ImageAsset(RegistryEntryBase):
-    """Pure image-source-based asset model used by images/logos/backgrounds/icons."""
-
-    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+class ImageLikeAssetBase(RegistryEntryBase):
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
 
     imageSource: ImageSource
     alt: str | None = None
     mimeType: str | None = None
     checksum: str | None = None
+    width: int | None = None
+    height: int | None = None
     source: str | None = None
     copyright: str | None = None
     language: str | None = None
-    width: int | None = None
-    height: int | None = None
 
     @model_validator(mode="after")
-    def validate_image_source_requirements(self) -> "ImageAsset":
+    def validate_image_source_requirements(self) -> "ImageLikeAssetBase":
+        if self.model_extra and "src" in self.model_extra:
+            raise ValueError("Legacy `src` is not allowed; use `imageSource` instead.")
         if self.imageSource.kind == "embedded" and not self.mimeType:
-            raise ValueError("Embedded image assets require `mimeType`.")
-        if self.width is not None and self.width <= 0:
-            raise ValueError("`width` must be a positive integer when provided.")
-        if self.height is not None and self.height <= 0:
-            raise ValueError("`height` must be a positive integer when provided.")
+            raise ValueError("Embedded image-like assets require `mimeType`.")
+        if self.width is not None and self.width < 1:
+            raise ValueError("`width` must be >= 1 when provided.")
+        if self.height is not None and self.height < 1:
+            raise ValueError("`height` must be >= 1 when provided.")
         return self
 
 
-class LogoAsset(ImageAsset):
-    variant: str | None = None
+class ImageAsset(ImageLikeAssetBase):
+    pass
 
 
-class BackgroundAsset(ImageAsset):
-    usage: str | None = None
+class LogoAsset(ImageLikeAssetBase):
+    pass
 
 
-class IconAsset(ImageAsset):
-    family: str | None = None
-    size: int | None = None
+class BackgroundAsset(ImageLikeAssetBase):
+    pass
+
+
+class IconAsset(ImageLikeAssetBase):
+    pass
 
 
 class AttachmentAsset(RegistryEntryBase):
-    """Attachments remain extension-oriented in v1.0."""
-
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
+    src: str | None = None
+    mimeType: str | None = None
     fileName: str | None = None
     description: str | None = None
     sizeBytes: int | None = None
-    mimeType: str | None = None
-    source: str | None = None
-    url: str | None = None
 
 
 class TableColumn(OvaBaseModel):
@@ -124,21 +127,21 @@ class RecordTableDataset(RegistryEntryBase):
 class GridTableCell(OvaBaseModel):
     text: str | None = None
     blocks: list[TextBlock] | None = None
-    header: bool | None = None
-    colSpan: int | None = None
-    rowSpan: int | None = None
+    header: bool = False
+    colSpan: int = 1
+    rowSpan: int = 1
     align: Literal["left", "center", "right"] | None = None
     verticalAlign: Literal["top", "middle", "bottom"] | None = None
     meta: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def validate_payload(self) -> "GridTableCell":
-        if self.text is None and self.blocks is None:
-            raise ValueError("Grid table cell requires `text` or `blocks`.")
-        if self.colSpan is not None and self.colSpan < 1:
-            raise ValueError("`colSpan` must be >= 1 when provided.")
-        if self.rowSpan is not None and self.rowSpan < 1:
-            raise ValueError("`rowSpan` must be >= 1 when provided.")
+    def validate_cell(self) -> "GridTableCell":
+        if (self.text is None or self.text == "") and (self.blocks is None or len(self.blocks) == 0):
+            raise ValueError("Grid table cells require either `text` or non-empty `blocks`.")
+        if self.colSpan < 1:
+            raise ValueError("`colSpan` must be >= 1.")
+        if self.rowSpan < 1:
+            raise ValueError("`rowSpan` must be >= 1.")
         return self
 
 
@@ -148,18 +151,44 @@ class GridTableRow(OvaBaseModel):
 
 class GridTableDataset(RegistryEntryBase):
     tableType: Literal["grid"] = "grid"
-    columnCount: int
+    columnCount: int | None = None
     rows: list[GridTableRow] = Field(default_factory=list)
 
     @model_validator(mode="after")
-    def validate_grid_rows(self) -> "GridTableDataset":
-        if self.columnCount < 1:
-            raise ValueError("`columnCount` must be >= 1.")
+    def validate_grid(self) -> "GridTableDataset":
+        if self.columnCount is not None and self.columnCount < 1:
+            raise ValueError("`columnCount` must be >= 1 when provided.")
+
+        if self.columnCount is None:
+            return self
+
+        carry = [0] * self.columnCount
         for row_index, row in enumerate(self.rows):
-            if len(row.cells) > self.columnCount:
-                raise ValueError(
-                    f"Row {row_index} has more cells ({len(row.cells)}) than columnCount ({self.columnCount})."
-                )
+            next_carry = [max(v - 1, 0) for v in carry]
+            occupied = [v > 0 for v in carry]
+            col = 0
+            for cell_index, cell in enumerate(row.cells):
+                while col < self.columnCount and occupied[col]:
+                    col += 1
+                if col >= self.columnCount:
+                    raise ValueError(
+                        f"Grid row {row_index} places cell {cell_index} beyond `columnCount`."
+                    )
+                end = col + cell.colSpan
+                if end > self.columnCount:
+                    raise ValueError(
+                        f"Grid row {row_index} cell {cell_index} exceeds `columnCount` with colSpan={cell.colSpan}."
+                    )
+                for slot in range(col, end):
+                    if occupied[slot]:
+                        raise ValueError(
+                            f"Grid row {row_index} cell {cell_index} overlaps a carried rowSpan slot."
+                        )
+                    occupied[slot] = True
+                    if cell.rowSpan > 1:
+                        next_carry[slot] = max(next_carry[slot], cell.rowSpan - 1)
+                col = end
+            carry = next_carry
         return self
 
 
@@ -172,12 +201,6 @@ class PieSlice(OvaBaseModel):
     value: int | float
     description: dict[str, str] = Field(default_factory=dict)
     colorHint: str | None = None
-
-    @model_validator(mode="after")
-    def validate_label_presence(self) -> "PieSlice":
-        if not self.label:
-            raise ValueError("Pie slice requires a non-empty `label` object.")
-        return self
 
 
 class PieChartDataset(RegistryEntryBase):
@@ -262,6 +285,22 @@ class PieChartDataset(RegistryEntryBase):
         return result or "slice"
 
 
+class GenericChartDataset(RegistryEntryBase):
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+    chartType: str
+
+    @field_validator("chartType")
+    @classmethod
+    def validate_chart_type(cls, value: str) -> str:
+        if not value:
+            raise ValueError("`chartType` is required.")
+        return value
+
+
+ChartDataset = PieChartDataset | GenericChartDataset
+
+
 class MetricValue(OvaBaseModel):
     key: str
     label: str | None = None
@@ -288,7 +327,7 @@ class BibliographyEntry(RegistryEntryBase):
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
     displayText: str
-    type: Literal["article", "book", "report", "webpage", "dataset", "other"] | None = None
+    type: str | None = None
     title: str | None = None
     authors: list[str] = Field(default_factory=list)
     year: int | None = None
@@ -315,7 +354,6 @@ class GlossaryEntry(RegistryEntryBase):
     term: str
     definition: str
     aliases: list[str] | None = None
-    short: str | None = None
 
     @field_validator("aliases")
     @classmethod
@@ -352,11 +390,11 @@ class AssetsRegistry(OvaBaseModel):
 
 
 class DatasetsRegistry(OvaBaseModel):
-    charts: list[PieChartDataset] = Field(default_factory=list)
+    charts: list[ChartDataset] = Field(default_factory=list)
     tables: list[TableDataset] = Field(default_factory=list)
     metrics: list[MetricDataset] = Field(default_factory=list)
 
-    def append_chart(self, chart: PieChartDataset) -> "DatasetsRegistry":
+    def append_chart(self, chart: ChartDataset) -> "DatasetsRegistry":
         self.charts.append(chart)
         return self
 

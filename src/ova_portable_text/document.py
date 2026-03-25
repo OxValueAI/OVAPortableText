@@ -23,10 +23,9 @@ This file therefore contains:
 """
 
 from collections import Counter
-from datetime import datetime
 from typing import Any, Iterable
 
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field
 
 from .base import OvaBaseModel
 from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
@@ -44,7 +43,7 @@ from .registry import (
     ImageAsset,
     LogoAsset,
     MetricDataset,
-    PieChartDataset,
+    ChartDataset,
     TableDataset,
 )
 from .section import NumberingMode, Section, SubsectionItem
@@ -90,69 +89,6 @@ class DocumentMeta(OvaBaseModel):
     locale: str | None = None
     source: str | None = None
 
-    @field_validator("language", "locale")
-    @classmethod
-    def validate_language_fields(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        allowed = {"zh", "en"}
-        if value not in allowed:
-            raise ValueError(f"Allowed values: {sorted(allowed)}")
-        return value
-
-    @field_validator("documentType")
-    @classmethod
-    def validate_document_type(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        allowed = {"valuationReport"}
-        if value not in allowed:
-            raise ValueError(f"Allowed values: {sorted(allowed)}")
-        return value
-
-    @field_validator("confidentiality")
-    @classmethod
-    def validate_confidentiality(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        allowed = {"public", "user", "internal", "confidential"}
-        if value not in allowed:
-            raise ValueError(f"Allowed values: {sorted(allowed)}")
-        return value
-
-    @field_validator("reportType")
-    @classmethod
-    def validate_report_type(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        allowed = {"startupCompany", "innovationTeam", "patent", "loan"}
-        if value not in allowed:
-            raise ValueError(f"Allowed values: {sorted(allowed)}")
-        return value
-
-    @field_validator("date")
-    @classmethod
-    def validate_date(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        try:
-            datetime.strptime(value, "%Y-%m-%d")
-        except ValueError as exc:
-            raise ValueError("Expected format YYYY-MM-DD") from exc
-        return value
-
-    @field_validator("generatedAt")
-    @classmethod
-    def validate_generated_at(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        normalized = value.replace("Z", "+00:00")
-        try:
-            datetime.fromisoformat(normalized)
-        except ValueError as exc:
-            raise ValueError("Expected RFC3339 / ISO8601 datetime string") from exc
-        return value
-
 
 class Document(OvaBaseModel):
     """
@@ -160,15 +96,15 @@ class Document(OvaBaseModel):
     顶层报告文档对象。
 
     Important protocol alignment / 关键协议对齐点：
-    - `schemaVersion` defaults to `report.v1.0`
-      `schemaVersion` 默认值为 `report.v1.0`
+    - `schemaVersion` defaults to `report.v1`
+      `schemaVersion` 默认值为 `report.v1`
     - `theme` is preserved as a placeholder, but now has a lightweight typed model
       `theme` 仍然是占位层，但现在有一个轻量强类型模型
     - top-level registries should always exist, even when empty
       顶层 registry 即使为空也应存在
     """
 
-    schemaVersion: str = "report.v1.0"
+    schemaVersion: str = "report.v1"
     strict_ids: bool = Field(default=False, exclude=True, repr=False)
     meta: DocumentMeta = Field(default_factory=DocumentMeta)
     theme: ThemeConfig = Field(default_factory=ThemeConfig)
@@ -364,7 +300,7 @@ class Document(OvaBaseModel):
         self.datasets.append_table(table)
         return self
 
-    def add_chart_dataset(self, chart: PieChartDataset) -> "Document":
+    def add_chart_dataset(self, chart: ChartDataset) -> "Document":
         """
         Append a `datasets.charts` entry.
         追加一个 `datasets.charts` 条目。

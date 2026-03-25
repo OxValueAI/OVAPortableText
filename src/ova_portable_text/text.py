@@ -143,33 +143,7 @@ class AnnotationMarkDef(MarkDefBase):
     data: dict[str, Any] = Field(default_factory=dict)
 
 
-class XRefMarkDef(MarkDefBase):
-    type_: Literal["xref"] = Field(default="xref", alias="_type", serialization_alias="_type")
-    targetType: str | None = None
-    targetId: str
-
-
-class CitationRefMarkDef(MarkDefBase):
-    type_: Literal["citation_ref"] = Field(default="citation_ref", alias="_type", serialization_alias="_type")
-    targetId: str
-
-
-class FootnoteRefMarkDef(MarkDefBase):
-    type_: Literal["footnote_ref"] = Field(default="footnote_ref", alias="_type", serialization_alias="_type")
-    targetId: str
-
-
-class GlossaryTermMarkDef(MarkDefBase):
-    type_: Literal["glossary_term"] = Field(default="glossary_term", alias="_type", serialization_alias="_type")
-    targetId: str
-
-
-class InlineMathMarkDef(MarkDefBase):
-    type_: Literal["inline_math"] = Field(default="inline_math", alias="_type", serialization_alias="_type")
-    latex: str
-
-
-MarkDef: TypeAlias = LinkMarkDef | XRefMarkDef | CitationRefMarkDef | FootnoteRefMarkDef | GlossaryTermMarkDef | InlineMathMarkDef | AnnotationMarkDef
+MarkDef: TypeAlias = LinkMarkDef | AnnotationMarkDef
 """
 Union of currently supported mark-definition models.
 当前支持的 mark-definition 模型联合类型。
