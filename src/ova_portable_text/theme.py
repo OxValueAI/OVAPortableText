@@ -1,44 +1,42 @@
 from __future__ import annotations
 
-"""
-Theme-related models for OVAPortableText.
-OVAPortableText 的主题相关模型。
+from typing import Literal
 
-The protocol explicitly says `theme` is currently only a placeholder and should
-not be over-specified yet.
-协议明确指出当前版本的 `theme` 仍是占位层，不应过度细化。
-
-So this module provides:
-因此本模块提供：
-1. a small typed core for the most obvious fields
-   一小组最明显的强类型字段
-2. extension-friendly behaviour for future renderer-specific additions
-   面向未来渲染器扩展的宽松扩展能力
-"""
-
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field, field_validator
 
 from .base import OvaBaseModel
 
 
+class LengthValue(OvaBaseModel):
+    unit: Literal["em", "pt"]
+    value: int | float
+
+    @field_validator("value")
+    @classmethod
+    def validate_non_negative_value(cls, value: int | float) -> int | float:
+        if value < 0:
+            raise ValueError("Length `value` must be >= 0.")
+        return value
+
+
+class BlockLayout(OvaBaseModel):
+    textAlign: Literal["left", "center", "right", "justify"] | None = None
+    firstLineIndent: LengthValue | None = None
+    spaceBefore: LengthValue | None = None
+    spaceAfter: LengthValue | None = None
+
+
+class BlockStyleDefault(OvaBaseModel):
+    layout: BlockLayout | None = None
+
+
 class ThemeConfig(OvaBaseModel):
-    """
-    Lightweight typed model for the top-level `theme` object.
-    顶层 `theme` 对象的轻量强类型模型。
-
-    The protocol currently treats `theme` as a placeholder.
-    协议当前把 `theme` 视作占位层。
-
-    Therefore this model is intentionally permissive:
-    因此这个模型刻意保持较宽松：
-    - it gives common fields typed names
-      为常见字段提供强类型名字
-    - it still allows extra keys
-      但仍允许额外字段存在
-    """
-
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
+    # v1.1 formal field
+    blockStyleDefaults: dict[str, BlockStyleDefault] = Field(default_factory=dict)
+
+    # backward-compatible legacy / extension-friendly fields
     name: str | None = None
     styleTemplate: str | None = None
     pageTemplateFamily: str | None = None

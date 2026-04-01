@@ -20,8 +20,8 @@ The package aligns to this top-level shape:
 - `glossary`
 - `sections`
 
-`schemaVersion` defaults to `report.v1.0`.  
-`schemaVersion` 默认值为 `report.v1.0`。
+`schemaVersion` defaults to `report.v1.1`.  
+`schemaVersion` 默认值为 `report.v1.1`。
 
 ---
 

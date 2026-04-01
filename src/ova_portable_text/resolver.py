@@ -146,7 +146,8 @@ class DocumentResolver(OvaBaseModel):
                             section_title=section.title,
                         )
                         if isinstance(block, ImageBlock):
-                            add_target(id=block.id, target_type="image", anchor=block.anchor, **common)
+                            if block.id is not None:
+                                add_target(id=block.id, target_type="image", anchor=block.anchor, **common)
                         elif isinstance(block, ChartBlock):
                             add_target(id=block.id, target_type="chart", anchor=block.anchor, **common)
                         elif isinstance(block, TableBlock):

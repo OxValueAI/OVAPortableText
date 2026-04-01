@@ -15,6 +15,7 @@ from .registry import (
     GenericChartDataset,
     FootnoteEntry,
     GlossaryEntry,
+    CellBlockElement,
     GridTableCell,
     GridTableDataset,
     GridTableRow,
@@ -30,9 +31,12 @@ from .registry import (
     PieSlice,
     RecordTableDataset,
     TableColumn,
+    TableColumnSpec,
+    TableColumnWidth,
+    TableLayout,
 )
 from .section import NumberingMode, Section
-from .theme import ThemeConfig
+from .theme import BlockLayout, LengthValue, ThemeConfig
 from .text import (
     AnnotationMarkDef,
     LinkMarkDef,
@@ -90,8 +94,22 @@ def annotation_def(*, key: str, type: str, data: dict[str, Any] | None = None) -
     return AnnotationMarkDef(_key=key, _type=type, data=data or {})
 
 
-def paragraph(*parts: str | TextChild, style: TextStyle = "normal", mark_defs: list[MarkDef] | None = None, list_item: ListItemStyle | None = None, level: int | None = None) -> TextBlock:
-    return TextBlock.from_parts(*parts, style=style, mark_defs=mark_defs, list_item=list_item, level=level)
+def paragraph(
+    *parts: str | TextChild,
+    style: TextStyle = "normal",
+    mark_defs: list[MarkDef] | None = None,
+    list_item: ListItemStyle | None = None,
+    level: int | None = None,
+    layout: BlockLayout | dict[str, Any] | None = None,
+) -> TextBlock:
+    return TextBlock.from_parts(
+        *parts,
+        style=style,
+        mark_defs=mark_defs,
+        list_item=list_item,
+        level=level,
+        layout=layout,
+    )
 
 
 def bullet_item(*parts: str | TextChild, level: int = 1, mark_defs: list[MarkDef] | None = None) -> TextBlock:
@@ -134,7 +152,7 @@ def inline_math(latex: str) -> InlineMath:
     return InlineMath(latex=latex)
 
 
-def image_block(*, id: str, image_ref: str, anchor: str | None = None) -> ImageBlock:
+def image_block(*, image_ref: str, id: str | None = None, anchor: str | None = None) -> ImageBlock:
     return ImageBlock(id=id, anchor=anchor, imageRef=image_ref)
 
 
@@ -257,19 +275,54 @@ def attachment_asset(*, id: str, src: str | None = None, file_name: str | None =
     return AttachmentAsset(id=id, src=src, fileName=file_name, description=description, label=label, anchor=anchor, meta=meta or {}, **extra)
 
 
+def length_em(value: int | float) -> LengthValue:
+    return LengthValue(unit="em", value=value)
+
+
+def length_pt(value: int | float) -> LengthValue:
+    return LengthValue(unit="pt", value=value)
+
+
+def block_layout(
+    *,
+    text_align: str | None = None,
+    first_line_indent: LengthValue | dict[str, Any] | None = None,
+    space_before: LengthValue | dict[str, Any] | None = None,
+    space_after: LengthValue | dict[str, Any] | None = None,
+) -> BlockLayout:
+    return BlockLayout(
+        textAlign=text_align,
+        firstLineIndent=first_line_indent,
+        spaceBefore=space_before,
+        spaceAfter=space_after,
+    )
+
+
+def table_column_spec_auto() -> TableColumnSpec:
+    return TableColumnSpec(width=TableColumnWidth(mode="auto"))
+
+
+def table_column_spec_weight(value: int | float) -> TableColumnSpec:
+    return TableColumnSpec(width=TableColumnWidth(mode="weight", value=value))
+
+
+def table_layout(*column_specs: TableColumnSpec) -> TableLayout:
+    return TableLayout(columnSpecs=list(column_specs))
+
+
 def table_column(*, key: str, header: str) -> TableColumn:
     return TableColumn(key=key, header=header)
 
 
-def record_table_dataset(*, id: str, columns: list[TableColumn], rows: list[dict], label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> RecordTableDataset:
-    return RecordTableDataset(id=id, columns=columns, rows=rows, label=label, anchor=anchor, meta=meta or {}, **extra)
+def record_table_dataset(*, id: str, columns: list[TableColumn], rows: list[dict], label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, layout: TableLayout | dict[str, Any] | None = None, **extra) -> RecordTableDataset:
+    return RecordTableDataset(id=id, columns=columns, rows=rows, label=label, anchor=anchor, meta=meta or {}, layout=layout, **extra)
 
 
-def table_dataset(*, id: str, columns: list[TableColumn], rows: list[dict], label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> RecordTableDataset:
-    return record_table_dataset(id=id, columns=columns, rows=rows, label=label, anchor=anchor, meta=meta, **extra)
+def table_dataset(*, id: str, columns: list[TableColumn], rows: list[dict], label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, layout: TableLayout | dict[str, Any] | None = None, **extra) -> RecordTableDataset:
+    return record_table_dataset(id=id, columns=columns, rows=rows, label=label, anchor=anchor, meta=meta, layout=layout, **extra)
 
 
-def grid_table_cell(*, text: str | None = None, blocks: list[TextBlock] | None = None, header: bool = False, col_span: int = 1, row_span: int = 1, align: str | None = None, vertical_align: str | None = None, meta: dict[str, Any] | None = None) -> GridTableCell:
+def grid_table_cell(*, text: str | None = None, blocks: list[CellBlockElement] | None = None, header: bool = False, col_span: int = 1, row_span: int = 1, align: str | None = None, vertical_align: str | None = None, meta: dict[str, Any] | None = None) -> GridTableCell:
     return GridTableCell(text=text, blocks=blocks, header=header, colSpan=col_span, rowSpan=row_span, align=align, verticalAlign=vertical_align, meta=meta or {})
 
 
@@ -277,8 +330,8 @@ def grid_table_row(*cells: GridTableCell) -> GridTableRow:
     return GridTableRow(cells=list(cells))
 
 
-def grid_table_dataset(*, id: str, rows: list[GridTableRow], column_count: int | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> GridTableDataset:
-    return GridTableDataset(id=id, rows=rows, columnCount=column_count, label=label, anchor=anchor, meta=meta or {}, **extra)
+def grid_table_dataset(*, id: str, rows: list[GridTableRow], column_count: int | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, layout: TableLayout | dict[str, Any] | None = None, **extra) -> GridTableDataset:
+    return GridTableDataset(id=id, rows=rows, columnCount=column_count, label=label, anchor=anchor, meta=meta or {}, layout=layout, **extra)
 
 
 def metric_value(*, key: str, value: str | int | float | bool | None, label: str | None = None, unit: str | None = None) -> MetricValue:

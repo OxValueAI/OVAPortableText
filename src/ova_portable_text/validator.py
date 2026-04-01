@@ -1,32 +1,18 @@
 from __future__ import annotations
 
-"""
-Document validation for OVAPortableText.
-OVAPortableText 的文档校验器。
-
-This validator intentionally stays close to the protocol's v1 guidance:
-本校验器刻意贴近协议 v1 的建议：
-- schemaVersion must exist / `schemaVersion` 必填
-- sections/body structure must be valid / `sections` 与 `body` 结构必须合法
-- top-level registries should exist / 顶层 registry 应存在
-- section nesting levels should be self-consistent / section 层级应自洽
-- all references should resolve / 所有引用应能解析
-- formal heading styles should not appear inside content.blocks
-  `content.blocks` 中不应出现正式标题样式
-
-Step 8 improves the *quality* of validation output:
-第 8 步重点提升的是校验输出质量：
-- richer issue context / 更丰富的 issue 上下文
-- better maintenance hints / 更明确的维护提示
-- readable report summaries / 更易读的报告摘要
-"""
-
-from .block_objects import CalloutBlock, ChartBlock, ImageBlock, TableBlock
+from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .content import ALLOWED_TEXT_STYLES, ContentItem, Span, TextBlock
 from .document import Document
 from .exceptions import ValidationReport
 from .inline import CitationRef, FootnoteRef, GlossaryTerm, InlineMath, XRef
-from .registry import BibliographyEntry, FootnoteEntry, GlossaryEntry
+from .registry import (
+    BibliographyEntry,
+    FootnoteEntry,
+    GlossaryEntry,
+    GridTableDataset,
+    ImageLikeAssetBase,
+    RecordTableDataset,
+)
 from .resolver import DocumentResolver, ResolvedTarget
 from .section import Section, SubsectionItem
 
@@ -34,10 +20,6 @@ ALLOWED_DECORATOR_MARKS = {"strong", "em", "underline", "code"}
 
 
 def validate_document(document: Document) -> ValidationReport:
-    """
-    Validate the whole document and return a structured report.
-    校验整份文档，并返回结构化报告。
-    """
     report = ValidationReport()
 
     if not document.schemaVersion:
@@ -46,7 +28,7 @@ def validate_document(document: Document) -> ValidationReport:
             message="`schemaVersion` is required.",
             path="schemaVersion",
             contextType="document",
-            suggestion="Set `schemaVersion` to `report.v1.0` unless you intentionally target another protocol version.",
+            suggestion="Set `schemaVersion` to `report.v1.1` unless you intentionally target another protocol version.",
         )
 
     if not isinstance(document.sections, list):
@@ -58,6 +40,10 @@ def validate_document(document: Document) -> ValidationReport:
             suggestion="Top-level `sections` should always be present, even when empty.",
         )
         return report
+
+    _validate_theme(document, report=report)
+    _validate_assets(document, report=report)
+    _validate_tables(document, report=report)
 
     for index, section in enumerate(document.sections):
         _validate_section(section, path=f"sections[{index}]", parent_level=None, report=report)
@@ -98,14 +84,12 @@ def validate_document(document: Document) -> ValidationReport:
     for index, section in enumerate(document.sections):
         _validate_section_references(section, path=f"sections[{index}]", resolver=resolver, report=report)
 
+    _validate_grid_table_dataset_references(document, resolver=resolver, report=report)
+
     return report
 
 
 def assert_valid_document(document: Document) -> Document:
-    """
-    Validate and raise on errors.
-    校验文档；若存在 error 则抛错。
-    """
     validate_document(document).raise_for_errors()
     return document
 
@@ -119,15 +103,6 @@ def _ctx(
     suggestion: str | None = None,
     location: str | None = None,
 ) -> dict[str, str | None]:
-    """
-    Build common context kwargs for `ValidationReport.add_issue()`.
-    为 `ValidationReport.add_issue()` 构建通用上下文参数。
-
-    This helper keeps the validator code readable while still attaching
-    rich issue context.
-    这个 helper 的意义是：
-    既让校验器代码保持可读，又能给 issue 挂上较丰富的上下文信息。
-    """
     return {
         "location": location,
         "contextType": context_type,
@@ -140,10 +115,6 @@ def _ctx(
 
 
 def _ctx_from_target(target: ResolvedTarget, *, suggestion: str | None = None) -> dict[str, str | None]:
-    """
-    Build context kwargs from a resolved target.
-    根据 resolver target 构建上下文参数。
-    """
     return {
         "location": target.location,
         "contextType": target.targetType,
@@ -153,6 +124,107 @@ def _ctx_from_target(target: ResolvedTarget, *, suggestion: str | None = None) -
         "sectionTitle": target.sectionTitle,
         "suggestion": suggestion,
     }
+
+
+def _validate_theme(document: Document, *, report: ValidationReport) -> None:
+    for style_key in document.theme.blockStyleDefaults.keys():
+        if style_key not in ALLOWED_TEXT_STYLES:
+            report.add_issue(
+                code="invalid_theme_block_style_default",
+                message=f"Unsupported `theme.blockStyleDefaults` key: {style_key!r}",
+                path=f"theme.blockStyleDefaults.{style_key}",
+                contextType="theme",
+                suggestion="Use only protocol-approved block styles as keys.",
+            )
+
+
+def _validate_image_like_asset(asset: ImageLikeAssetBase, *, path: str, report: ValidationReport) -> None:
+    if not asset.alt:
+        report.add_issue(
+            code="missing_image_alt",
+            message="Image-like asset is missing `alt` text.",
+            path=f"{path}.alt",
+            severity="warning",
+            contextType="asset",
+            contextId=asset.id,
+            contextAnchor=asset.anchor,
+            location=f"{path}.alt",
+            suggestion="Provide `alt` for accessibility and graceful fallback rendering.",
+        )
+
+
+def _validate_assets(document: Document, *, report: ValidationReport) -> None:
+    for index, asset in enumerate(document.assets.images):
+        _validate_image_like_asset(asset, path=f"assets.images[{index}]", report=report)
+    for index, asset in enumerate(document.assets.logos):
+        _validate_image_like_asset(asset, path=f"assets.logos[{index}]", report=report)
+    for index, asset in enumerate(document.assets.backgrounds):
+        _validate_image_like_asset(asset, path=f"assets.backgrounds[{index}]", report=report)
+    for index, asset in enumerate(document.assets.icons):
+        _validate_image_like_asset(asset, path=f"assets.icons[{index}]", report=report)
+
+
+def _validate_tables(document: Document, *, report: ValidationReport) -> None:
+    for index, table in enumerate(document.datasets.tables):
+        path = f"datasets.tables[{index}]"
+        if isinstance(table, RecordTableDataset):
+            if table.layout is not None and table.layout.columnSpecs:
+                if len(table.layout.columnSpecs) != len(table.columns):
+                    report.add_issue(
+                        code="invalid_record_table_layout_column_count",
+                        message="`layout.columnSpecs` length must match `columns` length for record tables.",
+                        path=f"{path}.layout.columnSpecs",
+                        contextType="table_dataset",
+                        contextId=table.id,
+                        contextAnchor=table.anchor,
+                    )
+        elif isinstance(table, GridTableDataset):
+            if table.layout is not None and table.layout.columnSpecs:
+                if table.columnCount is None:
+                    report.add_issue(
+                        code="missing_grid_column_count_for_layout",
+                        message="`columnCount` is required when `layout.columnSpecs` is present.",
+                        path=f"{path}.columnCount",
+                        contextType="table_dataset",
+                        contextId=table.id,
+                        contextAnchor=table.anchor,
+                    )
+                elif len(table.layout.columnSpecs) != table.columnCount:
+                    report.add_issue(
+                        code="invalid_grid_table_layout_column_count",
+                        message="`layout.columnSpecs` length must match `columnCount` for grid tables.",
+                        path=f"{path}.layout.columnSpecs",
+                        contextType="table_dataset",
+                        contextId=table.id,
+                        contextAnchor=table.anchor,
+                    )
+            for row_index, row in enumerate(table.rows):
+                for cell_index, cell in enumerate(row.cells):
+                    cell_path = f"{path}.rows[{row_index}].cells[{cell_index}]"
+                    if cell.blocks is not None and len(cell.blocks) == 0:
+                        report.add_issue(
+                            code="empty_grid_cell_blocks",
+                            message="Grid cell `blocks` must not be empty.",
+                            path=f"{cell_path}.blocks",
+                            contextType="table_cell",
+                            contextId=table.id,
+                            contextAnchor=table.anchor,
+                        )
+                    for block_index, block in enumerate(cell.blocks or []):
+                        block_path = f"{cell_path}.blocks[{block_index}]"
+                        if isinstance(block, TextBlock):
+                            _validate_text_block_structure(block, path=block_path, section=None, report=report)
+                        elif isinstance(block, ImageBlock):
+                            continue
+                        else:
+                            report.add_issue(
+                                code="unsupported_grid_cell_block_type",
+                                message="Grid cell `blocks` only support `_type='block'` and `_type='image'`.",
+                                path=block_path,
+                                contextType="table_cell",
+                                contextId=table.id,
+                                contextAnchor=table.anchor,
+                            )
 
 
 def _validate_section(section: Section, *, path: str, parent_level: int | None, report: ValidationReport) -> None:
@@ -204,6 +276,16 @@ def _validate_section(section: Section, *, path: str, parent_level: int | None, 
                 block_path = f"{item_path}.blocks[{block_index}]"
                 if isinstance(block, TextBlock):
                     _validate_text_block_structure(block, path=block_path, section=section, report=report)
+                elif isinstance(block, CalloutBlock):
+                    for sub_index, sub_block in enumerate(block.blocks):
+                        _validate_text_block_structure(sub_block, path=f"{block_path}.blocks[{sub_index}]", section=section, report=report)
+                elif isinstance(block, MathBlock) and not block.latex.strip():
+                    report.add_issue(
+                        code="empty_math_block",
+                        message="`math_block.latex` must not be empty.",
+                        path=f"{block_path}.latex",
+                        **_ctx(section=section, context_type="math_block", context_id=block.id, context_anchor=block.anchor, location=f"{block_path}.latex", suggestion="Provide a non-empty LaTeX string."),
+                    )
         elif isinstance(item, SubsectionItem):
             _validate_section(item.section, path=f"{item_path}.section", parent_level=section.level, report=report)
 
@@ -240,6 +322,17 @@ def _validate_text_block_structure(block: TextBlock, *, path: str, section: Sect
             path=f"{path}.level",
             **_ctx(section=section, context_type="text_block", location=f"{path}.level", suggestion="List nesting is 1-based in this package."),
         )
+
+    if block.layout is not None:
+        for field_name in ("firstLineIndent", "spaceBefore", "spaceAfter"):
+            value = getattr(block.layout, field_name)
+            if value is not None and value.value < 0:
+                report.add_issue(
+                    code="invalid_block_layout_length",
+                    message=f"`layout.{field_name}` must be >= 0.",
+                    path=f"{path}.layout.{field_name}.value",
+                    **_ctx(section=section, context_type="text_block", location=f"{path}.layout.{field_name}.value"),
+                )
 
     mark_def_keys: set[str] = set()
     for mark_def_index, mark_def in enumerate(block.markDefs):
@@ -425,7 +518,33 @@ def _validate_section_references(section: Section, *, path: str, resolver: Docum
             _validate_section_references(item.section, path=f"{item_path}.section", resolver=resolver, report=report)
 
 
-def _validate_text_block_inline_references(block: TextBlock, *, path: str, section: Section, resolver: DocumentResolver, report: ValidationReport) -> None:
+def _validate_grid_table_dataset_references(document: Document, *, resolver: DocumentResolver, report: ValidationReport) -> None:
+    for table_index, table in enumerate(document.datasets.tables):
+        if not isinstance(table, GridTableDataset):
+            continue
+        table_path = f"datasets.tables[{table_index}]"
+        for row_index, row in enumerate(table.rows):
+            for cell_index, cell in enumerate(row.cells):
+                cell_path = f"{table_path}.rows[{row_index}].cells[{cell_index}]"
+                for block_index, block in enumerate(cell.blocks or []):
+                    block_path = f"{cell_path}.blocks[{block_index}]"
+                    if isinstance(block, TextBlock):
+                        _validate_text_block_inline_references(block, path=block_path, section=None, resolver=resolver, report=report)
+                    elif isinstance(block, ImageBlock):
+                        if resolver.resolve_xref(target_type="image_asset", target_id=block.imageRef) is None:
+                            report.add_issue(
+                                code="unresolved_grid_cell_image_ref",
+                                message=f"Grid cell `imageRef` cannot be resolved: {block.imageRef!r}",
+                                path=f"{block_path}.imageRef",
+                                contextType="image",
+                                contextId=block.id,
+                                contextAnchor=block.anchor,
+                                location=f"{block_path}.imageRef",
+                                suggestion="Add the corresponding entry to `assets.images`, or fix the referenced id.",
+                            )
+
+
+def _validate_text_block_inline_references(block: TextBlock, *, path: str, section: Section | None, resolver: DocumentResolver, report: ValidationReport) -> None:
     for child_index, child in enumerate(block.children):
         child_path = f"{path}.children[{child_index}]"
         if isinstance(child, XRef):

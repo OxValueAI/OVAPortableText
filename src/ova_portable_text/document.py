@@ -104,7 +104,7 @@ class Document(OvaBaseModel):
       顶层 registry 即使为空也应存在
     """
 
-    schemaVersion: str = "report.v1.0"
+    schemaVersion: str = "report.v1.1"
     strict_ids: bool = Field(default=False, exclude=True, repr=False)
     meta: DocumentMeta = Field(default_factory=DocumentMeta)
     theme: ThemeConfig = Field(default_factory=ThemeConfig)
@@ -130,7 +130,7 @@ class Document(OvaBaseModel):
         for item in section.body:
             if isinstance(item, ContentItem):
                 for block in item.blocks:
-                    if isinstance(block, (ImageBlock, ChartBlock, TableBlock, MathBlock, CalloutBlock)):
+                    if isinstance(block, (ImageBlock, ChartBlock, TableBlock, MathBlock, CalloutBlock)) and block.id is not None:
                         yield block.id
             elif isinstance(item, SubsectionItem):
                 yield from self._iter_section_target_ids(item.section)

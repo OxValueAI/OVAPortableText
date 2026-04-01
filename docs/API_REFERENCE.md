@@ -1,10 +1,7 @@
 # API Reference / API 参考
 
-This page is a practical API map for the public surface of OVAPortableText.  
-本文档是 OVAPortableText 公开接口的实用型 API 地图。
-
-It is intentionally not a generated full symbol dump.  
-它刻意不是自动生成的“全量符号索引”。
+This page is a practical map of the public API in OVAPortableText `v0.2.0`, aligned to `report.v1.1`.
+本文档是 OVAPortableText `v0.2.0` 的实用 API 地图，对齐 `report.v1.1`。
 
 ---
 
@@ -13,19 +10,21 @@ It is intentionally not a generated full symbol dump.
 ### Document creation / 文档创建
 
 - `create_document(...)`
-- `document(...)`  
-  Alias of `create_document`. / `create_document` 的别名。
+- `document(...)` — alias of `create_document`
 - `Document.from_dict(...)`
 - `Document.from_json(...)`
 - `Document.load_json(...)`
 
-Typical arguments / 常用参数：
+Default schema version:
+
+- `Document.schemaVersion == "report.v1.1"`
+
+Common arguments / 常用参数：
 
 - `title`
-- `language` → current package validation: `"zh"` or `"en"`  
-  当前包校验：`"zh"` 或 `"en"`
-- `documentType` → current package validation: `"valuationReport"`  
-  当前包校验：`"valuationReport"`
+- `language`
+- `documentType`
+- `theme`
 - `strict_ids=False`
 
 ---
@@ -47,9 +46,56 @@ Body block objects / 正文块对象：
 - `MathBlock`
 - `CalloutBlock`
 
+Important v1.1 note / v1.1 重点：
+
+- `ImageBlock(imageRef="...")` is valid
+- `ImageBlock.id` and `ImageBlock.anchor` are optional
+- `imageRef` is required
+
 ---
 
-## 3. Text helpers / 文本层 helper
+## 3. Theme and block layout / theme 与块级 layout
+
+### Theme models / theme 模型
+
+- `ThemeConfig`
+- `BlockStyleDefault`
+- `BlockLayout`
+- `LengthValue`
+
+### Theme helpers / theme helper
+
+- `block_layout(...)`
+- `length_em(value)`
+- `length_pt(value)`
+
+### v1.1 formal fields / v1.1 正式字段
+
+- `theme.blockStyleDefaults`
+- `TextBlock.layout`
+
+Supported `BlockLayout` fields:
+
+- `textAlign`
+- `firstLineIndent`
+- `spaceBefore`
+- `spaceAfter`
+
+Supported `textAlign` values:
+
+- `left`
+- `center`
+- `right`
+- `justify`
+
+Supported length units:
+
+- `em`
+- `pt`
+
+---
+
+## 4. Text helpers / 文本层 helper
 
 ### Inline text constructors / 行内文本构造
 
@@ -63,16 +109,11 @@ Body block objects / 正文块对象：
 ### Mark-definition helpers / markDef helper
 
 - `link_def(key=..., href=...)`
-- `xref_def(key=..., target_id=..., target_type=...)`
-- `citation_ref_def(key=..., target_id=...)`
-- `footnote_ref_def(key=..., target_id=...)`
-- `glossary_term_def(key=..., target_id=...)`
-- `inline_math_def(key=..., latex=...)`
 - `annotation_def(key=..., type=..., data=...)`
 
 ### Block constructors / 文本块构造
 
-- `paragraph(*parts, style="normal", mark_defs=None, list_item=None, level=None)`
+- `paragraph(*parts, style="normal", mark_defs=None, list_item=None, level=None, layout=None)`
 - `bullet_item(*parts, level=1, mark_defs=None)`
 - `number_item(*parts, level=1, mark_defs=None)`
 - `blocks_from_items(...)`
@@ -80,7 +121,7 @@ Body block objects / 正文块对象：
 ### Inline object helpers / 行内对象 helper
 
 - `hard_break()`
-- `xref(target_id=..., target_type=None)`
+- `xref(target_type=..., target_id=...)`
 - `citation_ref(target_id)`
 - `footnote_ref(target_id)`
 - `glossary_term(target_id)`
@@ -88,7 +129,7 @@ Body block objects / 正文块对象：
 
 ---
 
-## 4. Section helpers / Section 级 helper
+## 5. Section helpers / Section 级 helper
 
 ### Create sections / 创建章节
 
@@ -100,13 +141,16 @@ Body block objects / 正文块对象：
 
 ### Append text / 追加文本
 
-- `Section.append_paragraph(...)`
+- `Section.append_paragraph(..., layout=None)`
 - `Section.append_paragraphs(...)`
 - `Section.append_lead(...)`
 - `Section.append_blockquote(...)`
 - `Section.append_subheading(...)`
 - `Section.append_smallprint(...)`
-- `Section.append_quote_source(...)`
+- `Section.append_caption(...)`
+- `Section.append_figure_caption(...)`
+- `Section.append_table_caption(...)`
+- `Section.append_equation_caption(...)`
 
 ### Append lists / 追加列表
 
@@ -120,24 +164,25 @@ Body block objects / 正文块对象：
 - `Section.append_to_last_content(block)`
 - `Section.append_blocks_to_last_content(*blocks)`
 - `Section.append_text_block_to_last_content(block)`
-- `Section.append_paragraph_to_last_content(...)`
-
-Use these when multiple blocks should remain in the same protocol `content` item.  
-当多段内容应继续停留在同一个协议 `content` item 中时，使用这组 helper。
+- `Section.append_paragraph_to_last_content(..., layout=None)`
 
 ### Append block objects / 追加块对象
 
 - `Section.append_block(...)`
 - `Section.append_blocks(...)`
 - `Section.append_callout(...)`
-- `Section.append_image_with_caption(...)`
+- `Section.append_image(image_ref=..., id=None, anchor=None)`
+- `Section.append_chart(...)`
+- `Section.append_table(...)`
+- `Section.append_math(...)`
+- `Section.append_image_with_caption(image_ref=..., id=None, caption=...)`
 - `Section.append_chart_with_caption(...)`
 - `Section.append_table_with_caption(...)`
 - `Section.append_math_with_caption(...)`
 
 ---
 
-## 5. Registry helpers / registry helper
+## 6. Registry helpers / registry helper
 
 ### Assets / 资源
 
@@ -153,25 +198,27 @@ Use these when multiple blocks should remain in the same protocol `content` item
 ### Datasets / 数据集
 
 - `table_column(...)`
-- `table_dataset(...)` → returns `RecordTableDataset`  
-  返回 `RecordTableDataset`
+- `table_dataset(...)` → returns `RecordTableDataset`
+- `record_table_dataset(...)`
 - `grid_table_cell(...)`
 - `grid_table_row(...)`
-- `grid_table_dataset(...)` → returns `GridTableDataset`  
-  返回 `GridTableDataset`
+- `grid_table_dataset(...)` → returns `GridTableDataset`
+- `table_column_spec_auto()`
+- `table_column_spec_weight(value)`
+- `table_layout(*column_specs)`
 - `pie_slice(...)`
 - `pie_chart_dataset(...)`
 - `pie_chart_from_parallel_arrays(...)`
 - `metric_value(...)`
 - `metric_dataset(...)`
 
-### Registry content / 引用型内容
+### Registry-backed block instances / 正文引用实例
 
-- `image_block(...)`
-- `chart_block(...)`
-- `table_block(...)`
-- `math_block(...)`
-- `callout(...)`
+- `image_block(image_ref=..., id=None, anchor=None)`
+- `chart_block(id=..., chart_ref=..., anchor=None)`
+- `table_block(id=..., table_ref=..., anchor=None)`
+- `math_block(id=..., latex=..., anchor=None)`
+- `callout(id=..., blocks=None, anchor=None)`
 
 ### Bibliography / footnotes / glossary
 
@@ -181,7 +228,7 @@ Use these when multiple blocks should remain in the same protocol `content` item
 
 ---
 
-## 6. Main registry models / 主要 registry 模型
+## 7. Main registry models / 主要 registry 模型
 
 ### Assets / 资源模型
 
@@ -201,9 +248,11 @@ Use these when multiple blocks should remain in the same protocol `content` item
 - `GridTableDataset`
 - `GridTableRow`
 - `GridTableCell`
-- `TableDataset`  
-  Discriminated union of `record | grid`. / `record | grid` 判别联合类型。
+- `TableDataset`
 - `TableColumn`
+- `TableLayout`
+- `TableColumnSpec`
+- `TableColumnWidth`
 - `PieChartDataset`
 - `PieSlice`
 - `MetricDataset`
@@ -218,7 +267,44 @@ Use these when multiple blocks should remain in the same protocol `content` item
 
 ---
 
-## 7. Validation / 校验
+## 8. v1.1 table notes / v1.1 表格说明
+
+### Table-level layout / 表级 layout
+
+Both record and grid tables now support:
+
+- `layout.columnSpecs[]`
+
+Width modes:
+
+- `auto`
+- `weight`
+
+Rules:
+
+- `mode="auto"` → no `value`
+- `mode="weight"` → `value > 0`
+- `weight` is relative weight, not percent
+
+### Grid cell blocks / grid 单元格 blocks
+
+`GridTableCell.blocks` is now a restricted block array.
+
+Currently supported block types:
+
+- `_type="block"`
+- `_type="image"`
+
+Not supported in cell blocks:
+
+- `chart`
+- `table`
+- `math_block`
+- `callout`
+
+---
+
+## 9. Validation / 校验
 
 - `Document.validate()`
 - `Document.assert_valid()`
@@ -236,81 +322,32 @@ print(validation.to_text())
 report.assert_valid()
 ```
 
+Validator additions relevant to v1.1:
+
+- checks `theme.blockStyleDefaults` keys
+- checks `TextBlock.layout`
+- checks table `layout.columnSpecs`
+- checks grid cell image refs
+- warns when image-like assets omit `alt`
+
 ---
 
-## 8. Resolver / 解析器
+## 10. Resolver / 解析器
 
 - `Document.build_resolver()`
 - `DocumentResolver.get(...)`
-- `DocumentResolver.get_by_id(...)`
 - `DocumentResolver.get_by_anchor(...)`
 - `DocumentResolver.resolve_xref(...)`
 - `DocumentResolver.debug_summary()`
 
-Use the resolver when you need to inspect what is globally addressable in the document.  
+Use the resolver when you need to inspect what is globally addressable in the document.
 当你需要检查文档中哪些对象在全局可解析时，使用 resolver。
 
 ---
 
-## 9. Numbering / 编号
+## 11. Numbering / 编号
 
 - `Document.build_numbering()`
 - `NumberingConfig`
 - `DocumentNumbering`
 - `NumberedTarget`
-- `Section.numbering`
-- `NumberingMode = Literal["auto", "none", "manual"]`
-
----
-
-## 10. Export and round-trip / 导出与回转
-
-- `Document.to_dict(exclude_none=True)`
-- `Document.to_json(indent=2, exclude_none=True)`
-- `Document.save_json(path, indent=2, exclude_none=True)`
-- `Document.from_dict(data)`
-- `Document.from_json(text)`
-- `Document.load_json(path)`
-
----
-
-## 11. Package-level enums and constrained values / 包内枚举与约束值
-
-### Text styles / 文本样式
-
-- `normal`
-- `blockquote`
-- `caption`
-- `figure_caption`
-- `table_caption`
-- `equation_caption`
-- `smallprint`
-- `lead`
-- `quote_source`
-- `subheading`
-
-### Decorator marks / 装饰 mark
-
-- `strong`
-- `em`
-- `underline`
-- `code`
-
-### List styles / 列表类型
-
-- `bullet`
-- `number`
-
-### Image source kinds / 图片来源类型
-
-- `url`
-- `embedded`
-
-### Current package metadata validation / 当前包对 meta 的校验
-
-- `language` / `locale`: `"zh"` or `"en"`
-- `documentType`: `"valuationReport"`
-- `confidentiality`: `"public" | "user" | "internal" | "confidential"`
-- `reportType`: `"startupCompany" | "innovationTeam" | "patent" | "loan"`
-- `date`: `YYYY-MM-DD`
-- `generatedAt`: RFC 3339 / ISO 8601 datetime string

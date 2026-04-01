@@ -47,6 +47,8 @@ If you are new to the package, read in this order:
   URL and embedded image-source models. / URL 与内嵌 imageSource 模型。
 - `grid_table_demo.py`  
   `record` and `grid` table datasets, including duplicate headers and irregular layouts. / `record` 与 `grid` 表格模式。
+- `v11_layout_and_cell_image_demo.py`  
+  Demonstrates `theme.blockStyleDefaults`, block `layout`, weighted table columns, and grid-cell images. / 演示 `theme.blockStyleDefaults`、块级 `layout`、表格列权重和单元格图片。
 - `extended_registries_demo.py`  
   Logos, backgrounds, icons, attachments, and metric datasets. / logo、背景、图标、附件和指标数据集。
 
