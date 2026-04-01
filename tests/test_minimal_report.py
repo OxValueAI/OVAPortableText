@@ -9,7 +9,7 @@ def test_minimal_report_structure():
 
     data = report.to_dict()
 
-    assert data["schemaVersion"] == "report.v1.0"
+    assert data["schemaVersion"] == "report.v1.1"
     assert data["meta"]["title"] == "Demo"
     assert data["sections"][0]["id"] == "sec-intro"
     assert data["sections"][0]["body"][0]["itemType"] == "content"

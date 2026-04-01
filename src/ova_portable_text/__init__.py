@@ -22,6 +22,7 @@ from .content import (
 from .document import Document, DocumentMeta
 from .exceptions import DocumentValidationError, ValidationIssue, ValidationReport
 from .helpers import (
+    block_layout,
     annotation_def,
     attachment_asset,
     background_asset,
@@ -31,6 +32,8 @@ from .helpers import (
     bibliography_entry,
     blocks_from_items,
     bullet_item,
+    length_em,
+    length_pt,
     callout,
     chart_block,
     citation_ref,
@@ -76,6 +79,9 @@ from .helpers import (
     span,
     strong,
     table_block,
+    table_column_spec_auto,
+    table_column_spec_weight,
+    table_layout,
     table_column,
     table_dataset,
     underline,
@@ -110,11 +116,14 @@ from .registry import (
     RecordTableDataset,
     RegistryEntryBase,
     TableColumn,
+    TableColumnSpec,
+    TableColumnWidth,
     TableDataset,
+    TableLayout,
 )
 from .resolver import DocumentResolver, ResolvedTarget
 from .section import NumberingMode, Section
-from .theme import ThemeConfig
+from .theme import BlockLayout, BlockStyleDefault, LengthValue, ThemeConfig
 from .validator import assert_valid_document, validate_document
 from .version import __version__
 

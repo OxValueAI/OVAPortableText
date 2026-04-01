@@ -31,6 +31,7 @@ from .base import OvaBaseModel
 from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .content import BlockElement, ContentItem, MarkDef, TextBlock, TextChild, TextStyle
 from .text import ListItemStyle
+from .theme import BlockLayout
 
 
 NumberingMode: TypeAlias = Literal["auto", "none", "manual"]
@@ -141,13 +142,14 @@ class Section(OvaBaseModel):
         *parts: str | TextChild,
         style: TextStyle = "normal",
         mark_defs: list[MarkDef] | None = None,
+        layout: BlockLayout | dict | None = None,
     ) -> "Section":
         """
         Append one paragraph-style text block to the current trailing `ContentItem`.
         把一个段落型文本块追加到当前末尾的 `ContentItem` 中。
         """
         return self.append_text_block_to_last_content(
-            TextBlock.from_parts(*parts, style=style, mark_defs=mark_defs)
+            TextBlock.from_parts(*parts, style=style, mark_defs=mark_defs, layout=layout)
         )
 
     def append_block(self, block: BlockElement) -> "Section":
@@ -191,6 +193,7 @@ class Section(OvaBaseModel):
         *parts: str | TextChild,
         style: TextStyle = "normal",
         mark_defs: list[MarkDef] | None = None,
+        layout: BlockLayout | dict | None = None,
     ) -> "Section":
         """
         Append one paragraph-style text block.
@@ -199,7 +202,7 @@ class Section(OvaBaseModel):
         self.body.append(
             ContentItem(
                 blocks=[
-                    TextBlock.from_parts(*parts, style=style, mark_defs=mark_defs)
+                    TextBlock.from_parts(*parts, style=style, mark_defs=mark_defs, layout=layout)
                 ]
             )
         )
@@ -336,7 +339,7 @@ class Section(OvaBaseModel):
         """
         return self.append_paragraph(*parts, style="equation_caption", mark_defs=mark_defs)
 
-    def append_image(self, *, id: str, image_ref: str, anchor: str | None = None) -> "Section":
+    def append_image(self, *, image_ref: str, id: str | None = None, anchor: str | None = None) -> "Section":
         """
         Create and append an image block in one step.
         一步创建并追加一个 image 块。
@@ -374,8 +377,8 @@ class Section(OvaBaseModel):
     def append_image_with_caption(
         self,
         *,
-        id: str,
         image_ref: str,
+        id: str | None = None,
         caption: str,
         anchor: str | None = None,
     ) -> "Section":
