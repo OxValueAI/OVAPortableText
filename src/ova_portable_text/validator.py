@@ -9,8 +9,10 @@ from .registry import (
     BibliographyEntry,
     FootnoteEntry,
     GlossaryEntry,
+    DoughnutChartDataset,
     GridTableDataset,
     ImageLikeAssetBase,
+    PieChartDataset,
     RecordTableDataset,
 )
 from .resolver import DocumentResolver, ResolvedTarget
@@ -28,7 +30,7 @@ def validate_document(document: Document) -> ValidationReport:
             message="`schemaVersion` is required.",
             path="schemaVersion",
             contextType="document",
-            suggestion="Set `schemaVersion` to `report.v1.1` unless you intentionally target another protocol version.",
+            suggestion="Set `schemaVersion` to `report.v1.2` unless you intentionally target another protocol version.",
         )
 
     if not isinstance(document.sections, list):
@@ -44,6 +46,7 @@ def validate_document(document: Document) -> ValidationReport:
     _validate_theme(document, report=report)
     _validate_assets(document, report=report)
     _validate_tables(document, report=report)
+    _validate_charts(document, report=report)
 
     for index, section in enumerate(document.sections):
         _validate_section(section, path=f"sections[{index}]", parent_level=None, report=report)
@@ -214,17 +217,77 @@ def _validate_tables(document: Document, *, report: ValidationReport) -> None:
                         block_path = f"{cell_path}.blocks[{block_index}]"
                         if isinstance(block, TextBlock):
                             _validate_text_block_structure(block, path=block_path, section=None, report=report)
-                        elif isinstance(block, ImageBlock):
+                        elif isinstance(block, (ImageBlock, ChartBlock)):
                             continue
                         else:
                             report.add_issue(
                                 code="unsupported_grid_cell_block_type",
-                                message="Grid cell `blocks` only support `_type='block'` and `_type='image'`.",
+                                message="Grid cell `blocks` only support `_type='block'`, `_type='image'`, and `_type='chart'`.",
                                 path=block_path,
                                 contextType="table_cell",
                                 contextId=table.id,
                                 contextAnchor=table.anchor,
                             )
+
+
+def _validate_charts(document: Document, *, report: ValidationReport) -> None:
+    for index, chart in enumerate(document.datasets.charts):
+        path = f"datasets.charts[{index}]"
+        if isinstance(chart, PieChartDataset):
+            seen: set[str] = set()
+            for slice_index, item in enumerate(chart.slices):
+                if item.key in seen:
+                    report.add_issue(
+                        code="duplicate_pie_slice_key",
+                        message=f"Duplicate pie slice key: {item.key!r}",
+                        path=f"{path}.slices[{slice_index}].key",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+                seen.add(item.key)
+        elif isinstance(chart, DoughnutChartDataset):
+            seen: set[str] = set()
+            total_value = 0
+            if chart.total <= 0:
+                report.add_issue(
+                    code="invalid_doughnut_total",
+                    message="`doughnut.total` must be > 0.",
+                    path=f"{path}.total",
+                    contextType="chart_dataset",
+                    contextId=chart.id,
+                    contextAnchor=chart.anchor,
+                )
+            for slice_index, item in enumerate(chart.slices):
+                if item.key in seen:
+                    report.add_issue(
+                        code="duplicate_doughnut_slice_key",
+                        message=f"Duplicate doughnut slice key: {item.key!r}",
+                        path=f"{path}.slices[{slice_index}].key",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+                seen.add(item.key)
+                if item.value < 0:
+                    report.add_issue(
+                        code="invalid_doughnut_slice_value",
+                        message="`doughnut.slices[].value` must be >= 0.",
+                        path=f"{path}.slices[{slice_index}].value",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+                total_value += item.value
+            if total_value > chart.total:
+                report.add_issue(
+                    code="invalid_doughnut_sum",
+                    message="`sum(doughnut.slices[].value)` must be <= `total`.",
+                    path=f"{path}.slices",
+                    contextType="chart_dataset",
+                    contextId=chart.id,
+                    contextAnchor=chart.anchor,
+                )
 
 
 def _validate_section(section: Section, *, path: str, parent_level: int | None, report: ValidationReport) -> None:
@@ -252,6 +315,15 @@ def _validate_section(section: Section, *, path: str, parent_level: int | None, 
             path=f"{path}.level",
             **_ctx(section=section, context_type="section", context_id=section.id, context_anchor=section.anchor, location=f"{path}.level", suggestion="Keep formal subsections strictly aligned with the section tree, instead of using heading-like text styles."),
         )
+
+    if section.presentation is not None and section.presentation.titleBlockStyle is not None:
+        if section.presentation.titleBlockStyle not in ALLOWED_TEXT_STYLES:
+            report.add_issue(
+                code="invalid_section_title_block_style",
+                message=f"Unsupported `presentation.titleBlockStyle`: {section.presentation.titleBlockStyle!r}",
+                path=f"{path}.presentation.titleBlockStyle",
+                **_ctx(section=section, context_type="section", context_id=section.id, context_anchor=section.anchor, location=f"{path}.presentation.titleBlockStyle", suggestion="Use one of the protocol-approved text styles for titleBlockStyle, or omit it."),
+            )
 
     for body_index, item in enumerate(section.body):
         item_path = f"{path}.body[{body_index}]"
@@ -541,6 +613,18 @@ def _validate_grid_table_dataset_references(document: Document, *, resolver: Doc
                                 contextAnchor=block.anchor,
                                 location=f"{block_path}.imageRef",
                                 suggestion="Add the corresponding entry to `assets.images`, or fix the referenced id.",
+                            )
+                    elif isinstance(block, ChartBlock):
+                        if resolver.resolve_xref(target_type="chart_dataset", target_id=block.chartRef) is None:
+                            report.add_issue(
+                                code="unresolved_grid_cell_chart_ref",
+                                message=f"Grid cell `chartRef` cannot be resolved: {block.chartRef!r}",
+                                path=f"{block_path}.chartRef",
+                                contextType="chart",
+                                contextId=block.id,
+                                contextAnchor=block.anchor,
+                                location=f"{block_path}.chartRef",
+                                suggestion="Add the corresponding entry to `datasets.charts`, or fix the referenced id.",
                             )
 
 

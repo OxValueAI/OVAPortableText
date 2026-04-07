@@ -36,6 +36,7 @@ from .helpers import (
     length_pt,
     callout,
     chart_block,
+    doughnut_chart_dataset,
     citation_ref,
     code_span,
     create_document,
@@ -97,6 +98,7 @@ from .registry import (
     ChartDataset,
     DatasetsRegistry,
     FootnoteEntry,
+    DoughnutChartDataset,
     GenericChartDataset,
     GlossaryEntry,
     GridTableCell,
@@ -122,7 +124,14 @@ from .registry import (
     TableLayout,
 )
 from .resolver import DocumentResolver, ResolvedTarget
-from .section import NumberingMode, Section
+from .section import (
+    NumberingMode,
+    Section,
+    SectionNavigation,
+    SectionPagination,
+    SectionPresentation,
+    SectionRole,
+)
 from .theme import BlockLayout, BlockStyleDefault, LengthValue, ThemeConfig
 from .validator import assert_valid_document, validate_document
 from .version import __version__

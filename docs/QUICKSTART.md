@@ -50,8 +50,8 @@ What happens here / 这里发生了什么：
 
 ## 3. Add registry-backed content / 添加引用型内容
 
-The protocol separates top-level registries from body instances. In `report.v1.1`, image instances may omit `id`, and text blocks can carry `layout`.  
-协议把“顶层 registry”与“正文实例”分开处理。在 `report.v1.1` 中，图片实例可以省略 `id`，文本块还可以携带 `layout`。
+The protocol separates top-level registries from body instances. In `report.v1.2`, image / chart / table / math instances may omit instance `id` where the protocol allows it, text blocks can carry `layout`, sections can carry `sectionRole / navigation / pagination / presentation`, and grid cells can now contain charts.  
+协议把“顶层 registry”与“正文实例”分开处理。在 `report.v1.2` 中，协议允许的图片 / 图表 / 表格 / 公式实例都可以省略实例 `id`，文本块可携带 `layout`，section 可携带 `sectionRole / navigation / pagination / presentation`，grid 单元格现在还可以放图表。
 
 ### Example / 示例
 

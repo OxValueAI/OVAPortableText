@@ -12,6 +12,7 @@ from .registry import (
     AttachmentAsset,
     BackgroundAsset,
     BibliographyEntry,
+    DoughnutChartDataset,
     GenericChartDataset,
     FootnoteEntry,
     GlossaryEntry,
@@ -35,7 +36,14 @@ from .registry import (
     TableColumnWidth,
     TableLayout,
 )
-from .section import NumberingMode, Section
+from .section import (
+    NumberingMode,
+    Section,
+    SectionNavigation,
+    SectionPagination,
+    SectionPresentation,
+    SectionRole,
+)
 from .theme import BlockLayout, LengthValue, ThemeConfig
 from .text import (
     AnnotationMarkDef,
@@ -58,8 +66,29 @@ def create_document(*, title: str | None = None, language: str | None = None, th
 document = create_document
 
 
-def section(*, id: str, level: int, title: str, numbering: NumberingMode = "auto", anchor: str | None = None) -> Section:
-    return Section(id=id, level=level, title=title, numbering=numbering, anchor=anchor)
+def section(
+    *,
+    id: str,
+    level: int,
+    title: str,
+    numbering: NumberingMode = "auto",
+    anchor: str | None = None,
+    section_role: SectionRole | None = None,
+    navigation: SectionNavigation | dict[str, Any] | None = None,
+    pagination: SectionPagination | dict[str, Any] | None = None,
+    presentation: SectionPresentation | dict[str, Any] | None = None,
+) -> Section:
+    return Section(
+        id=id,
+        level=level,
+        title=title,
+        numbering=numbering,
+        anchor=anchor,
+        sectionRole=section_role,
+        navigation=navigation,
+        pagination=pagination,
+        presentation=presentation,
+    )
 
 
 def span(text: str, *, marks: list[str] | None = None) -> Span:
@@ -348,6 +377,29 @@ def pie_slice(*, key: str, value: int | float, en: str | None = None, zh: str | 
 
 def pie_chart_dataset(*, id: str, slices: list[PieSlice], label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, value_unit: str | None = None) -> PieChartDataset:
     return PieChartDataset(id=id, slices=slices, label=label, anchor=anchor, meta=meta or {}, valueUnit=value_unit)
+
+
+def doughnut_chart_dataset(
+    *,
+    id: str,
+    slices: list[PieSlice],
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    value_unit: str | None = None,
+    total: int | float = 100,
+    show_remainder_track: bool = True,
+) -> DoughnutChartDataset:
+    return DoughnutChartDataset(
+        id=id,
+        slices=slices,
+        label=label,
+        anchor=anchor,
+        meta=meta or {},
+        valueUnit=value_unit,
+        total=total,
+        showRemainderTrack=show_remainder_track,
+    )
 
 
 def chart_dataset(*, id: str, chart_type: str, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> GenericChartDataset:

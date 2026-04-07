@@ -1,7 +1,7 @@
 # API Reference / API 参考
 
-This page is a practical map of the public API in OVAPortableText `v0.2.0`, aligned to `report.v1.1`.
-本文档是 OVAPortableText `v0.2.0` 的实用 API 地图，对齐 `report.v1.1`。
+This page is a practical map of the public API in OVAPortableText `v0.3.0`, aligned to `report.v1.2`.
+本文档是 OVAPortableText `v0.3.0` 的实用 API 地图，对齐 `report.v1.2`。
 
 ---
 
@@ -17,7 +17,7 @@ This page is a practical map of the public API in OVAPortableText `v0.2.0`, alig
 
 Default schema version:
 
-- `Document.schemaVersion == "report.v1.1"`
+- `Document.schemaVersion == "report.v1.2"`
 
 Common arguments / 常用参数：
 
@@ -46,11 +46,12 @@ Body block objects / 正文块对象：
 - `MathBlock`
 - `CalloutBlock`
 
-Important v1.1 note / v1.1 重点：
+Important v1.2 note / v1.2 重点：
 
-- `ImageBlock(imageRef="...")` is valid
-- `ImageBlock.id` and `ImageBlock.anchor` are optional
-- `imageRef` is required
+- `ImageBlock(imageRef="...")` remains valid
+- `ChartBlock(chartRef="...")`, `TableBlock(tableRef="...")`, and `MathBlock(latex="...")` may now omit instance `id`
+- `Section` now supports `sectionRole`, `navigation`, `pagination`, and `presentation`
+- `GridTableCell.blocks[]` now supports `_type="chart"` in addition to `_type="block"` and `_type="image"`
 
 ---
 
