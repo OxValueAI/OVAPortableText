@@ -35,22 +35,22 @@ class ImageBlock(OptionalReferenceableBlockBase):
     imageRef: str
 
 
-class ChartBlock(RequiredReferenceableBlockBase):
+class ChartBlock(OptionalReferenceableBlockBase):
     type_: Literal["chart"] = Field(default="chart", alias="_type", serialization_alias="_type")
     chartRef: str
 
 
-class TableBlock(RequiredReferenceableBlockBase):
+class TableBlock(OptionalReferenceableBlockBase):
     type_: Literal["table"] = Field(default="table", alias="_type", serialization_alias="_type")
     tableRef: str
 
 
-class MathBlock(RequiredReferenceableBlockBase):
+class MathBlock(OptionalReferenceableBlockBase):
     type_: Literal["math_block"] = Field(default="math_block", alias="_type", serialization_alias="_type")
     latex: str
 
 
-class CalloutBlock(RequiredReferenceableBlockBase):
+class CalloutBlock(OptionalReferenceableBlockBase):
     type_: Literal["callout"] = Field(default="callout", alias="_type", serialization_alias="_type")
     blocks: list[TextBlock] = Field(default_factory=list)
 

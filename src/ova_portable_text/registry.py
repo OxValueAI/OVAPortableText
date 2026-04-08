@@ -6,7 +6,7 @@ from typing import Annotated, Any, Literal, TypeAlias
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from .base import OvaBaseModel
-from .block_objects import ImageBlock
+from .block_objects import ChartBlock, ImageBlock
 from .text import TextBlock
 
 
@@ -168,7 +168,7 @@ class RecordTableDataset(RegistryEntryBase):
         return self
 
 
-CellBlockElement: TypeAlias = TextBlock | ImageBlock
+CellBlockElement: TypeAlias = TextBlock | ImageBlock | ChartBlock
 
 
 class GridTableCell(OvaBaseModel):
@@ -194,8 +194,8 @@ class GridTableCell(OvaBaseModel):
         if self.rowSpan < 1:
             raise ValueError("`rowSpan` must be >= 1.")
         for item in self.blocks or []:
-            if not isinstance(item, (TextBlock, ImageBlock)):
-                raise ValueError("Grid cell `blocks` only support `TextBlock` and `ImageBlock`.")
+            if not isinstance(item, (TextBlock, ImageBlock, ChartBlock)):
+                raise ValueError("Grid cell `blocks` only support `TextBlock`, `ImageBlock`, and `ChartBlock`.")
         return self
 
 
@@ -344,6 +344,46 @@ class PieChartDataset(RegistryEntryBase):
         return result or "slice"
 
 
+class DoughnutChartDataset(RegistryEntryBase):
+    chartType: Literal["doughnut"] = "doughnut"
+    valueUnit: str | None = None
+    total: int | float = 100
+    showRemainderTrack: bool = True
+    slices: list[PieSlice] = Field(default_factory=list)
+
+    @field_validator("slices")
+    @classmethod
+    def validate_unique_slice_keys(cls, value: list[PieSlice]) -> list[PieSlice]:
+        seen: set[str] = set()
+        for item in value:
+            if item.key in seen:
+                raise ValueError(f"Duplicate doughnut slice key: {item.key}")
+            seen.add(item.key)
+        return value
+
+    @field_validator("total")
+    @classmethod
+    def validate_total(cls, value: int | float) -> int | float:
+        if value <= 0:
+            raise ValueError("`total` must be > 0 for doughnut charts.")
+        return value
+
+    @field_validator("slices")
+    @classmethod
+    def validate_slice_values_non_negative(cls, value: list[PieSlice]) -> list[PieSlice]:
+        for item in value:
+            if item.value < 0:
+                raise ValueError("`doughnut.slices[].value` must be >= 0.")
+        return value
+
+    @model_validator(mode="after")
+    def validate_sum_within_total(self) -> "DoughnutChartDataset":
+        total_value = sum(item.value for item in self.slices)
+        if total_value > self.total:
+            raise ValueError("`sum(doughnut.slices[].value)` must be <= `total`.")
+        return self
+
+
 class GenericChartDataset(RegistryEntryBase):
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -357,7 +397,7 @@ class GenericChartDataset(RegistryEntryBase):
         return value
 
 
-ChartDataset = PieChartDataset | GenericChartDataset
+ChartDataset = PieChartDataset | DoughnutChartDataset | GenericChartDataset
 
 
 class MetricValue(OvaBaseModel):

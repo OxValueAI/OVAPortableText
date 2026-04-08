@@ -4,6 +4,31 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-08
+
+### Added
+
+* aligned the package with `report.v1.2`
+* added `DoughnutChartDataset` and `doughnut_chart_dataset(...)`
+* added section-level models and helpers for `sectionRole`, `navigation`, `pagination`, and `presentation`
+* added support for `_type="chart"` inside `GridTableCell.blocks`
+* added validation coverage for doughnut constraints, grid-cell chart refs, and `presentation.titleBlockStyle`
+* added tests covering v1.2 doughnut datasets, section fields, and grid-cell charts
+
+### Changed
+
+* default `schemaVersion` is now `report.v1.2`
+* `ChartBlock.id`, `TableBlock.id`, `MathBlock.id`, and `CalloutBlock.id` are now optional to match the protocol's instance-layer rules
+* `Section`, `Document.new_section(...)`, and `section(...)` now accept v1.2 section fields
+* chart / table / math helper functions now accept optional instance ids
+* public exports and packaging metadata now reflect `v0.3.0` / `report.v1.2`
+
+### Fixed
+
+* fixed the protocol mismatch where grid-cell chart blocks were still rejected by the Python models and validator
+* fixed the resolver mismatch where optional chart / table / math / callout instance ids could break target indexing
+* fixed the validation gap where grid-cell `chartRef` values were not resolved
+
 ## [0.2.0] - 2026-04-01
 
 ### Added

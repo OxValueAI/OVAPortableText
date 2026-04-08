@@ -149,13 +149,17 @@ class DocumentResolver(OvaBaseModel):
                             if block.id is not None:
                                 add_target(id=block.id, target_type="image", anchor=block.anchor, **common)
                         elif isinstance(block, ChartBlock):
-                            add_target(id=block.id, target_type="chart", anchor=block.anchor, **common)
+                            if block.id is not None:
+                                add_target(id=block.id, target_type="chart", anchor=block.anchor, **common)
                         elif isinstance(block, TableBlock):
-                            add_target(id=block.id, target_type="table", anchor=block.anchor, **common)
+                            if block.id is not None:
+                                add_target(id=block.id, target_type="table", anchor=block.anchor, **common)
                         elif isinstance(block, MathBlock):
-                            add_target(id=block.id, target_type="math_block", anchor=block.anchor, **common)
+                            if block.id is not None:
+                                add_target(id=block.id, target_type="math_block", anchor=block.anchor, **common)
                         elif isinstance(block, CalloutBlock):
-                            add_target(id=block.id, target_type="callout", anchor=block.anchor, **common)
+                            if block.id is not None:
+                                add_target(id=block.id, target_type="callout", anchor=block.anchor, **common)
                 elif isinstance(item, SubsectionItem):
                     walk_section(item.section, f"{item_path}.section")
 
