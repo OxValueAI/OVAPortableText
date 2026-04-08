@@ -46,7 +46,15 @@ from .registry import (
     ChartDataset,
     TableDataset,
 )
-from .section import NumberingMode, Section, SubsectionItem
+from .section import (
+    NumberingMode,
+    Section,
+    SectionNavigation,
+    SectionPagination,
+    SectionPresentation,
+    SectionRole,
+    SubsectionItem,
+)
 from .theme import ThemeConfig
 
 
@@ -104,7 +112,7 @@ class Document(OvaBaseModel):
       顶层 registry 即使为空也应存在
     """
 
-    schemaVersion: str = "report.v1.0"
+    schemaVersion: str = "report.v1.2"
     strict_ids: bool = Field(default=False, exclude=True, repr=False)
     meta: DocumentMeta = Field(default_factory=DocumentMeta)
     theme: ThemeConfig = Field(default_factory=ThemeConfig)
@@ -130,7 +138,7 @@ class Document(OvaBaseModel):
         for item in section.body:
             if isinstance(item, ContentItem):
                 for block in item.blocks:
-                    if isinstance(block, (ImageBlock, ChartBlock, TableBlock, MathBlock, CalloutBlock)):
+                    if isinstance(block, (ImageBlock, ChartBlock, TableBlock, MathBlock, CalloutBlock)) and block.id is not None:
                         yield block.id
             elif isinstance(item, SubsectionItem):
                 yield from self._iter_section_target_ids(item.section)
@@ -221,6 +229,10 @@ class Document(OvaBaseModel):
         title: str,
         numbering: NumberingMode = "auto",
         anchor: str | None = None,
+        section_role: SectionRole | None = None,
+        navigation: SectionNavigation | dict | None = None,
+        pagination: SectionPagination | dict | None = None,
+        presentation: SectionPresentation | dict | None = None,
         append: bool = True,
     ) -> Section:
         """
@@ -235,7 +247,17 @@ class Document(OvaBaseModel):
             sec = doc.new_section(...)
             sec.append_paragraph(...)
         """
-        section = Section(id=id, level=level, title=title, numbering=numbering, anchor=anchor)
+        section = Section(
+            id=id,
+            level=level,
+            title=title,
+            numbering=numbering,
+            anchor=anchor,
+            sectionRole=section_role,
+            navigation=navigation,
+            pagination=pagination,
+            presentation=presentation,
+        )
         if append:
             self.append_section(section)
         return section

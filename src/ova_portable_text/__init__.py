@@ -22,6 +22,7 @@ from .content import (
 from .document import Document, DocumentMeta
 from .exceptions import DocumentValidationError, ValidationIssue, ValidationReport
 from .helpers import (
+    block_layout,
     annotation_def,
     attachment_asset,
     background_asset,
@@ -31,8 +32,11 @@ from .helpers import (
     bibliography_entry,
     blocks_from_items,
     bullet_item,
+    length_em,
+    length_pt,
     callout,
     chart_block,
+    doughnut_chart_dataset,
     citation_ref,
     code_span,
     create_document,
@@ -76,6 +80,9 @@ from .helpers import (
     span,
     strong,
     table_block,
+    table_column_spec_auto,
+    table_column_spec_weight,
+    table_layout,
     table_column,
     table_dataset,
     underline,
@@ -91,6 +98,7 @@ from .registry import (
     ChartDataset,
     DatasetsRegistry,
     FootnoteEntry,
+    DoughnutChartDataset,
     GenericChartDataset,
     GlossaryEntry,
     GridTableCell,
@@ -110,11 +118,21 @@ from .registry import (
     RecordTableDataset,
     RegistryEntryBase,
     TableColumn,
+    TableColumnSpec,
+    TableColumnWidth,
     TableDataset,
+    TableLayout,
 )
 from .resolver import DocumentResolver, ResolvedTarget
-from .section import NumberingMode, Section
-from .theme import ThemeConfig
+from .section import (
+    NumberingMode,
+    Section,
+    SectionNavigation,
+    SectionPagination,
+    SectionPresentation,
+    SectionRole,
+)
+from .theme import BlockLayout, BlockStyleDefault, LengthValue, ThemeConfig
 from .validator import assert_valid_document, validate_document
 from .version import __version__
 

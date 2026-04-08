@@ -1,7 +1,7 @@
 # Protocol Alignment / 协议对齐说明
 
-This page explains how OVAPortableText 0.1.3 aligns with the current Report Profile v1.0 protocol draft used in this repository.  
-本文档说明 OVAPortableText 0.1.3 与当前仓库内维护的 Report Profile v1.0 协议草案之间的对齐关系。
+This page explains how OVAPortableText 0.3.0 aligns with the current Report Profile v1.2 protocol maintained in this repository.  
+本文档说明 OVAPortableText 0.3.0 与当前仓库内维护的 Report Profile v1.2 正式协议之间的对齐关系。
 
 ---
 
@@ -20,8 +20,8 @@ The package aligns to this top-level shape:
 - `glossary`
 - `sections`
 
-`schemaVersion` defaults to `report.v1.0`.  
-`schemaVersion` 默认值为 `report.v1.0`。
+`schemaVersion` defaults to `report.v1.2`.  
+`schemaVersion` 默认值为 `report.v1.2`。
 
 ---
 

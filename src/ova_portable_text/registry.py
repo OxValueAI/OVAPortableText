@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-"""
-Registry-entry models for OVAPortableText.
-OVAPortableText 的 registry 条目模型。
-"""
-
+import re
 from typing import Annotated, Any, Literal, TypeAlias
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from .base import OvaBaseModel
+from .block_objects import ChartBlock, ImageBlock
 from .text import TextBlock
 
 
@@ -30,11 +27,25 @@ class ImageSourceUrl(OvaBaseModel):
     kind: Literal["url"] = "url"
     url: str
 
+    @field_validator("url")
+    @classmethod
+    def validate_non_empty_url(cls, value: str) -> str:
+        if not value or not value.strip():
+            raise ValueError("`imageSource.url` must not be empty.")
+        return value
+
 
 class ImageSourceEmbedded(OvaBaseModel):
     kind: Literal["embedded"] = "embedded"
     encoding: Literal["base64"] = "base64"
     data: str
+
+    @field_validator("data")
+    @classmethod
+    def validate_non_empty_data(cls, value: str) -> str:
+        if not value or not value.strip():
+            raise ValueError("`imageSource.data` must not be empty.")
+        return value
 
 
 ImageSource = Annotated[ImageSourceUrl | ImageSourceEmbedded, Field(discriminator="kind")]
@@ -63,6 +74,10 @@ class ImageLikeAssetBase(RegistryEntryBase):
             raise ValueError("`width` must be >= 1 when provided.")
         if self.height is not None and self.height < 1:
             raise ValueError("`height` must be >= 1 when provided.")
+        if self.mimeType is not None and not re.fullmatch(r"[A-Za-z0-9.+-]+/[A-Za-z0-9.+-]+", self.mimeType):
+            raise ValueError("`mimeType` must look like `image/png` or `image/jpeg`.")
+        if self.checksum is not None and not re.fullmatch(r"(?:sha256|md5):[A-Fa-f0-9]+", self.checksum):
+            raise ValueError("`checksum` must use `sha256:<hex>` or `md5:<hex>` format.")
         return self
 
 
@@ -92,6 +107,31 @@ class AttachmentAsset(RegistryEntryBase):
     sizeBytes: int | None = None
 
 
+class TableColumnWidth(OvaBaseModel):
+    mode: Literal["auto", "weight"]
+    value: int | float | None = None
+
+    @model_validator(mode="after")
+    def validate_width(self) -> "TableColumnWidth":
+        if self.mode == "auto":
+            if self.value is not None:
+                raise ValueError("`value` must be omitted when width.mode='auto'.")
+        else:
+            if self.value is None:
+                raise ValueError("`value` is required when width.mode='weight'.")
+            if self.value <= 0:
+                raise ValueError("`value` must be > 0 when width.mode='weight'.")
+        return self
+
+
+class TableColumnSpec(OvaBaseModel):
+    width: TableColumnWidth
+
+
+class TableLayout(OvaBaseModel):
+    columnSpecs: list[TableColumnSpec] = Field(default_factory=list)
+
+
 class TableColumn(OvaBaseModel):
     key: str
     header: str
@@ -101,6 +141,7 @@ class RecordTableDataset(RegistryEntryBase):
     tableType: Literal["record"] = "record"
     columns: list[TableColumn] = Field(default_factory=list)
     rows: list[dict[str, str | int | float | bool | None]] = Field(default_factory=list)
+    layout: TableLayout | None = None
 
     @field_validator("columns")
     @classmethod
@@ -121,12 +162,18 @@ class RecordTableDataset(RegistryEntryBase):
                 raise ValueError(
                     f"Row {row_index} contains keys not declared in columns: {extra_keys}"
                 )
+        if self.layout is not None and self.layout.columnSpecs:
+            if len(self.layout.columnSpecs) != len(self.columns):
+                raise ValueError("`layout.columnSpecs` length must match `columns` length for record tables.")
         return self
+
+
+CellBlockElement: TypeAlias = TextBlock | ImageBlock | ChartBlock
 
 
 class GridTableCell(OvaBaseModel):
     text: str | None = None
-    blocks: list[TextBlock] | None = None
+    blocks: list[CellBlockElement] | None = None
     header: bool = False
     colSpan: int = 1
     rowSpan: int = 1
@@ -136,12 +183,19 @@ class GridTableCell(OvaBaseModel):
 
     @model_validator(mode="after")
     def validate_cell(self) -> "GridTableCell":
-        if (self.text is None or self.text == "") and (self.blocks is None or len(self.blocks) == 0):
+        has_text = self.text is not None and self.text != ""
+        has_blocks = self.blocks is not None and len(self.blocks) > 0
+        if not has_text and not has_blocks:
             raise ValueError("Grid table cells require either `text` or non-empty `blocks`.")
+        if self.blocks is not None and len(self.blocks) == 0:
+            raise ValueError("`blocks` must not be an empty list.")
         if self.colSpan < 1:
             raise ValueError("`colSpan` must be >= 1.")
         if self.rowSpan < 1:
             raise ValueError("`rowSpan` must be >= 1.")
+        for item in self.blocks or []:
+            if not isinstance(item, (TextBlock, ImageBlock, ChartBlock)):
+                raise ValueError("Grid cell `blocks` only support `TextBlock`, `ImageBlock`, and `ChartBlock`.")
         return self
 
 
@@ -153,12 +207,17 @@ class GridTableDataset(RegistryEntryBase):
     tableType: Literal["grid"] = "grid"
     columnCount: int | None = None
     rows: list[GridTableRow] = Field(default_factory=list)
+    layout: TableLayout | None = None
 
     @model_validator(mode="after")
     def validate_grid(self) -> "GridTableDataset":
         if self.columnCount is not None and self.columnCount < 1:
             raise ValueError("`columnCount` must be >= 1 when provided.")
-
+        if self.layout is not None and self.layout.columnSpecs:
+            if self.columnCount is None:
+                raise ValueError("`columnCount` is required when `layout.columnSpecs` is provided for grid tables.")
+            if len(self.layout.columnSpecs) != self.columnCount:
+                raise ValueError("`layout.columnSpecs` length must match `columnCount` for grid tables.")
         if self.columnCount is None:
             return self
 
@@ -285,6 +344,46 @@ class PieChartDataset(RegistryEntryBase):
         return result or "slice"
 
 
+class DoughnutChartDataset(RegistryEntryBase):
+    chartType: Literal["doughnut"] = "doughnut"
+    valueUnit: str | None = None
+    total: int | float = 100
+    showRemainderTrack: bool = True
+    slices: list[PieSlice] = Field(default_factory=list)
+
+    @field_validator("slices")
+    @classmethod
+    def validate_unique_slice_keys(cls, value: list[PieSlice]) -> list[PieSlice]:
+        seen: set[str] = set()
+        for item in value:
+            if item.key in seen:
+                raise ValueError(f"Duplicate doughnut slice key: {item.key}")
+            seen.add(item.key)
+        return value
+
+    @field_validator("total")
+    @classmethod
+    def validate_total(cls, value: int | float) -> int | float:
+        if value <= 0:
+            raise ValueError("`total` must be > 0 for doughnut charts.")
+        return value
+
+    @field_validator("slices")
+    @classmethod
+    def validate_slice_values_non_negative(cls, value: list[PieSlice]) -> list[PieSlice]:
+        for item in value:
+            if item.value < 0:
+                raise ValueError("`doughnut.slices[].value` must be >= 0.")
+        return value
+
+    @model_validator(mode="after")
+    def validate_sum_within_total(self) -> "DoughnutChartDataset":
+        total_value = sum(item.value for item in self.slices)
+        if total_value > self.total:
+            raise ValueError("`sum(doughnut.slices[].value)` must be <= `total`.")
+        return self
+
+
 class GenericChartDataset(RegistryEntryBase):
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -298,7 +397,7 @@ class GenericChartDataset(RegistryEntryBase):
         return value
 
 
-ChartDataset = PieChartDataset | GenericChartDataset
+ChartDataset = PieChartDataset | DoughnutChartDataset | GenericChartDataset
 
 
 class MetricValue(OvaBaseModel):

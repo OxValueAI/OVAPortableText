@@ -4,6 +4,58 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-08
+
+### Added
+
+* aligned the package with `report.v1.2`
+* added `DoughnutChartDataset` and `doughnut_chart_dataset(...)`
+* added section-level models and helpers for `sectionRole`, `navigation`, `pagination`, and `presentation`
+* added support for `_type="chart"` inside `GridTableCell.blocks`
+* added validation coverage for doughnut constraints, grid-cell chart refs, and `presentation.titleBlockStyle`
+* added tests covering v1.2 doughnut datasets, section fields, and grid-cell charts
+
+### Changed
+
+* default `schemaVersion` is now `report.v1.2`
+* `ChartBlock.id`, `TableBlock.id`, `MathBlock.id`, and `CalloutBlock.id` are now optional to match the protocol's instance-layer rules
+* `Section`, `Document.new_section(...)`, and `section(...)` now accept v1.2 section fields
+* chart / table / math helper functions now accept optional instance ids
+* public exports and packaging metadata now reflect `v0.3.0` / `report.v1.2`
+
+### Fixed
+
+* fixed the protocol mismatch where grid-cell chart blocks were still rejected by the Python models and validator
+* fixed the resolver mismatch where optional chart / table / math / callout instance ids could break target indexing
+* fixed the validation gap where grid-cell `chartRef` values were not resolved
+
+## [0.2.0] - 2026-04-01
+
+### Added
+
+* aligned the package with `report.v1.1`
+* added `theme.blockStyleDefaults` models and helpers
+* added block-level `layout` support for `TextBlock` and paragraph helpers
+* added table-level `layout.columnSpecs[]` with `auto | weight` width modes
+* added helper functions: `block_layout`, `length_em`, `length_pt`, `table_column_spec_auto`, `table_column_spec_weight`, `table_layout`
+* added support for `_type="image"` inside `GridTableCell.blocks`
+* added validation coverage for grid-cell image refs and v1.1 table/theme features
+* added `examples/v11_layout_and_cell_image_demo.py`
+
+### Changed
+
+* default `schemaVersion` is now `report.v1.1`
+* `ImageBlock.id` and `ImageBlock.anchor` are now optional
+* `image_block(...)` and `Section.append_image(...)` now accept optional instance ids
+* `record` and `grid` table datasets both accept table-level `layout`
+* API docs and quickstart examples now reflect the v1.1 contract
+
+### Fixed
+
+* fixed the protocol mismatch where image instances incorrectly required `id`
+* fixed the protocol mismatch where grid-cell `blocks` only accepted text blocks
+* fixed the validation gap where grid-cell `imageRef` values were not resolved
+
 ## [0.1.4] - 2026-03-25
 
 ### Added

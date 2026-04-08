@@ -31,9 +31,25 @@ from .base import OvaBaseModel
 from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .content import BlockElement, ContentItem, MarkDef, TextBlock, TextChild, TextStyle
 from .text import ListItemStyle
+from .theme import BlockLayout
 
 
 NumberingMode: TypeAlias = Literal["auto", "none", "manual"]
+SectionRole: TypeAlias = Literal["cover", "toc", "chapter", "appendix", "backCover"]
+PageBreakBefore: TypeAlias = Literal["auto", "always"]
+
+
+class SectionNavigation(OvaBaseModel):
+    includeInToc: bool = True
+
+
+class SectionPagination(OvaBaseModel):
+    pageBreakBefore: PageBreakBefore = "auto"
+
+
+class SectionPresentation(OvaBaseModel):
+    templateVariant: str | None = None
+    titleBlockStyle: str | None = None
 
 
 class SubsectionItem(OvaBaseModel):
@@ -62,6 +78,10 @@ class Section(OvaBaseModel):
     title: str
     numbering: NumberingMode = "auto"
     anchor: str | None = None
+    sectionRole: SectionRole | None = None
+    navigation: SectionNavigation | None = None
+    pagination: SectionPagination | None = None
+    presentation: SectionPresentation | None = None
     body: list[ContentItem | SubsectionItem] = Field(default_factory=list)
 
     @model_validator(mode="after")
@@ -141,13 +161,14 @@ class Section(OvaBaseModel):
         *parts: str | TextChild,
         style: TextStyle = "normal",
         mark_defs: list[MarkDef] | None = None,
+        layout: BlockLayout | dict | None = None,
     ) -> "Section":
         """
         Append one paragraph-style text block to the current trailing `ContentItem`.
         把一个段落型文本块追加到当前末尾的 `ContentItem` 中。
         """
         return self.append_text_block_to_last_content(
-            TextBlock.from_parts(*parts, style=style, mark_defs=mark_defs)
+            TextBlock.from_parts(*parts, style=style, mark_defs=mark_defs, layout=layout)
         )
 
     def append_block(self, block: BlockElement) -> "Section":
@@ -191,6 +212,7 @@ class Section(OvaBaseModel):
         *parts: str | TextChild,
         style: TextStyle = "normal",
         mark_defs: list[MarkDef] | None = None,
+        layout: BlockLayout | dict | None = None,
     ) -> "Section":
         """
         Append one paragraph-style text block.
@@ -199,7 +221,7 @@ class Section(OvaBaseModel):
         self.body.append(
             ContentItem(
                 blocks=[
-                    TextBlock.from_parts(*parts, style=style, mark_defs=mark_defs)
+                    TextBlock.from_parts(*parts, style=style, mark_defs=mark_defs, layout=layout)
                 ]
             )
         )
@@ -336,28 +358,28 @@ class Section(OvaBaseModel):
         """
         return self.append_paragraph(*parts, style="equation_caption", mark_defs=mark_defs)
 
-    def append_image(self, *, id: str, image_ref: str, anchor: str | None = None) -> "Section":
+    def append_image(self, *, image_ref: str, id: str | None = None, anchor: str | None = None) -> "Section":
         """
         Create and append an image block in one step.
         一步创建并追加一个 image 块。
         """
         return self.append_block(ImageBlock(id=id, anchor=anchor, imageRef=image_ref))
 
-    def append_chart(self, *, id: str, chart_ref: str, anchor: str | None = None) -> "Section":
+    def append_chart(self, *, chart_ref: str, id: str | None = None, anchor: str | None = None) -> "Section":
         """
         Create and append a chart block in one step.
         一步创建并追加一个 chart 块。
         """
         return self.append_block(ChartBlock(id=id, anchor=anchor, chartRef=chart_ref))
 
-    def append_table(self, *, id: str, table_ref: str, anchor: str | None = None) -> "Section":
+    def append_table(self, *, table_ref: str, id: str | None = None, anchor: str | None = None) -> "Section":
         """
         Create and append a table block in one step.
         一步创建并追加一个 table 块。
         """
         return self.append_block(TableBlock(id=id, anchor=anchor, tableRef=table_ref))
 
-    def append_math(self, *, id: str, latex: str, anchor: str | None = None) -> "Section":
+    def append_math(self, *, latex: str, id: str | None = None, anchor: str | None = None) -> "Section":
         """
         Create and append a math block in one step.
         一步创建并追加一个 math_block。
@@ -374,8 +396,8 @@ class Section(OvaBaseModel):
     def append_image_with_caption(
         self,
         *,
-        id: str,
         image_ref: str,
+        id: str | None = None,
         caption: str,
         anchor: str | None = None,
     ) -> "Section":
@@ -398,9 +420,9 @@ class Section(OvaBaseModel):
     def append_chart_with_caption(
         self,
         *,
-        id: str,
         chart_ref: str,
         caption: str,
+        id: str | None = None,
         anchor: str | None = None,
     ) -> "Section":
         """
@@ -415,9 +437,9 @@ class Section(OvaBaseModel):
     def append_table_with_caption(
         self,
         *,
-        id: str,
         table_ref: str,
         caption: str,
+        id: str | None = None,
         anchor: str | None = None,
     ) -> "Section":
         """
@@ -432,9 +454,9 @@ class Section(OvaBaseModel):
     def append_math_with_caption(
         self,
         *,
-        id: str,
         latex: str,
         caption: str,
+        id: str | None = None,
         anchor: str | None = None,
     ) -> "Section":
         """
@@ -461,6 +483,10 @@ class Section(OvaBaseModel):
         title: str,
         numbering: NumberingMode = "auto",
         anchor: str | None = None,
+        section_role: SectionRole | None = None,
+        navigation: SectionNavigation | dict | None = None,
+        pagination: SectionPagination | dict | None = None,
+        presentation: SectionPresentation | dict | None = None,
         append: bool = True,
     ) -> "Section":
         """
@@ -477,6 +503,10 @@ class Section(OvaBaseModel):
             title=title,
             numbering=numbering,
             anchor=anchor,
+            sectionRole=section_role,
+            navigation=navigation,
+            pagination=pagination,
+            presentation=presentation,
         )
         if append:
             self.append_subsection(child)
