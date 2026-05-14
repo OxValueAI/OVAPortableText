@@ -49,7 +49,7 @@ def test_section_v12_fields_roundtrip_and_optional_chart_id():
     report.append_section(sec)
 
     data = report.to_dict()
-    assert data["schemaVersion"] == "report.v1.2"
+    assert data["schemaVersion"] == "report.v1.3"
     assert data["sections"][0]["sectionRole"] == "cover"
     assert data["sections"][0]["navigation"]["includeInToc"] is False
     assert data["sections"][0]["pagination"]["pageBreakBefore"] == "always"

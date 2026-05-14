@@ -6,12 +6,15 @@ from .document import Document
 from .exceptions import ValidationReport
 from .inline import CitationRef, FootnoteRef, GlossaryTerm, InlineMath, XRef
 from .registry import (
+    BarChartDataset,
     BibliographyEntry,
+    DoughnutChartDataset,
     FootnoteEntry,
     GlossaryEntry,
-    DoughnutChartDataset,
     GridTableDataset,
     ImageLikeAssetBase,
+    LineChartDataset,
+    MatrixBubbleChartDataset,
     PieChartDataset,
     RecordTableDataset,
 )
@@ -30,7 +33,7 @@ def validate_document(document: Document) -> ValidationReport:
             message="`schemaVersion` is required.",
             path="schemaVersion",
             contextType="document",
-            suggestion="Set `schemaVersion` to `report.v1.2` unless you intentionally target another protocol version.",
+            suggestion="Set `schemaVersion` to `report.v1.3` unless you intentionally target another protocol version.",
         )
 
     if not isinstance(document.sections, list):
@@ -288,6 +291,163 @@ def _validate_charts(document: Document, *, report: ValidationReport) -> None:
                     contextId=chart.id,
                     contextAnchor=chart.anchor,
                 )
+        elif isinstance(chart, BarChartDataset):
+            category_keys: set[str] = set()
+            for category_index, category in enumerate(chart.categories):
+                if category.key in category_keys:
+                    report.add_issue(
+                        code="duplicate_bar_category_key",
+                        message=f"Duplicate bar category key: {category.key!r}",
+                        path=f"{path}.categories[{category_index}].key",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+                category_keys.add(category.key)
+
+            series_keys: set[str] = set()
+            for series_index, series in enumerate(chart.series):
+                if series.key in series_keys:
+                    report.add_issue(
+                        code="duplicate_bar_series_key",
+                        message=f"Duplicate bar series key: {series.key!r}",
+                        path=f"{path}.series[{series_index}].key",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+                series_keys.add(series.key)
+                for point_index, item in enumerate(series.data):
+                    if item.categoryKey not in category_keys:
+                        report.add_issue(
+                            code="unresolved_bar_category_key",
+                            message=f"Bar data point categoryKey cannot be resolved: {item.categoryKey!r}",
+                            path=f"{path}.series[{series_index}].data[{point_index}].categoryKey",
+                            contextType="chart_dataset",
+                            contextId=chart.id,
+                            contextAnchor=chart.anchor,
+                        )
+        elif isinstance(chart, LineChartDataset):
+            series_keys: set[str] = set()
+            for series_index, series in enumerate(chart.series):
+                if series.key in series_keys:
+                    report.add_issue(
+                        code="duplicate_line_series_key",
+                        message=f"Duplicate line series key: {series.key!r}",
+                        path=f"{path}.series[{series_index}].key",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+                series_keys.add(series.key)
+                if not series.points:
+                    report.add_issue(
+                        code="empty_line_series_points",
+                        message="`line.series[].points` should contain at least one point.",
+                        path=f"{path}.series[{series_index}].points",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+        elif isinstance(chart, MatrixBubbleChartDataset):
+            x_keys: set[str] = set()
+            for category_index, category in enumerate(chart.xCategories):
+                if category.key in x_keys:
+                    report.add_issue(
+                        code="duplicate_matrix_bubble_x_category_key",
+                        message=f"Duplicate matrix_bubble xCategories key: {category.key!r}",
+                        path=f"{path}.xCategories[{category_index}].key",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+                x_keys.add(category.key)
+
+            y_keys: set[str] = set()
+            for category_index, category in enumerate(chart.yCategories):
+                if category.key in y_keys:
+                    report.add_issue(
+                        code="duplicate_matrix_bubble_y_category_key",
+                        message=f"Duplicate matrix_bubble yCategories key: {category.key!r}",
+                        path=f"{path}.yCategories[{category_index}].key",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+                y_keys.add(category.key)
+
+            if not chart.sizeMetric.label:
+                report.add_issue(
+                    code="missing_matrix_bubble_size_metric_label",
+                    message="`matrix_bubble.sizeMetric.label` should describe `sizeValue`.",
+                    path=f"{path}.sizeMetric.label",
+                    contextType="chart_dataset",
+                    contextId=chart.id,
+                    contextAnchor=chart.anchor,
+                )
+
+            series_keys: set[str] = set()
+            for series_index, series in enumerate(chart.series):
+                if series.key in series_keys:
+                    report.add_issue(
+                        code="duplicate_matrix_bubble_series_key",
+                        message=f"Duplicate matrix_bubble series key: {series.key!r}",
+                        path=f"{path}.series[{series_index}].key",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+                series_keys.add(series.key)
+                seen_pairs: set[tuple[str, str]] = set()
+                if not series.points:
+                    report.add_issue(
+                        code="empty_matrix_bubble_series_points",
+                        message="`matrix_bubble.series[].points` should contain at least one point.",
+                        path=f"{path}.series[{series_index}].points",
+                        contextType="chart_dataset",
+                        contextId=chart.id,
+                        contextAnchor=chart.anchor,
+                    )
+                for point_index, point in enumerate(series.points):
+                    point_path = f"{path}.series[{series_index}].points[{point_index}]"
+                    if point.xCategoryKey not in x_keys:
+                        report.add_issue(
+                            code="unresolved_matrix_bubble_x_category_key",
+                            message=f"Matrix bubble point xCategoryKey cannot be resolved: {point.xCategoryKey!r}",
+                            path=f"{point_path}.xCategoryKey",
+                            contextType="chart_dataset",
+                            contextId=chart.id,
+                            contextAnchor=chart.anchor,
+                        )
+                    if point.yCategoryKey not in y_keys:
+                        report.add_issue(
+                            code="unresolved_matrix_bubble_y_category_key",
+                            message=f"Matrix bubble point yCategoryKey cannot be resolved: {point.yCategoryKey!r}",
+                            path=f"{point_path}.yCategoryKey",
+                            contextType="chart_dataset",
+                            contextId=chart.id,
+                            contextAnchor=chart.anchor,
+                        )
+                    if point.sizeValue < 0:
+                        report.add_issue(
+                            code="invalid_matrix_bubble_size_value",
+                            message="`matrix_bubble.points[].sizeValue` must be >= 0.",
+                            path=f"{point_path}.sizeValue",
+                            contextType="chart_dataset",
+                            contextId=chart.id,
+                            contextAnchor=chart.anchor,
+                        )
+                    pair = (point.xCategoryKey, point.yCategoryKey)
+                    if pair in seen_pairs:
+                        report.add_issue(
+                            code="duplicate_matrix_bubble_category_pair",
+                            message="Duplicate matrix_bubble xCategoryKey + yCategoryKey pair in one series.",
+                            path=point_path,
+                            contextType="chart_dataset",
+                            contextId=chart.id,
+                            contextAnchor=chart.anchor,
+                        )
+                    seen_pairs.add(pair)
 
 
 def _validate_section(section: Section, *, path: str, parent_level: int | None, report: ValidationReport) -> None:
