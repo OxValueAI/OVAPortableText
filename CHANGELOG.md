@@ -4,6 +4,29 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-14
+
+### Added
+
+* aligned the package with `report.v1.3`
+* added typed chart models for `bar`, `line`, and `matrix_bubble` datasets
+* added shared `ChartAxis`, `ChartCategory`, `MatrixBubbleCategory`, and `SizeMetric` models
+* added chart helper functions for bar, horizontal bar, line, and matrix bubble datasets
+* added validation coverage for v1.3 chart category references, series keys, and matrix bubble size values
+* added tests covering v1.3 schema defaults, `pie.slices[].colorHint`, bar variants, line points, and matrix bubble output
+
+### Changed
+
+* default `schemaVersion` is now `report.v1.3`
+* package metadata and public version now reflect `v0.4.0` / `report.v1.3`
+* `datasets.charts` now has first-class Python models for all v1.3 formal chart types while keeping the generic chart fallback
+
+### Fixed
+
+* preserved `pie.slices[].colorHint` while avoiding new visual-style fields for v1.3 chart types
+* normalized legacy `sizeMetric.valueUnit` input to `sizeMetric.unit` without emitting `valueUnit` in new matrix-bubble output
+* avoided any `chartType = "bubble"` helper for v1.3; classification bubble charts now use `chartType = "matrix_bubble"`
+
 ## [0.3.0] - 2026-04-08
 
 ### Added

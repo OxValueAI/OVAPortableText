@@ -112,7 +112,7 @@ class Document(OvaBaseModel):
       顶层 registry 即使为空也应存在
     """
 
-    schemaVersion: str = "report.v1.2"
+    schemaVersion: str = "report.v1.3"
     strict_ids: bool = Field(default=False, exclude=True, repr=False)
     meta: DocumentMeta = Field(default_factory=DocumentMeta)
     theme: ThemeConfig = Field(default_factory=ThemeConfig)

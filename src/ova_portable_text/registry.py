@@ -384,6 +384,230 @@ class DoughnutChartDataset(RegistryEntryBase):
         return self
 
 
+class ChartAxis(OvaBaseModel):
+    label: dict[str, str] = Field(default_factory=dict)
+    valueType: str | None = None
+    unit: str | None = None
+
+
+class ChartCategory(OvaBaseModel):
+    key: str
+    label: dict[str, str] = Field(default_factory=dict)
+    description: dict[str, str] = Field(default_factory=dict)
+
+
+class BarDataPoint(OvaBaseModel):
+    categoryKey: str
+    value: int | float
+    label: dict[str, str] = Field(default_factory=dict)
+    description: dict[str, str] = Field(default_factory=dict)
+    meta: dict[str, Any] = Field(default_factory=dict)
+
+
+class BarSeries(OvaBaseModel):
+    key: str
+    label: dict[str, str] = Field(default_factory=dict)
+    description: dict[str, str] = Field(default_factory=dict)
+    data: list[BarDataPoint] = Field(default_factory=list)
+
+
+class BarChartDataset(RegistryEntryBase):
+    chartType: Literal["bar"] = "bar"
+    valueUnit: str | None = None
+    orientation: Literal["vertical", "horizontal"] = "vertical"
+    barMode: Literal["grouped", "stacked"] = "grouped"
+    xAxis: ChartAxis | None = None
+    yAxis: ChartAxis | None = None
+    categories: list[ChartCategory] = Field(default_factory=list)
+    series: list[BarSeries] = Field(default_factory=list)
+
+    @field_validator("categories")
+    @classmethod
+    def validate_unique_category_keys(cls, value: list[ChartCategory]) -> list[ChartCategory]:
+        seen: set[str] = set()
+        for item in value:
+            if item.key in seen:
+                raise ValueError(f"Duplicate bar category key: {item.key}")
+            seen.add(item.key)
+        return value
+
+    @field_validator("series")
+    @classmethod
+    def validate_unique_series_keys(cls, value: list[BarSeries]) -> list[BarSeries]:
+        seen: set[str] = set()
+        for item in value:
+            if item.key in seen:
+                raise ValueError(f"Duplicate bar series key: {item.key}")
+            seen.add(item.key)
+        return value
+
+    @model_validator(mode="after")
+    def validate_data_category_refs(self) -> "BarChartDataset":
+        category_keys = {item.key for item in self.categories}
+        for series in self.series:
+            for item in series.data:
+                if item.categoryKey not in category_keys:
+                    raise ValueError(
+                        f"Bar data point categoryKey {item.categoryKey!r} does not resolve to `categories[].key`."
+                    )
+        return self
+
+
+class LinePoint(OvaBaseModel):
+    key: str | None = None
+    xValue: str | int | float
+    yValue: int | float
+    label: dict[str, str] = Field(default_factory=dict)
+    description: dict[str, str] = Field(default_factory=dict)
+    meta: dict[str, Any] = Field(default_factory=dict)
+
+
+class LineSeries(OvaBaseModel):
+    key: str
+    label: dict[str, str] = Field(default_factory=dict)
+    description: dict[str, str] = Field(default_factory=dict)
+    points: list[LinePoint] = Field(default_factory=list)
+
+
+class LineChartDataset(RegistryEntryBase):
+    chartType: Literal["line"] = "line"
+    valueUnit: str | None = None
+    xAxis: ChartAxis | None = None
+    yAxis: ChartAxis | None = None
+    series: list[LineSeries] = Field(default_factory=list)
+
+    @field_validator("series")
+    @classmethod
+    def validate_unique_series_keys(cls, value: list[LineSeries]) -> list[LineSeries]:
+        seen: set[str] = set()
+        for item in value:
+            if item.key in seen:
+                raise ValueError(f"Duplicate line series key: {item.key}")
+            seen.add(item.key)
+        return value
+
+
+class MatrixBubbleCategory(OvaBaseModel):
+    key: str
+    label: dict[str, str] = Field(default_factory=dict)
+    description: dict[str, str] = Field(default_factory=dict)
+
+
+class SizeMetric(OvaBaseModel):
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
+    label: dict[str, str] = Field(default_factory=dict)
+    unit: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def accept_legacy_value_unit(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "unit" not in data and "valueUnit" in data:
+            data = dict(data)
+            data["unit"] = data["valueUnit"]
+        return data
+
+
+class MatrixBubblePoint(OvaBaseModel):
+    key: str | None = None
+    xCategoryKey: str
+    yCategoryKey: str
+    sizeValue: int | float
+    label: dict[str, str] = Field(default_factory=dict)
+    description: dict[str, str] = Field(default_factory=dict)
+    meta: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("sizeValue")
+    @classmethod
+    def validate_size_value_non_negative(cls, value: int | float) -> int | float:
+        if value < 0:
+            raise ValueError("`matrix_bubble.points[].sizeValue` must be >= 0.")
+        return value
+
+
+class MatrixBubbleSeries(OvaBaseModel):
+    key: str
+    label: dict[str, str] = Field(default_factory=dict)
+    description: dict[str, str] = Field(default_factory=dict)
+    points: list[MatrixBubblePoint] = Field(default_factory=list)
+
+    @field_validator("points")
+    @classmethod
+    def validate_unique_category_pairs(cls, value: list[MatrixBubblePoint]) -> list[MatrixBubblePoint]:
+        seen: set[tuple[str, str]] = set()
+        for item in value:
+            pair = (item.xCategoryKey, item.yCategoryKey)
+            if pair in seen:
+                raise ValueError(
+                    "Duplicate matrix_bubble point category pair: "
+                    f"xCategoryKey={item.xCategoryKey!r}, yCategoryKey={item.yCategoryKey!r}"
+                )
+            seen.add(pair)
+        return value
+
+
+class MatrixBubbleChartDataset(RegistryEntryBase):
+    chartType: Literal["matrix_bubble"] = "matrix_bubble"
+    xAxis: ChartAxis | None = None
+    yAxis: ChartAxis | None = None
+    sizeMetric: SizeMetric
+    xCategories: list[MatrixBubbleCategory] = Field(default_factory=list)
+    yCategories: list[MatrixBubbleCategory] = Field(default_factory=list)
+    series: list[MatrixBubbleSeries] = Field(default_factory=list)
+
+    @field_validator("xCategories")
+    @classmethod
+    def validate_unique_x_category_keys(
+        cls, value: list[MatrixBubbleCategory]
+    ) -> list[MatrixBubbleCategory]:
+        seen: set[str] = set()
+        for item in value:
+            if item.key in seen:
+                raise ValueError(f"Duplicate matrix_bubble xCategories key: {item.key}")
+            seen.add(item.key)
+        return value
+
+    @field_validator("yCategories")
+    @classmethod
+    def validate_unique_y_category_keys(
+        cls, value: list[MatrixBubbleCategory]
+    ) -> list[MatrixBubbleCategory]:
+        seen: set[str] = set()
+        for item in value:
+            if item.key in seen:
+                raise ValueError(f"Duplicate matrix_bubble yCategories key: {item.key}")
+            seen.add(item.key)
+        return value
+
+    @field_validator("series")
+    @classmethod
+    def validate_unique_series_keys(
+        cls, value: list[MatrixBubbleSeries]
+    ) -> list[MatrixBubbleSeries]:
+        seen: set[str] = set()
+        for item in value:
+            if item.key in seen:
+                raise ValueError(f"Duplicate matrix_bubble series key: {item.key}")
+            seen.add(item.key)
+        return value
+
+    @model_validator(mode="after")
+    def validate_point_category_refs(self) -> "MatrixBubbleChartDataset":
+        x_keys = {item.key for item in self.xCategories}
+        y_keys = {item.key for item in self.yCategories}
+        for series in self.series:
+            for item in series.points:
+                if item.xCategoryKey not in x_keys:
+                    raise ValueError(
+                        f"Matrix bubble point xCategoryKey {item.xCategoryKey!r} does not resolve to `xCategories[].key`."
+                    )
+                if item.yCategoryKey not in y_keys:
+                    raise ValueError(
+                        f"Matrix bubble point yCategoryKey {item.yCategoryKey!r} does not resolve to `yCategories[].key`."
+                    )
+        return self
+
+
 class GenericChartDataset(RegistryEntryBase):
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -397,7 +621,14 @@ class GenericChartDataset(RegistryEntryBase):
         return value
 
 
-ChartDataset = PieChartDataset | DoughnutChartDataset | GenericChartDataset
+ChartDataset = (
+    PieChartDataset
+    | DoughnutChartDataset
+    | BarChartDataset
+    | LineChartDataset
+    | MatrixBubbleChartDataset
+    | GenericChartDataset
+)
 
 
 class MetricValue(OvaBaseModel):
