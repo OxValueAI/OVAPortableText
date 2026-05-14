@@ -1,7 +1,7 @@
 # API Reference / API 参考
 
-This page is a practical map of the public API in OVAPortableText `v0.3.0`, aligned to `report.v1.2`.
-本文档是 OVAPortableText `v0.3.0` 的实用 API 地图，对齐 `report.v1.2`。
+This page is a practical map of the public API in OVAPortableText `v0.4.0`, aligned to `report.v1.3`.
+本文档是 OVAPortableText `v0.4.0` 的实用 API 地图，对齐 `report.v1.3`。
 
 ---
 
@@ -17,7 +17,7 @@ This page is a practical map of the public API in OVAPortableText `v0.3.0`, alig
 
 Default schema version:
 
-- `Document.schemaVersion == "report.v1.2"`
+- `Document.schemaVersion == "report.v1.3"`
 
 Common arguments / 常用参数：
 
@@ -46,7 +46,7 @@ Body block objects / 正文块对象：
 - `MathBlock`
 - `CalloutBlock`
 
-Important v1.2 note / v1.2 重点：
+Important v1.3 note / v1.3 重点：
 
 - `ImageBlock(imageRef="...")` remains valid
 - `ChartBlock(chartRef="...")`, `TableBlock(tableRef="...")`, and `MathBlock(latex="...")` may now omit instance `id`
@@ -209,9 +209,38 @@ Supported length units:
 - `table_layout(*column_specs)`
 - `pie_slice(...)`
 - `pie_chart_dataset(...)`
+- `doughnut_chart_dataset(...)`
 - `pie_chart_from_parallel_arrays(...)`
+- `chart_axis(...)`
+- `chart_category(...)`
+- `bar_data_point(...)`
+- `bar_series(...)`
+- `bar_chart_dataset(...)`
+- `horizontal_bar_chart_dataset(...)`
+- `line_point(...)`
+- `line_series(...)`
+- `line_chart_dataset(...)`
+- `matrix_bubble_category(...)`
+- `size_metric(...)`
+- `matrix_bubble_point(...)`
+- `matrix_bubble_series(...)`
+- `matrix_bubble_chart_dataset(...)`
 - `metric_value(...)`
 - `metric_dataset(...)`
+
+
+### v1.3 chart models / v1.3 图表模型
+
+`datasets.charts[]` now has typed helpers for the five formal chart types: `pie`, `doughnut`, `bar`, `line`, and `matrix_bubble`.
+`datasets.charts[]` 现在为五类正式图表提供 typed helper：`pie`、`doughnut`、`bar`、`line`、`matrix_bubble`。
+
+Key boundaries / 关键边界：
+
+- horizontal bar charts still use `chartType = "bar"` with `orientation = "horizontal"`
+- line charts use `points[].xValue / yValue / label`, not `categories[]`
+- classification bubble charts use `chartType = "matrix_bubble"`, never `bubble`
+- `matrix_bubble.sizeValue` uses `sizeMetric.unit`; new output does not emit `sizeMetric.valueUnit`
+- v1.2 `pie.slices[].colorHint` remains supported; new chart types intentionally avoid visual styling fields
 
 ### Registry-backed block instances / 正文引用实例
 

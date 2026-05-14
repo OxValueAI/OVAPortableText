@@ -11,12 +11,17 @@ from .inline import CitationRef, FootnoteRef, GlossaryTerm, HardBreak, InlineMat
 from .registry import (
     AttachmentAsset,
     BackgroundAsset,
+    BarChartDataset,
+    BarDataPoint,
+    BarSeries,
     BibliographyEntry,
-    DoughnutChartDataset,
-    GenericChartDataset,
-    FootnoteEntry,
-    GlossaryEntry,
     CellBlockElement,
+    ChartAxis,
+    ChartCategory,
+    DoughnutChartDataset,
+    FootnoteEntry,
+    GenericChartDataset,
+    GlossaryEntry,
     GridTableCell,
     GridTableDataset,
     GridTableRow,
@@ -25,12 +30,20 @@ from .registry import (
     ImageLikeAssetBase,
     ImageSourceEmbedded,
     ImageSourceUrl,
+    LineChartDataset,
+    LinePoint,
+    LineSeries,
     LogoAsset,
+    MatrixBubbleCategory,
+    MatrixBubbleChartDataset,
+    MatrixBubblePoint,
+    MatrixBubbleSeries,
     MetricDataset,
     MetricValue,
     PieChartDataset,
     PieSlice,
     RecordTableDataset,
+    SizeMetric,
     TableColumn,
     TableColumnSpec,
     TableColumnWidth,
@@ -55,6 +68,20 @@ from .text import (
     TextChild,
     TextStyle,
 )
+
+
+def _lang_dict(
+    label: dict[str, str] | None = None,
+    *,
+    en: str | None = None,
+    zh: str | None = None,
+) -> dict[str, str]:
+    data = dict(label or {})
+    if en is not None:
+        data["en"] = en
+    if zh is not None:
+        data["zh"] = zh
+    return {key: value for key, value in data.items() if value is not None}
 
 
 def create_document(*, title: str | None = None, language: str | None = None, theme: ThemeConfig | dict[str, Any] | None = None, strict_ids: bool = False, **meta_fields) -> Document:
@@ -371,12 +398,42 @@ def metric_dataset(*, id: str, values: list[MetricValue], label: str | None = No
     return MetricDataset(id=id, values=values, label=label, anchor=anchor, meta=meta or {}, **extra)
 
 
-def pie_slice(*, key: str, value: int | float, en: str | None = None, zh: str | None = None, description_en: str | None = None, description_zh: str | None = None, color_hint: str | None = None) -> PieSlice:
-    return PieSlice(key=key, label={k: v for k, v in {"en": en, "zh": zh}.items() if v}, value=value, description={k: v for k, v in {"en": description_en, "zh": description_zh}.items() if v}, colorHint=color_hint)
+def pie_slice(
+    *,
+    key: str,
+    value: int | float,
+    en: str | None = None,
+    zh: str | None = None,
+    description_en: str | None = None,
+    description_zh: str | None = None,
+    color_hint: str | None = None,
+) -> PieSlice:
+    return PieSlice(
+        key=key,
+        label=_lang_dict(en=en, zh=zh),
+        value=value,
+        description=_lang_dict(en=description_en, zh=description_zh),
+        colorHint=color_hint,
+    )
 
 
-def pie_chart_dataset(*, id: str, slices: list[PieSlice], label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, value_unit: str | None = None) -> PieChartDataset:
-    return PieChartDataset(id=id, slices=slices, label=label, anchor=anchor, meta=meta or {}, valueUnit=value_unit)
+def pie_chart_dataset(
+    *,
+    id: str,
+    slices: list[PieSlice],
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    value_unit: str | None = None,
+) -> PieChartDataset:
+    return PieChartDataset(
+        id=id,
+        slices=slices,
+        label=label,
+        anchor=anchor,
+        meta=meta or {},
+        valueUnit=value_unit,
+    )
 
 
 def doughnut_chart_dataset(
@@ -401,6 +458,294 @@ def doughnut_chart_dataset(
         showRemainderTrack=show_remainder_track,
     )
 
+
+
+def chart_axis(
+    *,
+    label: dict[str, str] | None = None,
+    en: str | None = None,
+    zh: str | None = None,
+    value_type: str | None = None,
+    unit: str | None = None,
+) -> ChartAxis:
+    return ChartAxis(label=_lang_dict(label, en=en, zh=zh), valueType=value_type, unit=unit)
+
+
+def chart_category(
+    *,
+    key: str,
+    label: dict[str, str] | None = None,
+    en: str | None = None,
+    zh: str | None = None,
+    description: dict[str, str] | None = None,
+    description_en: str | None = None,
+    description_zh: str | None = None,
+) -> ChartCategory:
+    return ChartCategory(
+        key=key,
+        label=_lang_dict(label, en=en, zh=zh),
+        description=_lang_dict(description, en=description_en, zh=description_zh),
+    )
+
+
+def bar_data_point(
+    *,
+    category_key: str,
+    value: int | float,
+    label: dict[str, str] | None = None,
+    en: str | None = None,
+    zh: str | None = None,
+    description: dict[str, str] | None = None,
+    description_en: str | None = None,
+    description_zh: str | None = None,
+    meta: dict[str, Any] | None = None,
+) -> BarDataPoint:
+    return BarDataPoint(
+        categoryKey=category_key,
+        value=value,
+        label=_lang_dict(label, en=en, zh=zh),
+        description=_lang_dict(description, en=description_en, zh=description_zh),
+        meta=meta or {},
+    )
+
+
+def bar_series(
+    *,
+    key: str,
+    data: list[BarDataPoint],
+    label: dict[str, str] | None = None,
+    en: str | None = None,
+    zh: str | None = None,
+    description: dict[str, str] | None = None,
+    description_en: str | None = None,
+    description_zh: str | None = None,
+) -> BarSeries:
+    return BarSeries(
+        key=key,
+        label=_lang_dict(label, en=en, zh=zh),
+        description=_lang_dict(description, en=description_en, zh=description_zh),
+        data=data,
+    )
+
+
+def bar_chart_dataset(
+    *,
+    id: str,
+    categories: list[ChartCategory],
+    series: list[BarSeries],
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    value_unit: str | None = None,
+    orientation: str = "vertical",
+    bar_mode: str = "grouped",
+    x_axis: ChartAxis | dict[str, Any] | None = None,
+    y_axis: ChartAxis | dict[str, Any] | None = None,
+) -> BarChartDataset:
+    return BarChartDataset(
+        id=id,
+        label=label,
+        anchor=anchor,
+        meta=meta or {},
+        valueUnit=value_unit,
+        orientation=orientation,
+        barMode=bar_mode,
+        xAxis=x_axis,
+        yAxis=y_axis,
+        categories=categories,
+        series=series,
+    )
+
+
+def horizontal_bar_chart_dataset(
+    *,
+    id: str,
+    categories: list[ChartCategory],
+    series: list[BarSeries],
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    value_unit: str | None = None,
+    bar_mode: str = "grouped",
+    x_axis: ChartAxis | dict[str, Any] | None = None,
+    y_axis: ChartAxis | dict[str, Any] | None = None,
+) -> BarChartDataset:
+    return bar_chart_dataset(
+        id=id,
+        categories=categories,
+        series=series,
+        label=label,
+        anchor=anchor,
+        meta=meta,
+        value_unit=value_unit,
+        orientation="horizontal",
+        bar_mode=bar_mode,
+        x_axis=x_axis,
+        y_axis=y_axis,
+    )
+
+
+def line_point(
+    *,
+    x_value: str | int | float,
+    y_value: int | float,
+    key: str | None = None,
+    label: dict[str, str] | None = None,
+    en: str | None = None,
+    zh: str | None = None,
+    description: dict[str, str] | None = None,
+    description_en: str | None = None,
+    description_zh: str | None = None,
+    meta: dict[str, Any] | None = None,
+) -> LinePoint:
+    return LinePoint(
+        key=key,
+        xValue=x_value,
+        yValue=y_value,
+        label=_lang_dict(label, en=en, zh=zh),
+        description=_lang_dict(description, en=description_en, zh=description_zh),
+        meta=meta or {},
+    )
+
+
+def line_series(
+    *,
+    key: str,
+    points: list[LinePoint],
+    label: dict[str, str] | None = None,
+    en: str | None = None,
+    zh: str | None = None,
+    description: dict[str, str] | None = None,
+    description_en: str | None = None,
+    description_zh: str | None = None,
+) -> LineSeries:
+    return LineSeries(
+        key=key,
+        label=_lang_dict(label, en=en, zh=zh),
+        description=_lang_dict(description, en=description_en, zh=description_zh),
+        points=points,
+    )
+
+
+def line_chart_dataset(
+    *,
+    id: str,
+    series: list[LineSeries],
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    value_unit: str | None = None,
+    x_axis: ChartAxis | dict[str, Any] | None = None,
+    y_axis: ChartAxis | dict[str, Any] | None = None,
+) -> LineChartDataset:
+    return LineChartDataset(
+        id=id,
+        label=label,
+        anchor=anchor,
+        meta=meta or {},
+        valueUnit=value_unit,
+        xAxis=x_axis,
+        yAxis=y_axis,
+        series=series,
+    )
+
+
+def matrix_bubble_category(
+    *,
+    key: str,
+    label: dict[str, str] | None = None,
+    en: str | None = None,
+    zh: str | None = None,
+    description: dict[str, str] | None = None,
+    description_en: str | None = None,
+    description_zh: str | None = None,
+) -> MatrixBubbleCategory:
+    return MatrixBubbleCategory(
+        key=key,
+        label=_lang_dict(label, en=en, zh=zh),
+        description=_lang_dict(description, en=description_en, zh=description_zh),
+    )
+
+
+def size_metric(
+    *,
+    label: dict[str, str] | None = None,
+    en: str | None = None,
+    zh: str | None = None,
+    unit: str | None = None,
+) -> SizeMetric:
+    return SizeMetric(label=_lang_dict(label, en=en, zh=zh), unit=unit)
+
+
+def matrix_bubble_point(
+    *,
+    x_category_key: str,
+    y_category_key: str,
+    size_value: int | float,
+    key: str | None = None,
+    label: dict[str, str] | None = None,
+    en: str | None = None,
+    zh: str | None = None,
+    description: dict[str, str] | None = None,
+    description_en: str | None = None,
+    description_zh: str | None = None,
+    meta: dict[str, Any] | None = None,
+) -> MatrixBubblePoint:
+    return MatrixBubblePoint(
+        key=key,
+        xCategoryKey=x_category_key,
+        yCategoryKey=y_category_key,
+        sizeValue=size_value,
+        label=_lang_dict(label, en=en, zh=zh),
+        description=_lang_dict(description, en=description_en, zh=description_zh),
+        meta=meta or {},
+    )
+
+
+def matrix_bubble_series(
+    *,
+    key: str,
+    points: list[MatrixBubblePoint],
+    label: dict[str, str] | None = None,
+    en: str | None = None,
+    zh: str | None = None,
+    description: dict[str, str] | None = None,
+    description_en: str | None = None,
+    description_zh: str | None = None,
+) -> MatrixBubbleSeries:
+    return MatrixBubbleSeries(
+        key=key,
+        label=_lang_dict(label, en=en, zh=zh),
+        description=_lang_dict(description, en=description_en, zh=description_zh),
+        points=points,
+    )
+
+
+def matrix_bubble_chart_dataset(
+    *,
+    id: str,
+    x_categories: list[MatrixBubbleCategory],
+    y_categories: list[MatrixBubbleCategory],
+    size_metric: SizeMetric | dict[str, Any],
+    series: list[MatrixBubbleSeries],
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    x_axis: ChartAxis | dict[str, Any] | None = None,
+    y_axis: ChartAxis | dict[str, Any] | None = None,
+) -> MatrixBubbleChartDataset:
+    return MatrixBubbleChartDataset(
+        id=id,
+        label=label,
+        anchor=anchor,
+        meta=meta or {},
+        xAxis=x_axis,
+        yAxis=y_axis,
+        sizeMetric=size_metric,
+        xCategories=x_categories,
+        yCategories=y_categories,
+        series=series,
+    )
 
 def chart_dataset(*, id: str, chart_type: str, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> GenericChartDataset:
     return GenericChartDataset(id=id, chartType=chart_type, label=label, anchor=anchor, meta=meta or {}, **extra)
