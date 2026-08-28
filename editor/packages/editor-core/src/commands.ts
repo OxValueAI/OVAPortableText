@@ -54,6 +54,27 @@ export function updateFirstTextBlock(
   return { document: next, changed: true, selectionId: sectionId };
 }
 
+export function updateTextBlock(
+  document: OVAReportDocument,
+  sectionId: string,
+  blockIndex: number,
+  text: string
+): CommandResult {
+  const next = cloneDocument(document);
+  const slot = editableBlockSlots(next, sectionId)[blockIndex];
+  if (!slot?.block || slot.block._type !== "block" || !Array.isArray(slot.block.children)) {
+    return { document, changed: false };
+  }
+
+  const firstSpan = slot.block.children.find((child) => child._type === "span");
+  if (!firstSpan) {
+    return { document, changed: false };
+  }
+
+  firstSpan.text = text;
+  return { document: next, changed: true, selectionId: sectionId };
+}
+
 export function addSection(
   document: OVAReportDocument,
   options: { parentSectionId?: string; title?: string } = {}

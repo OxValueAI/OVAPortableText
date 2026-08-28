@@ -16,6 +16,7 @@ import {
   updateGridTableCellText,
   updateLineChartPoint,
   updateMatrixBubblePoint,
+  updateTextBlock,
   validateDocument
 } from "../src";
 
@@ -66,6 +67,18 @@ describe("editor core", () => {
 
     expect(result.changed).toBe(true);
     expect(result.document.datasets?.charts?.length).toBe(before + 1);
+  });
+
+  it("updates a selected text block by section block index", () => {
+    const found = findTextBlockAfterFirst();
+    const result = updateTextBlock(fixture, found.sectionId, found.blockIndex, "Updated selected block");
+    const updated = flattenSections(result.document.sections)
+      .find((node) => node.id === found.sectionId)
+      ?.section.body?.flatMap((item) => item.blocks ?? [])
+      ?.[found.blockIndex];
+
+    expect(result.changed).toBe(true);
+    expect(updated?.children?.[0]?.text).toBe("Updated selected block");
   });
 
   it("updates chart labels and pie slices without replacing the dataset", () => {
@@ -157,4 +170,17 @@ function findFirstChartBlock(): { sectionId: string; blockIndex: number } {
   }
 
   throw new Error("Fixture does not contain a top-level chart block.");
+}
+
+function findTextBlockAfterFirst(): { sectionId: string; blockIndex: number } {
+  for (const node of flattenSections(fixture.sections)) {
+    const blocks = node.section.body?.flatMap((item) => item.blocks ?? []) ?? [];
+    const firstTextIndex = blocks.findIndex((block) => block._type === "block");
+    const secondTextIndex = blocks.findIndex((block, index) => index > firstTextIndex && block._type === "block");
+    if (firstTextIndex >= 0 && secondTextIndex >= 0) {
+      return { sectionId: node.id, blockIndex: secondTextIndex };
+    }
+  }
+
+  throw new Error("Fixture does not contain a second text block in one section.");
 }

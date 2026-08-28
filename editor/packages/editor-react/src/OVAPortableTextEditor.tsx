@@ -12,6 +12,7 @@ import {
   listVersions as listBrowserVersions,
   loadVersion as loadBrowserVersion,
   moveBlock,
+  plainBlockText,
   renameVersion as renameBrowserVersion,
   searchDocument,
   saveVersion as saveBrowserVersion,
@@ -20,11 +21,11 @@ import {
   updateBarChartValue,
   updateChartLabel,
   updateChartSlice,
-  updateFirstTextBlock,
   updateGridTableCellText,
   updateLineChartPoint,
   updateMatrixBubblePoint,
   updateSectionTitle,
+  updateTextBlock,
   validateDocument,
   type BrowserVersioningOptions,
   type EditorIssue,
@@ -32,6 +33,7 @@ import {
   type SectionNode,
   type CommandResult,
   type JSONObject,
+  type OVABlock,
   type SavedVersion,
   type SavedVersionMeta
 } from "@ova/portable-text-editor-core";
@@ -88,7 +90,7 @@ export const OVAPortableTextEditor = forwardRef<
   const [versionError, setVersionError] = useState<string>();
   const [past, setPast] = useState<OVAReportDocument[]>([]);
   const [future, setFuture] = useState<OVAReportDocument[]>([]);
-  const [selectedResource, setSelectedResource] = useState<{ kind: "chart" | "table"; id: string }>();
+  const [selectedBlockIndex, setSelectedBlockIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -116,6 +118,8 @@ export const OVAPortableTextEditor = forwardRef<
     () => findSection(sections, selectedSectionId) ?? sections[0],
     [sections, selectedSectionId]
   );
+  const selectedBlocks = useMemo(() => getSectionBlocks(selectedSection), [selectedSection]);
+  const selectedBlock = selectedBlocks[selectedBlockIndex];
   const searchResults = useMemo(
     () => (document ? searchDocument(document, query) : []),
     [document, query]
@@ -129,6 +133,15 @@ export const OVAPortableTextEditor = forwardRef<
       setLocale(props.initialLocale);
     }
   }, [props.initialLocale]);
+
+  useEffect(() => {
+    setSelectedBlockIndex((current) => {
+      if (selectedBlocks.length === 0) {
+        return 0;
+      }
+      return Math.min(current, selectedBlocks.length - 1);
+    });
+  }, [selectedSection?.id, selectedBlocks.length]);
 
   useEffect(() => {
     if (validation) {
@@ -407,9 +420,11 @@ export const OVAPortableTextEditor = forwardRef<
   return (
     <div className="ova-pte-shell">
       <header className="ova-pte-toolbar">
-        <button className={mode === "visual" ? "active" : ""} onClick={() => setMode("visual")}>{t.visual}</button>
-        <button className={mode === "json" ? "active" : ""} onClick={() => setMode("json")}>{t.json}</button>
-        <div className="ova-pte-locale" aria-label={t.language}>
+        <div className="ova-pte-toolbar-group ova-pte-segmented" aria-label={t.visual}>
+          <button className={mode === "visual" ? "active" : ""} onClick={() => setMode("visual")}>{t.visual}</button>
+          <button className={mode === "json" ? "active" : ""} onClick={() => setMode("json")}>{t.json}</button>
+        </div>
+        <div className="ova-pte-toolbar-group ova-pte-segmented ova-pte-locale" aria-label={t.language}>
           <button className={locale === "en" ? "active" : ""} onClick={() => setLocale("en")}>EN</button>
           <button className={locale === "zh" ? "active" : ""} onClick={() => setLocale("zh")}>中文</button>
         </div>
@@ -423,24 +438,33 @@ export const OVAPortableTextEditor = forwardRef<
             event.currentTarget.value = "";
           }}
         />
-        <button onClick={() => fileInputRef.current?.click()}>{t.open}</button>
-        <button onClick={copyJSON}>{t.copyJSON}</button>
-        <button onClick={downloadJSON}>{t.download}</button>
-        <input
-          aria-label={t.find}
-          placeholder={t.find}
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
-        <button disabled={past.length === 0} onClick={undo}>{t.undo}</button>
-        <button disabled={future.length === 0} onClick={redo}>{t.redo}</button>
-        <button onClick={() => validation && props.onValidationChange?.(validation)}>{t.validate}</button>
+        <div className="ova-pte-toolbar-group">
+          <button onClick={() => fileInputRef.current?.click()}>{t.open}</button>
+          <button onClick={copyJSON}>{t.copyJSON}</button>
+          <button onClick={downloadJSON}>{t.download}</button>
+        </div>
+        <div className="ova-pte-toolbar-group ova-pte-search-group">
+          <input
+            aria-label={t.find}
+            placeholder={t.find}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+        <div className="ova-pte-toolbar-group">
+          <button disabled={past.length === 0} onClick={undo}>{t.undo}</button>
+          <button disabled={future.length === 0} onClick={redo}>{t.redo}</button>
+        </div>
+        <div className="ova-pte-toolbar-group">
+          <button onClick={() => validation && props.onValidationChange?.(validation)}>{t.validate}</button>
         <button disabled={!props.onRequestFinalPreview} onClick={() => props.onRequestFinalPreview?.(document)}>
           {t.finalPreview}
         </button>
         <button onClick={save}>{t.save}</button>
         <button disabled={!versioningEnabled} onClick={saveLocalVersion}>{t.saveVersion}</button>
-        <button disabled={visualLocked} onClick={() => applyCommand(addSection(document))}>{t.addSection}</button>
+        </div>
+        <div className="ova-pte-toolbar-group">
+          <button disabled={visualLocked} onClick={() => applyCommand(addSection(document))}>{t.addSection}</button>
         <button
           disabled={visualLocked || !selectedSection}
           onClick={() => selectedSection && applyCommand(addSection(document, { parentSectionId: selectedSection.id }))}
@@ -459,21 +483,20 @@ export const OVAPortableTextEditor = forwardRef<
         >
           {t.deleteSection}
         </button>
-        <span>{dirty ? t.modified : t.saved} - {validation?.issues.filter((issue) => issue.severity === "error").length ?? 0} {t.errors} - {validation?.issues.filter((issue) => issue.severity === "warning").length ?? 0} {t.warnings}</span>
+        </div>
+        <span className="ova-pte-status">{dirty ? t.modified : t.saved} - {validation?.issues.filter((issue) => issue.severity === "error").length ?? 0} {t.errors} - {validation?.issues.filter((issue) => issue.severity === "warning").length ?? 0} {t.warnings}</span>
       </header>
 
       <main className="ova-pte-grid">
         <aside className="ova-pte-sidebar">
           <Panel title={t.outline}>
-            <SectionTree nodes={sections} selectedId={selectedSection?.id} onSelect={setSelectedSectionId} />
-          </Panel>
-          <Panel title={t.resources}>
-            <ResourceStats
-              document={document}
-              validation={validation}
-              selectedResource={selectedResource}
-              onSelectResource={setSelectedResource}
-              t={t}
+            <SectionTree
+              nodes={sections}
+              selectedId={selectedSection?.id}
+              onSelect={(id) => {
+                setSelectedSectionId(id);
+                setSelectedBlockIndex(0);
+              }}
             />
           </Panel>
           <Panel title={t.issues}>
@@ -483,23 +506,32 @@ export const OVAPortableTextEditor = forwardRef<
 
         <section className="ova-pte-editor">
           {mode === "visual" ? (
-            <VisualSection
+            <SectionComposer
               node={selectedSection}
+              selectedBlockIndex={selectedBlockIndex}
               readOnly={visualLocked}
+              document={document}
               onTitleChange={(title) => {
                 if (!selectedSection) return;
                 applyCommand(updateSectionTitle(document, selectedSection.id, title));
               }}
-              onFirstTextChange={(text) => {
-                if (!selectedSection) return;
-                applyCommand(updateFirstTextBlock(document, selectedSection.id, text));
-              }}
+              onSelectBlock={setSelectedBlockIndex}
               onAddParagraph={() => selectedSection && applyCommand(addParagraphBlock(document, selectedSection.id))}
-              onDuplicateBlock={(index) => selectedSection && applyCommand(duplicateBlock(document, selectedSection.id, index))}
-              onDeleteBlock={(index) => selectedSection && applyCommand(deleteBlock(document, selectedSection.id, index))}
-              onMoveBlock={(fromIndex, toIndex) =>
-                selectedSection && applyCommand(moveBlock(document, selectedSection.id, fromIndex, toIndex))
-              }
+              onDuplicateBlock={(index) => {
+                if (!selectedSection) return;
+                applyCommand(duplicateBlock(document, selectedSection.id, index));
+                setSelectedBlockIndex(index + 1);
+              }}
+              onDeleteBlock={(index) => {
+                if (!selectedSection) return;
+                applyCommand(deleteBlock(document, selectedSection.id, index));
+                setSelectedBlockIndex(Math.max(0, index - 1));
+              }}
+              onMoveBlock={(fromIndex, toIndex) => {
+                if (!selectedSection) return;
+                applyCommand(moveBlock(document, selectedSection.id, fromIndex, toIndex));
+                setSelectedBlockIndex(Math.max(0, Math.min(toIndex, selectedBlocks.length - 1)));
+              }}
               t={t}
             />
           ) : (
@@ -525,7 +557,22 @@ export const OVAPortableTextEditor = forwardRef<
         </section>
 
         <aside className="ova-pte-properties">
-          <Panel title={t.properties}>
+          <Panel title={t.blockInspector}>
+            <BlockInspector
+              document={document}
+              sectionId={selectedSection?.id}
+              block={selectedBlock}
+              blockIndex={selectedBlockIndex}
+              readOnly={visualLocked}
+              onTextChange={(text) => {
+                if (!selectedSection) return;
+                applyCommand(updateTextBlock(document, selectedSection.id, selectedBlockIndex, text));
+              }}
+              onCommand={applyCommand}
+              t={t}
+            />
+          </Panel>
+          <Panel title={t.documentSummary}>
             <dl>
               <dt>{t.schema}</dt>
               <dd>{document.schemaVersion}</dd>
@@ -536,15 +583,6 @@ export const OVAPortableTextEditor = forwardRef<
               <dt>{t.selected}</dt>
               <dd>{selectedSection?.id ?? t.none}</dd>
             </dl>
-          </Panel>
-          <Panel title={t.data}>
-            <DataEditor
-              document={document}
-              selectedResource={selectedResource}
-              readOnly={visualLocked}
-              onCommand={applyCommand}
-              t={t}
-            />
           </Panel>
           <Panel title={t.findResults}>
             <IssueList issues={searchResults.map((result) => ({
@@ -614,11 +652,13 @@ function SectionTree({
   );
 }
 
-function VisualSection({
+function SectionComposer({
   node,
+  selectedBlockIndex,
   readOnly,
+  document,
   onTitleChange,
-  onFirstTextChange,
+  onSelectBlock,
   onAddParagraph,
   onDuplicateBlock,
   onDeleteBlock,
@@ -626,51 +666,48 @@ function VisualSection({
   t
 }: {
   node: SectionNode | undefined;
+  selectedBlockIndex: number;
   readOnly: boolean;
+  document: OVAReportDocument;
   onTitleChange: (title: string) => void;
-  onFirstTextChange: (text: string) => void;
+  onSelectBlock: (index: number) => void;
   onAddParagraph: () => void;
   onDuplicateBlock: (index: number) => void;
   onDeleteBlock: (index: number) => void;
   onMoveBlock: (fromIndex: number, toIndex: number) => void;
   t: EditorMessages;
 }) {
-  const firstTextBlock = node?.section.body
-    ?.flatMap((item) => item.blocks ?? [])
-    .find((block) => block._type === "block");
-  const firstText = firstTextBlock?.children
-    ?.map((child) => (typeof child.text === "string" ? child.text : ""))
-    .join("") ?? "";
-
   if (!node) {
     return <div className="ova-pte-empty">{t.noSectionSelected}</div>;
   }
 
+  const blocks = getSectionBlocks(node);
+
   return (
-    <article className="ova-pte-document">
+    <article className="ova-pte-section-composer">
       {readOnly && <div className="ova-pte-lock">{t.visualLocked}</div>}
-      <input
-        className="ova-pte-title-input"
-        value={node.title}
-        readOnly={readOnly}
-        onChange={(event) => onTitleChange(event.target.value)}
-      />
-      <textarea
-        className="ova-pte-paragraph-input"
-        value={firstText}
-        readOnly={readOnly}
-        onChange={(event) => onFirstTextChange(event.target.value)}
-      />
+      <div className="ova-pte-section-header">
+        <label>
+          {t.sectionTitle}
+          <input
+            className="ova-pte-title-input"
+            value={node.title}
+            readOnly={readOnly}
+            onChange={(event) => onTitleChange(event.target.value)}
+          />
+        </label>
+        <span>{t.sectionBlocks}: {blocks.length}</span>
+      </div>
       <div className="ova-pte-section-actions">
         <button disabled={readOnly} onClick={onAddParagraph}>{t.addParagraph}</button>
       </div>
       <div className="ova-pte-block-list">
-        {node.section.body?.flatMap((item) => item.blocks ?? []).map((block, index) => (
-          <div className="ova-pte-block-card" key={index}>
-            <strong>{block._type ?? "unknown"}</strong>
-            {"chartRef" in block && block.chartRef ? <span>{block.chartRef}</span> : null}
-            {"tableRef" in block && block.tableRef ? <span>{block.tableRef}</span> : null}
-            {"imageRef" in block && block.imageRef ? <span>{block.imageRef}</span> : null}
+        {blocks.map((block, index) => (
+          <div className={index === selectedBlockIndex ? "ova-pte-block-card active" : "ova-pte-block-card"} key={index}>
+            <button className="ova-pte-block-select" onClick={() => onSelectBlock(index)}>
+              <strong>{blockKindLabel(block, t)}</strong>
+              <span>{blockSummary(block, document, t)}</span>
+            </button>
             <div className="ova-pte-block-actions">
               <button
                 disabled={readOnly || index === 0}
@@ -680,7 +717,7 @@ function VisualSection({
                 {t.upBlock}
               </button>
               <button
-                disabled={readOnly}
+                disabled={readOnly || index === blocks.length - 1}
                 title={t.downBlock}
                 onClick={() => onMoveBlock(index, index + 1)}
               >
@@ -748,6 +785,65 @@ function ResourceStats({
         })}
       </div>
     </>
+  );
+}
+
+function BlockInspector({
+  document,
+  sectionId,
+  block,
+  blockIndex,
+  readOnly,
+  onTextChange,
+  onCommand,
+  t
+}: {
+  document: OVAReportDocument;
+  sectionId: string | undefined;
+  block: OVABlock | undefined;
+  blockIndex: number;
+  readOnly: boolean;
+  onTextChange: (text: string) => void;
+  onCommand: (result: CommandResult) => void;
+  t: EditorMessages;
+}) {
+  if (!sectionId || !block) {
+    return <p className="ova-pte-muted">{t.noBlockSelected}</p>;
+  }
+
+  const selectedResource = resourceFromBlock(block);
+  const text = block._type === "block" ? plainBlockText(block.children) : "";
+
+  return (
+    <div className="ova-pte-block-inspector">
+      <dl>
+        <dt>{t.blockType}</dt>
+        <dd>{blockKindLabel(block, t)}</dd>
+        <dt>{t.linkedResource}</dt>
+        <dd>{selectedResource?.id ?? t.none}</dd>
+      </dl>
+      {block._type === "block" ? (
+        <label>
+          {t.textBlock}
+          <textarea
+            className="ova-pte-inspector-textarea"
+            value={text}
+            readOnly={readOnly}
+            onChange={(event) => onTextChange(event.target.value)}
+          />
+        </label>
+      ) : selectedResource ? (
+        <DataEditor
+          document={document}
+          selectedResource={selectedResource}
+          readOnly={readOnly}
+          onCommand={onCommand}
+          t={t}
+        />
+      ) : (
+        <p className="ova-pte-muted">{blockSummary(block, document, t)}</p>
+      )}
+    </div>
   );
 }
 
@@ -1148,6 +1244,56 @@ function VersionsPanel({
       ))}
     </ul>
   );
+}
+
+function getSectionBlocks(node: SectionNode | undefined): OVABlock[] {
+  return node?.section.body?.flatMap((item) => item.blocks ?? []) ?? [];
+}
+
+function resourceFromBlock(block: OVABlock): { kind: "chart" | "table"; id: string } | undefined {
+  if (block.chartRef) {
+    return { kind: "chart", id: block.chartRef };
+  }
+  if (block.tableRef) {
+    return { kind: "table", id: block.tableRef };
+  }
+  return undefined;
+}
+
+function blockKindLabel(block: OVABlock, t: EditorMessages): string {
+  if (block.chartRef || block._type === "chart") {
+    return t.chartBlock;
+  }
+  if (block.tableRef || block._type === "table") {
+    return t.tableBlock;
+  }
+  if (block.imageRef || block._type === "image") {
+    return t.imageBlock;
+  }
+  if (block._type === "block") {
+    return t.textBlock;
+  }
+  return t.unknownBlock;
+}
+
+function blockSummary(block: OVABlock, document: OVAReportDocument, t: EditorMessages): string {
+  if (block.chartRef) {
+    const chart = document.datasets?.charts?.find((item) => item.id === block.chartRef);
+    const label = displayText(chart?.label as string | Record<string, string> | undefined, document.meta?.language ?? "en");
+    return label ? `${t.chart}: ${label}` : `${t.chart}: ${block.chartRef}`;
+  }
+  if (block.tableRef) {
+    const table = document.datasets?.tables?.find((item) => item.id === block.tableRef);
+    const label = displayText(table?.label as string | Record<string, string> | undefined, document.meta?.language ?? "en");
+    return label ? `${t.table}: ${label}` : `${t.table}: ${block.tableRef}`;
+  }
+  if (block.imageRef) {
+    return `${t.imageBlock}: ${block.imageRef}`;
+  }
+  if (block._type === "block") {
+    return plainBlockText(block.children).trim() || t.textBlock;
+  }
+  return String(block._type ?? t.unknownBlock);
 }
 
 function findSection(nodes: SectionNode[], id: string | undefined): SectionNode | undefined {
