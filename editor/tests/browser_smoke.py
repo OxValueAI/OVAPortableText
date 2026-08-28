@@ -132,6 +132,7 @@ def run_with_playwright() -> None:
         expect(text).to_have_value(original_text)
         page.locator(".ova-pte-nav-toggle").first.click()
         expect(page.locator(".ova-pte-nav-block").first).to_be_hidden()
+        assert_synced_data_rows_playwright(page)
 
         page.locator(".ova-pte-locale button").nth(0).click()
         expect(page.get_by_role("button", name="Visual")).to_be_visible()
@@ -158,6 +159,38 @@ def assert_independent_scroll_playwright(page) -> None:
     for pane in result:
         assert pane["overflowY"] == "auto", pane
         assert pane["clientHeight"] > 100, pane
+
+
+def assert_synced_data_rows_playwright(page) -> None:
+    for _ in range(6):
+        page.evaluate(
+            """
+            () => Array.from(document.querySelectorAll('.ova-pte-nav-toggle'))
+              .filter((button) => !button.disabled && button.textContent.trim() === '+')
+              .forEach((button) => button.click())
+            """
+        )
+        page.wait_for_timeout(50)
+
+    blocks = page.locator(".ova-pte-nav-block")
+    for index in range(blocks.count()):
+        blocks.nth(index).click()
+        row = page.locator(
+            ".ova-pte-table-row, .ova-pte-slice-row, .ova-pte-chart-row:not(.ova-pte-chart-head)"
+        ).first
+        if row.count() == 0:
+            continue
+        heights = row.evaluate(
+            """
+            (element) => Array.from(element.querySelectorAll('textarea, input, span'))
+              .map((field) => Math.round(field.getBoundingClientRect().height))
+            """
+        )
+        if len(heights) < 2:
+            continue
+        assert max(heights) - min(heights) <= 1, heights
+        return
+    raise AssertionError("No editable chart or table data row was found")
 
 
 def main() -> int:

@@ -613,6 +613,7 @@
 
 .ova-pte-data-editor input,
 .ova-pte-data-editor textarea {
+  box-sizing: border-box;
   min-width: 0;
   min-height: 30px;
   padding: 5px 7px;
@@ -623,6 +624,7 @@
 }
 
 .ova-pte-autogrow {
+  display: block;
   width: 100%;
   overflow: hidden;
   line-height: 1.45;
@@ -667,7 +669,7 @@
 .ova-pte-chart-row input,
 .ova-pte-slice-row textarea,
 .ova-pte-slice-row input {
-  height: 100%;
+  min-height: 100%;
 }
 
 .ova-pte-chart-head {
@@ -677,6 +679,9 @@
 }
 
 .ova-pte-chart-row span {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
   overflow: visible;
   padding: 6px 0;
   white-space: normal;

@@ -44,7 +44,8 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
-  useState
+  useState,
+  type ReactNode
 } from "react";
 import { detectInitialLocale, UI_TEXT, type EditorLocale, type EditorMessages } from "./i18n";
 import { Badge, Button, Panel, ToolbarGroup } from "./ui";
@@ -1025,6 +1026,46 @@ function AutoGrowTextarea({
   );
 }
 
+function SyncedDataRow({
+  className,
+  children,
+  syncKey
+}: {
+  className: string;
+  children: ReactNode;
+  syncKey: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const row = ref.current;
+    if (!row) {
+      return;
+    }
+    const fields = Array.from(row.querySelectorAll<HTMLElement>("textarea, input, span"));
+    fields.forEach((field) => {
+      field.style.height = "auto";
+      field.style.minHeight = "";
+    });
+    const maxHeight = fields.reduce((height, field) => {
+      return Math.max(height, field.scrollHeight, field.offsetHeight);
+    }, 0);
+    fields.forEach((field) => {
+      if (field instanceof HTMLTextAreaElement || field instanceof HTMLInputElement) {
+        field.style.height = `${maxHeight}px`;
+      } else {
+        field.style.minHeight = `${maxHeight}px`;
+      }
+    });
+  }, [syncKey]);
+
+  return (
+    <div ref={ref} className={className}>
+      {children}
+    </div>
+  );
+}
+
 function DataEditor({
   document,
   selectedResource,
@@ -1117,8 +1158,9 @@ function DataEditor({
       <div className="ova-pte-table-editor">
         {rows.slice(0, 20).map((row, rowIndex) => {
           const cells = Array.isArray(row.cells) ? row.cells.filter(isRecord) : [];
+          const syncKey = cells.map((cell) => String(cell.text ?? "")).join("\u001f");
           return (
-            <div className="ova-pte-table-row" key={rowIndex}>
+            <SyncedDataRow className="ova-pte-table-row" key={rowIndex} syncKey={syncKey}>
               {cells.map((cell, cellIndex) => (
                 <AutoGrowTextarea
                   key={`${rowIndex}-${cellIndex}`}
@@ -1127,7 +1169,7 @@ function DataEditor({
                   onChange={(value) => onCommand(updateGridTableCellText(document, selectedResource.id, rowIndex, cellIndex, value))}
                 />
               ))}
-            </div>
+            </SyncedDataRow>
           );
         })}
       </div>
@@ -1152,10 +1194,11 @@ function SliceDataEditor({
     <div className="ova-pte-slice-list">
       {slices.map((slice) => {
         const key = String(slice.key ?? "");
+        const label = displayText(slice.label as string | Record<string, string> | undefined, document.meta?.language ?? "en");
         return (
-          <div className="ova-pte-slice-row" key={key}>
+          <SyncedDataRow className="ova-pte-slice-row" key={key} syncKey={`${label}\u001f${Number(slice.value ?? 0)}`}>
             <AutoGrowTextarea
-              value={displayText(slice.label as string | Record<string, string> | undefined, document.meta?.language ?? "en")}
+              value={label}
               readOnly={readOnly}
               onChange={(value) => onCommand(updateChartSlice(document, chartId, key, { label: value }))}
             />
@@ -1168,7 +1211,7 @@ function SliceDataEditor({
                 onCommand(updateChartSlice(document, chartId, key, { value: Number(event.target.value) }))
               }
             />
-          </div>
+          </SyncedDataRow>
         );
       })}
     </div>
@@ -1201,10 +1244,15 @@ function BarDataEditor({
       </div>
       {categories.slice(0, 30).map((category) => {
         const categoryKey = String(category.key ?? "");
+        const categoryLabel = displayText(category.label as string | Record<string, string> | undefined, document.meta?.language ?? "en") || categoryKey;
+        const rowValues = series.map((item) => {
+          const data = Array.isArray(item.data) ? item.data.filter(isRecord) : [];
+          return String(data.find((entry) => entry.categoryKey === categoryKey)?.value ?? 0);
+        });
         return (
-          <div className="ova-pte-chart-row" key={categoryKey}>
+          <SyncedDataRow className="ova-pte-chart-row" key={categoryKey} syncKey={[categoryLabel, ...rowValues].join("\u001f")}>
             <AutoGrowTextarea
-              value={displayText(category.label as string | Record<string, string> | undefined, document.meta?.language ?? "en") || categoryKey}
+              value={categoryLabel}
               readOnly={readOnly}
               onChange={(value) => onCommand(updateBarChartCategory(document, chartId, categoryKey, value))}
             />
@@ -1224,7 +1272,7 @@ function BarDataEditor({
                 />
               );
             })}
-          </div>
+          </SyncedDataRow>
         );
       })}
     </div>
@@ -1258,10 +1306,15 @@ function LineDataEditor({
       </div>
       {points.slice(0, 40).map((point) => {
         const pointKey = String(point.key ?? "");
+        const pointLabel = displayText(point.label as string | Record<string, string> | undefined, document.meta?.language ?? "en") || pointKey;
         return (
-          <div className="ova-pte-chart-row" key={pointKey}>
+          <SyncedDataRow
+            className="ova-pte-chart-row"
+            key={pointKey}
+            syncKey={`${pointLabel}\u001f${Number(point.xValue ?? 0)}\u001f${Number(point.yValue ?? 0)}`}
+          >
             <AutoGrowTextarea
-              value={displayText(point.label as string | Record<string, string> | undefined, document.meta?.language ?? "en") || pointKey}
+              value={pointLabel}
               readOnly={readOnly}
               onChange={(value) => onCommand(updateLineChartPoint(document, chartId, seriesKey, pointKey, { label: value }))}
             />
@@ -1281,7 +1334,7 @@ function LineDataEditor({
                 onCommand(updateLineChartPoint(document, chartId, seriesKey, pointKey, { yValue: Number(event.target.value) }))
               }
             />
-          </div>
+          </SyncedDataRow>
         );
       })}
     </div>
@@ -1316,7 +1369,11 @@ function MatrixBubbleDataEditor({
       {points.slice(0, 40).map((point) => {
         const pointKey = String(point.key ?? "");
         return (
-          <div className="ova-pte-chart-row" key={pointKey}>
+          <SyncedDataRow
+            className="ova-pte-chart-row"
+            key={pointKey}
+            syncKey={`${String(point.xCategoryKey ?? "")}\u001f${String(point.yCategoryKey ?? "")}\u001f${Number(point.sizeValue ?? 0)}`}
+          >
             <span>{String(point.xCategoryKey ?? "")}</span>
             <span>{String(point.yCategoryKey ?? "")}</span>
             <input
@@ -1327,7 +1384,7 @@ function MatrixBubbleDataEditor({
                 onCommand(updateMatrixBubblePoint(document, chartId, seriesKey, pointKey, Number(event.target.value)))
               }
             />
-          </div>
+          </SyncedDataRow>
         );
       })}
     </div>
