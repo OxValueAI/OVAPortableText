@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "rootDir": "src",
+    "outDir": "dist",
+    "paths": {
+      "@ova/portable-text-editor-core": ["packages/editor-core/dist/index.d.ts"]
+    }
+  },
+  "include": ["src"]
+}
