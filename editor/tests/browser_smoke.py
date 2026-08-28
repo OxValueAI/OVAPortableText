@@ -18,7 +18,7 @@ ZH_OUTLINE = "\u5927\u7eb2"
 ZH_VISUAL = "\u53ef\u89c6\u5316"
 ZH_MODIFIED = "\u5df2\u4fee\u6539"
 ZH_UNDO = "\u64a4\u9500"
-ZH_BLOCK_INSPECTOR = "\u533a\u5757\u8be6\u60c5"
+ZH_CONTEXT = "\u4e0a\u4e0b\u6587"
 ZH_TEXT_BLOCK = "\u6587\u672c\u533a\u5757"
 
 
@@ -55,11 +55,14 @@ def run_with_selenium() -> None:
         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ova-pte-locale button:nth-child(2)"))).click()
         wait.until(EC.visibility_of_element_located((By.XPATH, f"//*[contains(normalize-space(), '{ZH_OUTLINE}')]")))
         wait.until(EC.visibility_of_element_located((By.XPATH, f"//button[normalize-space()='{ZH_VISUAL}']")))
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ova-pte-nav-block")))
+        first_block = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ova-pte-nav-block")))
+        first_block.click()
         wait.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(normalize-space(), '\u4e0a\u79fb\u533a\u5757')]")))
-        wait.until(EC.visibility_of_element_located((By.XPATH, f"//*[contains(normalize-space(), '{ZH_BLOCK_INSPECTOR}')]")))
+        wait.until(EC.visibility_of_element_located((By.XPATH, f"//*[contains(normalize-space(), '{ZH_CONTEXT}')]")))
         wait.until(EC.visibility_of_element_located((By.XPATH, f"//*[contains(normalize-space(), '{ZH_TEXT_BLOCK}')]")))
 
-        text = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ova-pte-inspector-textarea")))
+        text = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ova-pte-focused-editor .ova-pte-inspector-textarea")))
         original_text = text.get_attribute("value") or ""
         text.clear()
         text.send_keys(f"{original_text} smoke")
@@ -113,11 +116,13 @@ def run_with_playwright() -> None:
         page.locator(".ova-pte-locale button").nth(1).click()
         expect(page.get_by_text(ZH_OUTLINE)).to_be_visible()
         expect(page.get_by_role("button", name=ZH_VISUAL)).to_be_visible()
+        expect(page.locator(".ova-pte-nav-block").first).to_be_visible()
+        page.locator(".ova-pte-nav-block").first.click()
         expect(page.get_by_text("\u4e0a\u79fb\u533a\u5757").nth(0)).to_be_visible()
-        expect(page.get_by_text(ZH_BLOCK_INSPECTOR)).to_be_visible()
+        expect(page.get_by_text(ZH_CONTEXT)).to_be_visible()
         expect(page.get_by_text(ZH_TEXT_BLOCK).nth(0)).to_be_visible()
 
-        text = page.locator(".ova-pte-inspector-textarea")
+        text = page.locator(".ova-pte-focused-editor .ova-pte-inspector-textarea")
         original_text = text.input_value()
         text.fill(f"{original_text} smoke")
         expect(page.get_by_text(ZH_MODIFIED)).to_be_visible()

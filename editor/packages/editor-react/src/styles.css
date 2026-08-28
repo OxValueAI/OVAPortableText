@@ -21,22 +21,51 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  min-height: 56px;
-  padding: 8px 12px;
+  gap: 8px;
+  min-height: 68px;
+  padding: 8px 14px;
   border-bottom: 1px solid #d9dde5;
   background: #ffffff;
 }
 
-.ova-pte-toolbar button,
-.ova-pte-tree button,
-.ova-pte-source-actions button {
+.ova-pte-ui-button {
   min-height: 32px;
   border: 1px solid #c9d1df;
   border-radius: 6px;
   color: #1d2433;
   background: #ffffff;
   cursor: pointer;
+}
+
+.ova-pte-ui-button:hover:not(:disabled) {
+  border-color: #8ba8c7;
+  background: #f6f9fc;
+}
+
+.ova-pte-ui-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ova-pte-ui-button-primary {
+  border-color: #1f6fb2;
+  color: #ffffff;
+  background: #1f6fb2;
+}
+
+.ova-pte-ui-button-primary:hover:not(:disabled) {
+  border-color: #1a5d96;
+  background: #1a5d96;
+}
+
+.ova-pte-ui-button-danger {
+  border-color: #f2b8b5;
+  color: #b42318;
+}
+
+.ova-pte-ui-button-ghost {
+  border-color: transparent;
+  background: transparent;
 }
 
 .ova-pte-toolbar button.active,
@@ -46,14 +75,31 @@
 }
 
 .ova-pte-toolbar-group {
+  display: grid;
+  gap: 4px;
+  min-height: 46px;
+  padding: 5px 7px;
+  border: 1px solid #e5e9f0;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.ova-pte-toolbar-group.compact {
+  min-width: max-content;
+}
+
+.ova-pte-toolbar-label {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.ova-pte-toolbar-items {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 38px;
-  padding: 3px;
-  border: 1px solid #edf0f5;
-  border-radius: 8px;
-  background: #fbfcfe;
 }
 
 .ova-pte-segmented {
@@ -68,6 +114,7 @@
   min-height: 30px;
   border: 0;
   border-radius: 0;
+  padding: 0 10px;
 }
 
 .ova-pte-segmented button + button {
@@ -100,9 +147,25 @@
 }
 
 .ova-pte-toolbar .ova-pte-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin-left: auto;
   color: #667085;
   font-size: 13px;
+}
+
+.ova-pte-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid #c6d8ea;
+  border-radius: 999px;
+  color: #194f82;
+  background: #eef6ff;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .ova-pte-search-group {
@@ -116,7 +179,8 @@
 
 .ova-pte-grid {
   display: grid;
-  grid-template-columns: 280px minmax(420px, 1fr) 300px;
+  grid-template-columns: minmax(280px, 340px) minmax(520px, 760px) minmax(280px, 360px);
+  justify-content: center;
   min-height: 0;
   overflow: hidden;
 }
@@ -137,7 +201,8 @@
 .ova-pte-editor {
   min-height: 0;
   overflow: auto;
-  padding: 22px;
+  padding: 20px 18px;
+  background: #f4f6f8;
 }
 
 .ova-pte-panel {
@@ -168,14 +233,64 @@
 }
 
 .ova-pte-tree button {
-  display: grid;
-  grid-template-columns: 24px 1fr;
-  align-items: center;
   width: 100%;
-  margin: 2px 0;
-  padding: 5px 6px;
-  overflow: hidden;
   text-align: left;
+}
+
+.ova-pte-tree ul {
+  padding-left: 18px;
+}
+
+.ova-pte-nav-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 4px;
+  margin: 3px 0;
+}
+
+.ova-pte-nav-toggle {
+  width: 28px;
+  min-height: 30px;
+  padding: 0;
+  font-weight: 800;
+}
+
+.ova-pte-nav-section,
+.ova-pte-nav-block {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 2px 6px;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 8px;
+  overflow: hidden;
+}
+
+.ova-pte-nav-block {
+  grid-template-columns: 24px minmax(0, 1fr);
+  margin: 2px 0 2px 32px;
+  border-style: dashed;
+}
+
+.ova-pte-nav-section strong,
+.ova-pte-nav-block strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ova-pte-nav-section small,
+.ova-pte-nav-block small {
+  grid-column: 2;
+  min-width: 0;
+  overflow: hidden;
+  color: #667085;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ova-pte-tree button span {
@@ -184,18 +299,46 @@
 }
 
 .ova-pte-document,
-.ova-pte-section-composer {
-  max-width: 920px;
+.ova-pte-focused-editor {
+  max-width: 720px;
   margin: 0 auto;
-  padding: 28px;
+  padding: 24px;
   background: #ffffff;
   border: 1px solid #d9dde5;
   border-radius: 8px;
 }
 
+.ova-pte-focused-editor,
 .ova-pte-section-composer {
   display: grid;
   gap: 16px;
+}
+
+.ova-pte-focus-header {
+  display: grid;
+  gap: 4px;
+  border-bottom: 1px solid #edf0f5;
+  padding-bottom: 14px;
+}
+
+.ova-pte-focus-header span {
+  color: #255e9c;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ova-pte-focus-header h1 {
+  margin: 0;
+  color: #101828;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.ova-pte-focus-header p {
+  margin: 0;
+  color: #667085;
+  font-size: 13px;
 }
 
 .ova-pte-section-header {
@@ -203,7 +346,9 @@
   gap: 8px;
 }
 
-.ova-pte-section-header label {
+.ova-pte-section-header label,
+.ova-pte-title-field,
+.ova-pte-block-editor-field {
   display: grid;
   gap: 6px;
   color: #667085;
@@ -251,16 +396,9 @@
 
 .ova-pte-section-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
-}
-
-.ova-pte-section-actions button,
-.ova-pte-block-actions button {
-  min-height: 28px;
-  border: 1px solid #c9d1df;
-  border-radius: 6px;
-  background: #ffffff;
 }
 
 .ova-pte-block-list {
@@ -270,14 +408,17 @@
 }
 
 .ova-pte-block-card {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
   padding: 8px 10px;
   border: 1px solid #d9dde5;
   border-radius: 6px;
   background: #fbfcfe;
+  color: #1d2433;
   font-size: 13px;
+  text-align: left;
+  cursor: pointer;
 }
 
 .ova-pte-block-card.active {
@@ -452,7 +593,8 @@
 }
 
 .ova-pte-inspector-textarea {
-  min-height: 220px;
+  width: 100%;
+  min-height: 300px;
   padding: 10px;
   border: 1px solid #c9d1df;
   border-radius: 6px;

@@ -43,11 +43,13 @@ import {
   useImperativeHandle,
   useMemo,
   useRef,
-  useState,
-  type ReactNode
+  useState
 } from "react";
 import { detectInitialLocale, UI_TEXT, type EditorLocale, type EditorMessages } from "./i18n";
+import { Badge, Button, Panel, ToolbarGroup } from "./ui";
 import "./styles.css";
+
+type FocusTarget = "section" | "block";
 
 export interface OVAPortableTextEditorHandle {
   setValue(value: object | string): Promise<{ ok: boolean; issues: EditorIssue[] }>;
@@ -91,6 +93,8 @@ export const OVAPortableTextEditor = forwardRef<
   const [past, setPast] = useState<OVAReportDocument[]>([]);
   const [future, setFuture] = useState<OVAReportDocument[]>([]);
   const [selectedBlockIndex, setSelectedBlockIndex] = useState(0);
+  const [focusTarget, setFocusTarget] = useState<FocusTarget>("section");
+  const [expandedSectionIds, setExpandedSectionIds] = useState<Set<string>>(() => new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -99,9 +103,12 @@ export const OVAPortableTextEditor = forwardRef<
     }
     const loaded = loadDocument(props.initialValue);
     if (loaded.document) {
+      const firstSectionId = buildSectionTree(loaded.document.sections)[0]?.id;
       setDocument(loaded.document);
       setSourceText(stringifyDocument(loaded.document, true));
-      setSelectedSectionId(buildSectionTree(loaded.document.sections)[0]?.id);
+      setSelectedSectionId(firstSectionId);
+      setFocusTarget("section");
+      setExpandedSectionIds(new Set(firstSectionId ? [firstSectionId] : []));
       setPast([]);
       setFuture([]);
       setDirty(false);
@@ -120,6 +127,7 @@ export const OVAPortableTextEditor = forwardRef<
   );
   const selectedBlocks = useMemo(() => getSectionBlocks(selectedSection), [selectedSection]);
   const selectedBlock = selectedBlocks[selectedBlockIndex];
+  const selectedResource = selectedBlock ? resourceFromBlock(selectedBlock) : undefined;
   const searchResults = useMemo(
     () => (document ? searchDocument(document, query) : []),
     [document, query]
@@ -162,6 +170,7 @@ export const OVAPortableTextEditor = forwardRef<
     setSourceState("SYNCED");
     if (result.selectionId) {
       setSelectedSectionId(result.selectionId);
+      setExpandedSectionIds((current) => new Set(current).add(result.selectionId as string));
     }
     setDirty(true);
   };
@@ -169,12 +178,15 @@ export const OVAPortableTextEditor = forwardRef<
   const applySource = () => {
     const loaded = loadDocument(sourceText);
     if (loaded.document) {
+      const firstSectionId = buildSectionTree(loaded.document.sections)[0]?.id;
       setDocument(loaded.document);
       setSourceState("SYNCED");
       setPast((current) => (document ? [...current, document] : current));
       setFuture([]);
       setDirty(true);
-      setSelectedSectionId(buildSectionTree(loaded.document.sections)[0]?.id);
+      setSelectedSectionId(firstSectionId);
+      setFocusTarget("section");
+      setExpandedSectionIds(new Set(firstSectionId ? [firstSectionId] : []));
       return;
     }
     setSourceState("INVALID");
@@ -227,13 +239,16 @@ export const OVAPortableTextEditor = forwardRef<
     const text = await file.text();
     const loaded = loadDocument(text);
     if (loaded.document) {
+      const firstSectionId = buildSectionTree(loaded.document.sections)[0]?.id;
       setDocument(loaded.document);
       setSourceText(stringifyDocument(loaded.document, true));
       setSourceState("SYNCED");
       setPast([]);
       setFuture([]);
       setDirty(false);
-      setSelectedSectionId(buildSectionTree(loaded.document.sections)[0]?.id);
+      setSelectedSectionId(firstSectionId);
+      setFocusTarget("section");
+      setExpandedSectionIds(new Set(firstSectionId ? [firstSectionId] : []));
     } else {
       setSourceText(text);
       setSourceState("INVALID");
@@ -310,7 +325,10 @@ export const OVAPortableTextEditor = forwardRef<
       setDirty(false);
       setPast([]);
       setFuture([]);
-      setSelectedSectionId(buildSectionTree(version.document.sections)[0]?.id);
+      const firstSectionId = buildSectionTree(version.document.sections)[0]?.id;
+      setSelectedSectionId(firstSectionId);
+      setFocusTarget("section");
+      setExpandedSectionIds(new Set(firstSectionId ? [firstSectionId] : []));
     } catch (error) {
       setVersionError(error instanceof Error ? error.message : String(error));
     }
@@ -334,12 +352,16 @@ export const OVAPortableTextEditor = forwardRef<
 
       const loaded = loadDocument(value);
       if (loaded.document) {
+        const firstSectionId = buildSectionTree(loaded.document.sections)[0]?.id;
         setDocument(loaded.document);
         setSourceText(stringifyDocument(loaded.document, true));
         setSourceState("SYNCED");
         setPast([]);
         setFuture([]);
         setDirty(false);
+        setSelectedSectionId(firstSectionId);
+        setFocusTarget("section");
+        setExpandedSectionIds(new Set(firstSectionId ? [firstSectionId] : []));
       }
       return { ok: loaded.ok, issues: loaded.issues };
     },
@@ -391,7 +413,10 @@ export const OVAPortableTextEditor = forwardRef<
       setPast([]);
       setFuture([]);
       setDirty(false);
-      setSelectedSectionId(buildSectionTree(version.document.sections)[0]?.id);
+      const firstSectionId = buildSectionTree(version.document.sections)[0]?.id;
+      setSelectedSectionId(firstSectionId);
+      setFocusTarget("section");
+      setExpandedSectionIds(new Set(firstSectionId ? [firstSectionId] : []));
       return { ok: true, issues: [] };
     }
   }));
@@ -417,17 +442,34 @@ export const OVAPortableTextEditor = forwardRef<
     return <div className="ova-pte-shell ova-pte-empty">{t.openEmpty}</div>;
   }
 
+  const selectSection = (id: string) => {
+    setSelectedSectionId(id);
+    setSelectedBlockIndex(0);
+    setFocusTarget("section");
+    setExpandedSectionIds((current) => new Set(current).add(id));
+  };
+
+  const selectBlock = (sectionId: string, index: number) => {
+    setSelectedSectionId(sectionId);
+    setSelectedBlockIndex(index);
+    setFocusTarget("block");
+    setExpandedSectionIds((current) => new Set(current).add(sectionId));
+  };
+
+  const toggleSection = (id: string) => {
+    setExpandedSectionIds((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
   return (
     <div className="ova-pte-shell">
       <header className="ova-pte-toolbar">
-        <div className="ova-pte-toolbar-group ova-pte-segmented" aria-label={t.visual}>
-          <button className={mode === "visual" ? "active" : ""} onClick={() => setMode("visual")}>{t.visual}</button>
-          <button className={mode === "json" ? "active" : ""} onClick={() => setMode("json")}>{t.json}</button>
-        </div>
-        <div className="ova-pte-toolbar-group ova-pte-segmented ova-pte-locale" aria-label={t.language}>
-          <button className={locale === "en" ? "active" : ""} onClick={() => setLocale("en")}>EN</button>
-          <button className={locale === "zh" ? "active" : ""} onClick={() => setLocale("zh")}>中文</button>
-        </div>
         <input
           ref={fileInputRef}
           type="file"
@@ -438,65 +480,63 @@ export const OVAPortableTextEditor = forwardRef<
             event.currentTarget.value = "";
           }}
         />
-        <div className="ova-pte-toolbar-group">
-          <button onClick={() => fileInputRef.current?.click()}>{t.open}</button>
-          <button onClick={copyJSON}>{t.copyJSON}</button>
-          <button onClick={downloadJSON}>{t.download}</button>
-        </div>
-        <div className="ova-pte-toolbar-group ova-pte-search-group">
+        <ToolbarGroup label={t.mode} compact>
+          <div className="ova-pte-segmented" aria-label={t.mode}>
+            <Button className={mode === "visual" ? "active" : ""} onClick={() => setMode("visual")}>{t.visual}</Button>
+            <Button className={mode === "json" ? "active" : ""} onClick={() => setMode("json")}>{t.json}</Button>
+          </div>
+        </ToolbarGroup>
+        <ToolbarGroup label={t.file}>
+          <Button onClick={() => fileInputRef.current?.click()}>{t.open}</Button>
+          <Button onClick={copyJSON}>{t.copyJSON}</Button>
+          <Button onClick={downloadJSON}>{t.download}</Button>
+        </ToolbarGroup>
+        <ToolbarGroup label={t.search} compact>
           <input
             aria-label={t.find}
             placeholder={t.find}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
-        </div>
-        <div className="ova-pte-toolbar-group">
-          <button disabled={past.length === 0} onClick={undo}>{t.undo}</button>
-          <button disabled={future.length === 0} onClick={redo}>{t.redo}</button>
-        </div>
-        <div className="ova-pte-toolbar-group">
-          <button onClick={() => validation && props.onValidationChange?.(validation)}>{t.validate}</button>
-        <button disabled={!props.onRequestFinalPreview} onClick={() => props.onRequestFinalPreview?.(document)}>
-          {t.finalPreview}
-        </button>
-        <button onClick={save}>{t.save}</button>
-        <button disabled={!versioningEnabled} onClick={saveLocalVersion}>{t.saveVersion}</button>
-        </div>
-        <div className="ova-pte-toolbar-group">
-          <button disabled={visualLocked} onClick={() => applyCommand(addSection(document))}>{t.addSection}</button>
-        <button
-          disabled={visualLocked || !selectedSection}
-          onClick={() => selectedSection && applyCommand(addSection(document, { parentSectionId: selectedSection.id }))}
-        >
-          {t.addSubsection}
-        </button>
-        <button
-          disabled={visualLocked || !selectedSection}
-          onClick={() => selectedSection && applyCommand(duplicateSection(document, selectedSection.id))}
-        >
-          {t.duplicateSection}
-        </button>
-        <button
-          disabled={visualLocked || !selectedSection}
-          onClick={() => selectedSection && applyCommand(deleteSection(document, selectedSection.id))}
-        >
-          {t.deleteSection}
-        </button>
-        </div>
-        <span className="ova-pte-status">{dirty ? t.modified : t.saved} - {validation?.issues.filter((issue) => issue.severity === "error").length ?? 0} {t.errors} - {validation?.issues.filter((issue) => issue.severity === "warning").length ?? 0} {t.warnings}</span>
+        </ToolbarGroup>
+        <ToolbarGroup label={t.history} compact>
+          <Button disabled={past.length === 0} onClick={undo}>{t.undo}</Button>
+          <Button disabled={future.length === 0} onClick={redo}>{t.redo}</Button>
+        </ToolbarGroup>
+        <ToolbarGroup label={t.output}>
+          <Button onClick={() => validation && props.onValidationChange?.(validation)}>{t.validate}</Button>
+          <Button disabled={!props.onRequestFinalPreview} onClick={() => props.onRequestFinalPreview?.(document)}>
+            {t.finalPreview}
+          </Button>
+          <Button tone="primary" onClick={save}>{t.save}</Button>
+          <Button disabled={!versioningEnabled} onClick={saveLocalVersion}>{t.saveVersion}</Button>
+        </ToolbarGroup>
+        <ToolbarGroup label={t.language} compact>
+          <div className="ova-pte-segmented ova-pte-locale" aria-label={t.language}>
+            <Button className={locale === "en" ? "active" : ""} onClick={() => setLocale("en")}>EN</Button>
+            <Button className={locale === "zh" ? "active" : ""} onClick={() => setLocale("zh")}>中文</Button>
+          </div>
+        </ToolbarGroup>
+        <span className="ova-pte-status">
+          <Badge>{dirty ? t.modified : t.saved}</Badge>
+          <span>{validation?.issues.filter((issue) => issue.severity === "error").length ?? 0} {t.errors}</span>
+          <span>{validation?.issues.filter((issue) => issue.severity === "warning").length ?? 0} {t.warnings}</span>
+        </span>
       </header>
 
       <main className="ova-pte-grid">
         <aside className="ova-pte-sidebar">
           <Panel title={t.outline}>
-            <SectionTree
+            <NavigatorTree
               nodes={sections}
               selectedId={selectedSection?.id}
-              onSelect={(id) => {
-                setSelectedSectionId(id);
-                setSelectedBlockIndex(0);
-              }}
+              selectedBlockIndex={focusTarget === "block" ? selectedBlockIndex : undefined}
+              expandedIds={expandedSectionIds}
+              document={document}
+              onSelectSection={selectSection}
+              onSelectBlock={selectBlock}
+              onToggleSection={toggleSection}
+              t={t}
             />
           </Panel>
           <Panel title={t.issues}>
@@ -506,8 +546,10 @@ export const OVAPortableTextEditor = forwardRef<
 
         <section className="ova-pte-editor">
           {mode === "visual" ? (
-            <SectionComposer
+            <FocusedEditor
               node={selectedSection}
+              focusTarget={focusTarget}
+              block={selectedBlock}
               selectedBlockIndex={selectedBlockIndex}
               readOnly={visualLocked}
               document={document}
@@ -515,34 +557,46 @@ export const OVAPortableTextEditor = forwardRef<
                 if (!selectedSection) return;
                 applyCommand(updateSectionTitle(document, selectedSection.id, title));
               }}
-              onSelectBlock={setSelectedBlockIndex}
+              onSelectBlock={(index) => selectedSection && selectBlock(selectedSection.id, index)}
               onAddParagraph={() => selectedSection && applyCommand(addParagraphBlock(document, selectedSection.id))}
+              onAddSubsection={() => selectedSection && applyCommand(addSection(document, { parentSectionId: selectedSection.id }))}
+              onAddRootSection={() => applyCommand(addSection(document))}
+              onDuplicateSection={() => selectedSection && applyCommand(duplicateSection(document, selectedSection.id))}
+              onDeleteSection={() => selectedSection && applyCommand(deleteSection(document, selectedSection.id))}
               onDuplicateBlock={(index) => {
                 if (!selectedSection) return;
                 applyCommand(duplicateBlock(document, selectedSection.id, index));
                 setSelectedBlockIndex(index + 1);
+                setFocusTarget("block");
               }}
               onDeleteBlock={(index) => {
                 if (!selectedSection) return;
                 applyCommand(deleteBlock(document, selectedSection.id, index));
                 setSelectedBlockIndex(Math.max(0, index - 1));
+                setFocusTarget("section");
               }}
               onMoveBlock={(fromIndex, toIndex) => {
                 if (!selectedSection) return;
                 applyCommand(moveBlock(document, selectedSection.id, fromIndex, toIndex));
                 setSelectedBlockIndex(Math.max(0, Math.min(toIndex, selectedBlocks.length - 1)));
+                setFocusTarget("block");
               }}
+              onTextChange={(text) => {
+                if (!selectedSection) return;
+                applyCommand(updateTextBlock(document, selectedSection.id, selectedBlockIndex, text));
+              }}
+              onCommand={applyCommand}
               t={t}
             />
           ) : (
             <div className="ova-pte-source">
               <div className="ova-pte-source-actions">
                 <span>{sourceState}</span>
-                <button onClick={applySource}>{t.apply}</button>
-                <button onClick={() => {
+                <Button onClick={applySource}>{t.apply}</Button>
+                <Button onClick={() => {
                   setSourceText(stringifyDocument(document, true));
                   setSourceState("SYNCED");
-                }}>{t.discard}</button>
+                }}>{t.discard}</Button>
               </div>
               <textarea
                 value={sourceText}
@@ -557,18 +611,14 @@ export const OVAPortableTextEditor = forwardRef<
         </section>
 
         <aside className="ova-pte-properties">
-          <Panel title={t.blockInspector}>
-            <BlockInspector
+          <Panel title={t.context}>
+            <SelectedContext
               document={document}
-              sectionId={selectedSection?.id}
+              section={selectedSection}
+              focusTarget={focusTarget}
               block={selectedBlock}
               blockIndex={selectedBlockIndex}
-              readOnly={visualLocked}
-              onTextChange={(text) => {
-                if (!selectedSection) return;
-                applyCommand(updateTextBlock(document, selectedSection.id, selectedBlockIndex, text));
-              }}
-              onCommand={applyCommand}
+              resource={selectedResource}
               t={t}
             />
           </Panel>
@@ -617,236 +667,328 @@ export const OVAPortableTextEditor = forwardRef<
   );
 });
 
-function Panel({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="ova-pte-panel">
-      <h2>{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function SectionTree({
+function NavigatorTree({
   nodes,
   selectedId,
-  onSelect
+  selectedBlockIndex,
+  expandedIds,
+  document,
+  onSelectSection,
+  onSelectBlock,
+  onToggleSection,
+  t
 }: {
   nodes: SectionNode[];
   selectedId: string | undefined;
-  onSelect: (id: string) => void;
+  selectedBlockIndex: number | undefined;
+  expandedIds: Set<string>;
+  document: OVAReportDocument;
+  onSelectSection: (id: string) => void;
+  onSelectBlock: (sectionId: string, index: number) => void;
+  onToggleSection: (id: string) => void;
+  t: EditorMessages;
 }) {
   return (
-    <ul className="ova-pte-tree">
+    <ul className="ova-pte-tree ova-pte-navigator">
       {nodes.map((node) => (
-        <li key={node.path}>
-          <button className={node.id === selectedId ? "active" : ""} onClick={() => onSelect(node.id)}>
-            <span>{node.level}</span>
-            {node.title || node.id}
-          </button>
-          {node.children.length > 0 && (
-            <SectionTree nodes={node.children} selectedId={selectedId} onSelect={onSelect} />
-          )}
-        </li>
+        <NavigatorNode
+          key={node.path}
+          node={node}
+          selectedId={selectedId}
+          selectedBlockIndex={selectedBlockIndex}
+          expandedIds={expandedIds}
+          document={document}
+          onSelectSection={onSelectSection}
+          onSelectBlock={onSelectBlock}
+          onToggleSection={onToggleSection}
+          t={t}
+        />
       ))}
     </ul>
   );
 }
 
-function SectionComposer({
+function NavigatorNode({
   node,
+  selectedId,
+  selectedBlockIndex,
+  expandedIds,
+  document,
+  onSelectSection,
+  onSelectBlock,
+  onToggleSection,
+  t
+}: {
+  node: SectionNode;
+  selectedId: string | undefined;
+  selectedBlockIndex: number | undefined;
+  expandedIds: Set<string>;
+  document: OVAReportDocument;
+  onSelectSection: (id: string) => void;
+  onSelectBlock: (sectionId: string, index: number) => void;
+  onToggleSection: (id: string) => void;
+  t: EditorMessages;
+}) {
+  const blocks = getSectionBlocks(node);
+  const expanded = expandedIds.has(node.id) || selectedId === node.id;
+  const hasChildren = node.children.length > 0 || blocks.length > 0;
+
+  return (
+    <li>
+      <div className="ova-pte-nav-row">
+        <Button
+          className="ova-pte-nav-toggle"
+          disabled={!hasChildren}
+          title={expanded ? t.closeSection : t.openSection}
+          onClick={() => onToggleSection(node.id)}
+        >
+          {expanded ? "-" : "+"}
+        </Button>
+        <Button
+          className={node.id === selectedId && selectedBlockIndex === undefined ? "ova-pte-nav-section active" : "ova-pte-nav-section"}
+          onClick={() => onSelectSection(node.id)}
+        >
+          <span>{node.level}</span>
+          <strong>{node.title || node.id}</strong>
+          <small>{blocks.length} {t.blocks}</small>
+        </Button>
+      </div>
+      {expanded && (
+        <ul>
+          {blocks.map((block, index) => (
+            <li key={`${node.id}-block-${index}`}>
+              <Button
+                className={node.id === selectedId && selectedBlockIndex === index ? "ova-pte-nav-block active" : "ova-pte-nav-block"}
+                onClick={() => onSelectBlock(node.id, index)}
+              >
+                <span>{index + 1}</span>
+                <strong>{blockKindLabel(block, t)}</strong>
+                <small>{blockSummary(block, document, t)}</small>
+              </Button>
+            </li>
+          ))}
+          {node.children.map((child) => (
+            <NavigatorNode
+              key={child.path}
+              node={child}
+              selectedId={selectedId}
+              selectedBlockIndex={selectedBlockIndex}
+              expandedIds={expandedIds}
+              document={document}
+              onSelectSection={onSelectSection}
+              onSelectBlock={onSelectBlock}
+              onToggleSection={onToggleSection}
+              t={t}
+            />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+function FocusedEditor({
+  node,
+  focusTarget,
+  block,
   selectedBlockIndex,
   readOnly,
   document,
   onTitleChange,
   onSelectBlock,
   onAddParagraph,
+  onAddSubsection,
+  onAddRootSection,
+  onDuplicateSection,
+  onDeleteSection,
   onDuplicateBlock,
   onDeleteBlock,
   onMoveBlock,
+  onTextChange,
+  onCommand,
   t
 }: {
   node: SectionNode | undefined;
+  focusTarget: FocusTarget;
+  block: OVABlock | undefined;
   selectedBlockIndex: number;
   readOnly: boolean;
   document: OVAReportDocument;
   onTitleChange: (title: string) => void;
   onSelectBlock: (index: number) => void;
   onAddParagraph: () => void;
+  onAddSubsection: () => void;
+  onAddRootSection: () => void;
+  onDuplicateSection: () => void;
+  onDeleteSection: () => void;
   onDuplicateBlock: (index: number) => void;
   onDeleteBlock: (index: number) => void;
   onMoveBlock: (fromIndex: number, toIndex: number) => void;
+  onTextChange: (text: string) => void;
+  onCommand: (result: CommandResult) => void;
   t: EditorMessages;
 }) {
   if (!node) {
     return <div className="ova-pte-empty">{t.noSectionSelected}</div>;
   }
 
-  const blocks = getSectionBlocks(node);
+  if (focusTarget === "block" && block) {
+    return (
+      <article className="ova-pte-focused-editor">
+        {readOnly && <div className="ova-pte-lock">{t.visualLocked}</div>}
+        <div className="ova-pte-focus-header">
+          <span>{t.currentBlock}</span>
+          <h1>{blockKindLabel(block, t)}</h1>
+          <p>{node.level} / {node.title || node.id} / {selectedBlockIndex + 1}</p>
+        </div>
+        <div className="ova-pte-section-actions">
+          <Button disabled={readOnly || selectedBlockIndex === 0} title={t.upBlock} onClick={() => onMoveBlock(selectedBlockIndex, selectedBlockIndex - 1)}>
+            {t.upBlock}
+          </Button>
+          <Button disabled={readOnly || selectedBlockIndex >= getSectionBlocks(node).length - 1} title={t.downBlock} onClick={() => onMoveBlock(selectedBlockIndex, selectedBlockIndex + 1)}>
+            {t.downBlock}
+          </Button>
+          <Button disabled={readOnly} onClick={() => onDuplicateBlock(selectedBlockIndex)}>{t.duplicateBlock}</Button>
+          <Button tone="danger" disabled={readOnly} onClick={() => onDeleteBlock(selectedBlockIndex)}>{t.deleteBlock}</Button>
+        </div>
+        <BlockEditor
+          document={document}
+          block={block}
+          readOnly={readOnly}
+          onTextChange={onTextChange}
+          onCommand={onCommand}
+          t={t}
+        />
+      </article>
+    );
+  }
 
+  const blocks = getSectionBlocks(node);
   return (
-    <article className="ova-pte-section-composer">
+    <article className="ova-pte-focused-editor ova-pte-section-composer">
       {readOnly && <div className="ova-pte-lock">{t.visualLocked}</div>}
-      <div className="ova-pte-section-header">
-        <label>
-          {t.sectionTitle}
-          <input
-            className="ova-pte-title-input"
-            value={node.title}
-            readOnly={readOnly}
-            onChange={(event) => onTitleChange(event.target.value)}
-          />
-        </label>
-        <span>{t.sectionBlocks}: {blocks.length}</span>
+      <div className="ova-pte-focus-header">
+        <span>{t.currentSection}</span>
+        <h1>{node.title || node.id}</h1>
+        <p>{node.level} / {blocks.length} {t.blocks} / {node.children.length} {t.childSections}</p>
       </div>
+      <label className="ova-pte-title-field">
+        {t.sectionTitle}
+        <input
+          className="ova-pte-title-input"
+          value={node.title}
+          readOnly={readOnly}
+          onChange={(event) => onTitleChange(event.target.value)}
+        />
+      </label>
       <div className="ova-pte-section-actions">
-        <button disabled={readOnly} onClick={onAddParagraph}>{t.addParagraph}</button>
+        <Button disabled={readOnly} onClick={onAddRootSection}>{t.addSection}</Button>
+        <Button disabled={readOnly} onClick={onAddSubsection}>{t.addSubsection}</Button>
+        <Button disabled={readOnly} onClick={onAddParagraph}>{t.addParagraph}</Button>
+        <Button disabled={readOnly} onClick={onDuplicateSection}>{t.duplicateSection}</Button>
+        <Button tone="danger" disabled={readOnly} onClick={onDeleteSection}>{t.deleteSection}</Button>
       </div>
       <div className="ova-pte-block-list">
-        {blocks.map((block, index) => (
-          <div className={index === selectedBlockIndex ? "ova-pte-block-card active" : "ova-pte-block-card"} key={index}>
-            <button className="ova-pte-block-select" onClick={() => onSelectBlock(index)}>
-              <strong>{blockKindLabel(block, t)}</strong>
-              <span>{blockSummary(block, document, t)}</span>
-            </button>
-            <div className="ova-pte-block-actions">
-              <button
-                disabled={readOnly || index === 0}
-                title={t.upBlock}
-                onClick={() => onMoveBlock(index, index - 1)}
-              >
-                {t.upBlock}
-              </button>
-              <button
-                disabled={readOnly || index === blocks.length - 1}
-                title={t.downBlock}
-                onClick={() => onMoveBlock(index, index + 1)}
-              >
-                {t.downBlock}
-              </button>
-              <button disabled={readOnly} title={t.duplicateBlock} onClick={() => onDuplicateBlock(index)}>
-                {t.duplicateBlock}
-              </button>
-              <button disabled={readOnly} title={t.deleteBlock} onClick={() => onDeleteBlock(index)}>
-                {t.deleteBlock}
-              </button>
-            </div>
-          </div>
+        {blocks.map((item, index) => (
+          <button className="ova-pte-block-card" key={index} onClick={() => onSelectBlock(index)}>
+            <strong>{index + 1}. {blockKindLabel(item, t)}</strong>
+            <span>{blockSummary(item, document, t)}</span>
+          </button>
         ))}
       </div>
     </article>
   );
 }
 
-function ResourceStats({
+function BlockEditor({
   document,
-  validation,
-  selectedResource,
-  onSelectResource,
-  t
-}: {
-  document: OVAReportDocument;
-  validation: ReturnType<typeof validateDocument> | undefined;
-  selectedResource: { kind: "chart" | "table"; id: string } | undefined;
-  onSelectResource: (resource: { kind: "chart" | "table"; id: string }) => void;
-  t: EditorMessages;
-}) {
-  return (
-    <>
-      <ul className="ova-pte-stats">
-        <li>{t.charts} <strong>{document.datasets?.charts?.length ?? 0}</strong></li>
-        <li>{t.tables} <strong>{document.datasets?.tables?.length ?? 0}</strong></li>
-        <li>{t.images} <strong>{document.assets?.images?.length ?? 0}</strong></li>
-        <li>{t.refs} <strong>{validation?.referenceIndex.outgoing.length ?? 0}</strong></li>
-      </ul>
-      <div className="ova-pte-resource-list">
-        {document.datasets?.charts?.slice(0, 30).map((chart) => {
-          const id = String(chart.id ?? "");
-          return (
-            <button
-              key={`chart-${id}`}
-              className={selectedResource?.kind === "chart" && selectedResource.id === id ? "active" : ""}
-              onClick={() => id && onSelectResource({ kind: "chart", id })}
-            >
-              {t.chart}: {displayText(chart.label as string | Record<string, string> | undefined) || id}
-            </button>
-          );
-        })}
-        {document.datasets?.tables?.slice(0, 30).map((table) => {
-          const id = String(table.id ?? "");
-          return (
-            <button
-              key={`table-${id}`}
-              className={selectedResource?.kind === "table" && selectedResource.id === id ? "active" : ""}
-              onClick={() => id && onSelectResource({ kind: "table", id })}
-            >
-              {t.table}: {displayText(table.label as string | Record<string, string> | undefined) || id}
-            </button>
-          );
-        })}
-      </div>
-    </>
-  );
-}
-
-function BlockInspector({
-  document,
-  sectionId,
   block,
-  blockIndex,
   readOnly,
   onTextChange,
   onCommand,
   t
 }: {
   document: OVAReportDocument;
-  sectionId: string | undefined;
-  block: OVABlock | undefined;
-  blockIndex: number;
+  block: OVABlock;
   readOnly: boolean;
   onTextChange: (text: string) => void;
   onCommand: (result: CommandResult) => void;
   t: EditorMessages;
 }) {
-  if (!sectionId || !block) {
-    return <p className="ova-pte-muted">{t.noBlockSelected}</p>;
-  }
-
   const selectedResource = resourceFromBlock(block);
   const text = block._type === "block" ? plainBlockText(block.children) : "";
 
-  return (
-    <div className="ova-pte-block-inspector">
-      <dl>
-        <dt>{t.blockType}</dt>
-        <dd>{blockKindLabel(block, t)}</dd>
-        <dt>{t.linkedResource}</dt>
-        <dd>{selectedResource?.id ?? t.none}</dd>
-      </dl>
-      {block._type === "block" ? (
-        <label>
-          {t.textBlock}
-          <textarea
-            className="ova-pte-inspector-textarea"
-            value={text}
-            readOnly={readOnly}
-            onChange={(event) => onTextChange(event.target.value)}
-          />
-        </label>
-      ) : selectedResource ? (
-        <DataEditor
-          document={document}
-          selectedResource={selectedResource}
+  if (block._type === "block") {
+    return (
+      <label className="ova-pte-block-editor-field">
+        {t.textBlock}
+        <textarea
+          className="ova-pte-inspector-textarea"
+          value={text}
           readOnly={readOnly}
-          onCommand={onCommand}
-          t={t}
+          onChange={(event) => onTextChange(event.target.value)}
         />
-      ) : (
-        <p className="ova-pte-muted">{blockSummary(block, document, t)}</p>
-      )}
-    </div>
-  );
+      </label>
+    );
+  }
+
+  if (selectedResource) {
+    return (
+      <DataEditor
+        document={document}
+        selectedResource={selectedResource}
+        readOnly={readOnly}
+        onCommand={onCommand}
+        t={t}
+      />
+    );
+  }
+
+  return <p className="ova-pte-muted">{blockSummary(block, document, t)}</p>;
 }
 
+function SelectedContext({
+  document,
+  section,
+  focusTarget,
+  block,
+  blockIndex,
+  resource,
+  t
+}: {
+  document: OVAReportDocument;
+  section: SectionNode | undefined;
+  focusTarget: FocusTarget;
+  block: OVABlock | undefined;
+  blockIndex: number;
+  resource: { kind: "chart" | "table"; id: string } | undefined;
+  t: EditorMessages;
+}) {
+  if (!section) {
+    return <p className="ova-pte-muted">{t.noSectionSelected}</p>;
+  }
+
+  return (
+    <dl>
+      <dt>{t.selectedObject}</dt>
+      <dd>{focusTarget === "block" ? t.currentBlock : t.currentSection}</dd>
+      <dt>{t.section}</dt>
+      <dd>{section.level} / {section.title || section.id}</dd>
+      {focusTarget === "block" && block ? (
+        <>
+          <dt>{t.blockPath}</dt>
+          <dd>{section.id} / {blockIndex + 1}</dd>
+          <dt>{t.blockType}</dt>
+          <dd>{blockKindLabel(block, t)}</dd>
+          <dt>{t.linkedResource}</dt>
+          <dd>{resource?.id ?? t.none}</dd>
+        </>
+      ) : null}
+      <dt>{t.resources}</dt>
+      <dd>{document.datasets?.charts?.length ?? 0} {t.charts} / {document.datasets?.tables?.length ?? 0} {t.tables}</dd>
+    </dl>
+  );
+}
 function DataEditor({
   document,
   selectedResource,
