@@ -41,6 +41,7 @@ import {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState
@@ -730,7 +731,7 @@ function NavigatorNode({
   t: EditorMessages;
 }) {
   const blocks = getSectionBlocks(node);
-  const expanded = expandedIds.has(node.id) || selectedId === node.id;
+  const expanded = expandedIds.has(node.id);
   const hasChildren = node.children.length > 0 || blocks.length > 0;
 
   return (
@@ -762,8 +763,8 @@ function NavigatorNode({
                 onClick={() => onSelectBlock(node.id, index)}
               >
                 <span>{index + 1}</span>
-                <strong>{blockKindLabel(block, t)}</strong>
-                <small>{blockSummary(block, document, t)}</small>
+                <strong>{blockNavigatorTitle(block, document, t)}</strong>
+                <small>{blockKindLabel(block, t)}</small>
               </Button>
             </li>
           ))}
@@ -891,8 +892,8 @@ function FocusedEditor({
       <div className="ova-pte-block-list">
         {blocks.map((item, index) => (
           <button className="ova-pte-block-card" key={index} onClick={() => onSelectBlock(index)}>
-            <strong>{index + 1}. {blockKindLabel(item, t)}</strong>
-            <span>{blockSummary(item, document, t)}</span>
+            <strong>{index + 1}. {blockNavigatorTitle(item, document, t)}</strong>
+            <span>{blockKindLabel(item, t)}</span>
           </button>
         ))}
       </div>
@@ -989,6 +990,41 @@ function SelectedContext({
     </dl>
   );
 }
+
+function AutoGrowTextarea({
+  value,
+  readOnly,
+  className,
+  onChange
+}: {
+  value: string;
+  readOnly: boolean;
+  className?: string;
+  onChange: (value: string) => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      ref={ref}
+      className={["ova-pte-autogrow", className].filter(Boolean).join(" ")}
+      value={value}
+      readOnly={readOnly}
+      rows={1}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  );
+}
+
 function DataEditor({
   document,
   selectedResource,
@@ -1019,12 +1055,10 @@ function DataEditor({
       <div className="ova-pte-data-editor">
         <label>
           {t.chartLabel}
-          <input
+          <AutoGrowTextarea
             value={displayText(chart.label as string | Record<string, string> | undefined, document.meta?.language ?? "en")}
             readOnly={readOnly}
-            onChange={(event) =>
-              onCommand(updateChartLabel(document, selectedResource.id, event.target.value))
-            }
+            onChange={(value) => onCommand(updateChartLabel(document, selectedResource.id, value))}
           />
         </label>
         <p className="ova-pte-muted">{t.type}: {chartType}</p>
@@ -1086,13 +1120,11 @@ function DataEditor({
           return (
             <div className="ova-pte-table-row" key={rowIndex}>
               {cells.map((cell, cellIndex) => (
-                <input
+                <AutoGrowTextarea
                   key={`${rowIndex}-${cellIndex}`}
                   value={String(cell.text ?? "")}
                   readOnly={readOnly}
-                  onChange={(event) =>
-                    onCommand(updateGridTableCellText(document, selectedResource.id, rowIndex, cellIndex, event.target.value))
-                  }
+                  onChange={(value) => onCommand(updateGridTableCellText(document, selectedResource.id, rowIndex, cellIndex, value))}
                 />
               ))}
             </div>
@@ -1122,12 +1154,10 @@ function SliceDataEditor({
         const key = String(slice.key ?? "");
         return (
           <div className="ova-pte-slice-row" key={key}>
-            <input
+            <AutoGrowTextarea
               value={displayText(slice.label as string | Record<string, string> | undefined, document.meta?.language ?? "en")}
               readOnly={readOnly}
-              onChange={(event) =>
-                onCommand(updateChartSlice(document, chartId, key, { label: event.target.value }))
-              }
+              onChange={(value) => onCommand(updateChartSlice(document, chartId, key, { label: value }))}
             />
             <input
               type="number"
@@ -1173,10 +1203,10 @@ function BarDataEditor({
         const categoryKey = String(category.key ?? "");
         return (
           <div className="ova-pte-chart-row" key={categoryKey}>
-            <input
+            <AutoGrowTextarea
               value={displayText(category.label as string | Record<string, string> | undefined, document.meta?.language ?? "en") || categoryKey}
               readOnly={readOnly}
-              onChange={(event) => onCommand(updateBarChartCategory(document, chartId, categoryKey, event.target.value))}
+              onChange={(value) => onCommand(updateBarChartCategory(document, chartId, categoryKey, value))}
             />
             {series.map((item) => {
               const seriesKey = String(item.key ?? "");
@@ -1230,12 +1260,10 @@ function LineDataEditor({
         const pointKey = String(point.key ?? "");
         return (
           <div className="ova-pte-chart-row" key={pointKey}>
-            <input
+            <AutoGrowTextarea
               value={displayText(point.label as string | Record<string, string> | undefined, document.meta?.language ?? "en") || pointKey}
               readOnly={readOnly}
-              onChange={(event) =>
-                onCommand(updateLineChartPoint(document, chartId, seriesKey, pointKey, { label: event.target.value }))
-              }
+              onChange={(value) => onCommand(updateLineChartPoint(document, chartId, seriesKey, pointKey, { label: value }))}
             />
             <input
               type="number"
@@ -1436,6 +1464,55 @@ function blockSummary(block: OVABlock, document: OVAReportDocument, t: EditorMes
     return plainBlockText(block.children).trim() || t.textBlock;
   }
   return String(block._type ?? t.unknownBlock);
+}
+
+function blockNavigatorTitle(block: OVABlock, document: OVAReportDocument, t: EditorMessages): string {
+  const locale = document.meta?.language ?? "en";
+  const ownTitle = displayMaybeLocalized(block.title, locale) || displayMaybeLocalized(block.label, locale);
+  if (ownTitle) {
+    return truncateLabel(ownTitle);
+  }
+
+  if (block.chartRef) {
+    const chart = document.datasets?.charts?.find((item) => item.id === block.chartRef);
+    const chartLabel = displayMaybeLocalized(chart?.label, locale);
+    return truncateLabel(chartLabel || block.chartRef);
+  }
+
+  if (block.tableRef) {
+    const table = document.datasets?.tables?.find((item) => item.id === block.tableRef);
+    const tableLabel = displayMaybeLocalized(table?.label, locale);
+    return truncateLabel(tableLabel || block.tableRef);
+  }
+
+  if (block.imageRef) {
+    return truncateLabel(block.imageRef);
+  }
+
+  if (block._type === "block") {
+    const text = plainBlockText(block.children).trim();
+    return truncateLabel(text || t.textBlock);
+  }
+
+  return truncateLabel(String(block._type ?? t.unknownBlock));
+}
+
+function displayMaybeLocalized(value: unknown, locale: string): string {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+  if (isRecord(value)) {
+    return displayText(value as Record<string, string>, locale).trim();
+  }
+  return "";
+}
+
+function truncateLabel(value: string, maxLength = 86): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+  return `${normalized.slice(0, maxLength - 1)}...`;
 }
 
 function findSection(nodes: SectionNode[], id: string | undefined): SectionNode | undefined {

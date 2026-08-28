@@ -69,6 +69,8 @@ def run_with_selenium() -> None:
         wait.until(EC.visibility_of_element_located((By.XPATH, f"//*[contains(normalize-space(), '{ZH_MODIFIED}')]")))
         wait.until(EC.element_to_be_clickable((By.XPATH, f"//button[normalize-space()='{ZH_UNDO}']"))).click()
         wait.until(lambda _: text.get_attribute("value") == original_text)
+        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ova-pte-nav-toggle"))).click()
+        wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, ".ova-pte-nav-block")))
 
         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ova-pte-locale button:nth-child(1)"))).click()
         wait.until(EC.visibility_of_element_located((By.XPATH, "//button[normalize-space()='Visual']")))
@@ -128,6 +130,8 @@ def run_with_playwright() -> None:
         expect(page.get_by_text(ZH_MODIFIED)).to_be_visible()
         page.get_by_role("button", name=ZH_UNDO).click()
         expect(text).to_have_value(original_text)
+        page.locator(".ova-pte-nav-toggle").first.click()
+        expect(page.locator(".ova-pte-nav-block").first).to_be_hidden()
 
         page.locator(".ova-pte-locale button").nth(0).click()
         expect(page.get_by_role("button", name="Visual")).to_be_visible()
