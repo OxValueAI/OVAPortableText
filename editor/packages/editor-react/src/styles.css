@@ -1,5 +1,9 @@
 .ova-pte-shell {
-  min-height: 720px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: min(100vh, 100dvh);
+  min-height: 640px;
+  overflow: hidden;
   color: #1d2433;
   background: #f7f8fa;
   border: 1px solid #d9dde5;
@@ -40,6 +44,23 @@
   background: #e9f2ff;
 }
 
+.ova-pte-locale {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid #c9d1df;
+  border-radius: 6px;
+}
+
+.ova-pte-locale button {
+  min-height: 30px;
+  border: 0;
+  border-radius: 0;
+}
+
+.ova-pte-locale button + button {
+  border-left: 1px solid #c9d1df;
+}
+
 .ova-pte-toolbar input {
   min-width: 220px;
   min-height: 32px;
@@ -57,11 +78,13 @@
 .ova-pte-grid {
   display: grid;
   grid-template-columns: 280px minmax(420px, 1fr) 300px;
-  min-height: 672px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .ova-pte-sidebar,
 .ova-pte-properties {
+  min-height: 0;
   overflow: auto;
   border-right: 1px solid #d9dde5;
   background: #ffffff;
@@ -73,6 +96,7 @@
 }
 
 .ova-pte-editor {
+  min-height: 0;
   overflow: auto;
   padding: 22px;
 }
@@ -416,8 +440,15 @@
 }
 
 @media (max-width: 980px) {
+  .ova-pte-shell {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
   .ova-pte-grid {
     grid-template-columns: 1fr;
+    overflow: visible;
   }
 
   .ova-pte-sidebar,

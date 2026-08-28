@@ -25,4 +25,24 @@ npm run build
 npm run dev
 ```
 
+On this workspace, a portable Node.js toolchain is installed under `.tools/`.
+In PowerShell:
+
+```powershell
+$env:Path = (Resolve-Path '.\.tools\node-v22.23.2-win-x64').Path + ';' + $env:Path
+npm.cmd run dev
+```
+
+## Browser Smoke Test
+
+With the dev server running at `http://127.0.0.1:5173/`:
+
+```powershell
+python tests/browser_smoke.py
+```
+
+The script tries Selenium first, then falls back to Python Playwright with an installed local browser.
+
+The concise user manual is `docs/OVAPortableText_Editor_User_Manual.md`.
+
 The current Golden Fixture is `fixtures/report-v1.3-company.json`.

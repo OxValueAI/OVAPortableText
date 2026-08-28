@@ -10,7 +10,8 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces --if-present",
-    "dev": "npm run dev -w apps/playground"
+    "dev": "npm run dev -w apps/playground",
+    "browser:smoke": "python tests/browser_smoke.py"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.0",

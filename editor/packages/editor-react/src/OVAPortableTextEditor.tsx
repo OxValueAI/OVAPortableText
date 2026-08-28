@@ -44,6 +44,7 @@ import {
   useState,
   type ReactNode
 } from "react";
+import { detectInitialLocale, UI_TEXT, type EditorLocale, type EditorMessages } from "./i18n";
 import "./styles.css";
 
 export interface OVAPortableTextEditorHandle {
@@ -62,6 +63,7 @@ export interface OVAPortableTextEditorHandle {
 
 export interface OVAPortableTextEditorProps {
   initialValue?: object | string;
+  initialLocale?: EditorLocale;
   readOnly?: boolean;
   versioning?: BrowserVersioningOptions;
   onSave?: (document: OVAReportDocument) => void | Promise<void>;
@@ -75,6 +77,7 @@ export const OVAPortableTextEditor = forwardRef<
   OVAPortableTextEditorProps
 >(function OVAPortableTextEditor(props, ref) {
   const [document, setDocument] = useState<OVAReportDocument>();
+  const [locale, setLocale] = useState<EditorLocale>(() => detectInitialLocale(props.initialLocale));
   const [sourceText, setSourceText] = useState("");
   const [mode, setMode] = useState<"visual" | "json">("visual");
   const [selectedSectionId, setSelectedSectionId] = useState<string>();
@@ -119,6 +122,13 @@ export const OVAPortableTextEditor = forwardRef<
   );
   const visualLocked = Boolean(props.readOnly || sourceState !== "SYNCED");
   const versioningEnabled = Boolean(props.versioning?.enabled && props.versioning.documentKey);
+  const t = UI_TEXT[locale];
+
+  useEffect(() => {
+    if (props.initialLocale) {
+      setLocale(props.initialLocale);
+    }
+  }, [props.initialLocale]);
 
   useEffect(() => {
     if (validation) {
@@ -197,7 +207,7 @@ export const OVAPortableTextEditor = forwardRef<
     if (!file) {
       return;
     }
-    if (dirty && !window.confirm("Current document has unsaved changes. Discard them and open another JSON file?")) {
+    if (dirty && !window.confirm(t.openDirtyConfirm)) {
       return;
     }
 
@@ -271,7 +281,7 @@ export const OVAPortableTextEditor = forwardRef<
     if (!props.versioning?.enabled) {
       return;
     }
-    if (dirty && !window.confirm("Current document has unsaved changes. Discard them and load this version?")) {
+    if (dirty && !window.confirm(t.openDirtyConfirm)) {
       return;
     }
 
@@ -391,14 +401,18 @@ export const OVAPortableTextEditor = forwardRef<
   }, [dirty]);
 
   if (!document) {
-    return <div className="ova-pte-shell ova-pte-empty">Open or paste OVAPortableText JSON to begin.</div>;
+    return <div className="ova-pte-shell ova-pte-empty">{t.openEmpty}</div>;
   }
 
   return (
     <div className="ova-pte-shell">
       <header className="ova-pte-toolbar">
-        <button className={mode === "visual" ? "active" : ""} onClick={() => setMode("visual")}>Visual</button>
-        <button className={mode === "json" ? "active" : ""} onClick={() => setMode("json")}>JSON</button>
+        <button className={mode === "visual" ? "active" : ""} onClick={() => setMode("visual")}>{t.visual}</button>
+        <button className={mode === "json" ? "active" : ""} onClick={() => setMode("json")}>{t.json}</button>
+        <div className="ova-pte-locale" aria-label={t.language}>
+          <button className={locale === "en" ? "active" : ""} onClick={() => setLocale("en")}>EN</button>
+          <button className={locale === "zh" ? "active" : ""} onClick={() => setLocale("zh")}>中文</button>
+        </div>
         <input
           ref={fileInputRef}
           type="file"
@@ -409,60 +423,61 @@ export const OVAPortableTextEditor = forwardRef<
             event.currentTarget.value = "";
           }}
         />
-        <button onClick={() => fileInputRef.current?.click()}>Open</button>
-        <button onClick={copyJSON}>Copy JSON</button>
-        <button onClick={downloadJSON}>Download</button>
+        <button onClick={() => fileInputRef.current?.click()}>{t.open}</button>
+        <button onClick={copyJSON}>{t.copyJSON}</button>
+        <button onClick={downloadJSON}>{t.download}</button>
         <input
-          aria-label="Find"
-          placeholder="Find"
+          aria-label={t.find}
+          placeholder={t.find}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
-        <button disabled={past.length === 0} onClick={undo}>Undo</button>
-        <button disabled={future.length === 0} onClick={redo}>Redo</button>
-        <button onClick={() => validation && props.onValidationChange?.(validation)}>Validate</button>
+        <button disabled={past.length === 0} onClick={undo}>{t.undo}</button>
+        <button disabled={future.length === 0} onClick={redo}>{t.redo}</button>
+        <button onClick={() => validation && props.onValidationChange?.(validation)}>{t.validate}</button>
         <button disabled={!props.onRequestFinalPreview} onClick={() => props.onRequestFinalPreview?.(document)}>
-          Final Preview
+          {t.finalPreview}
         </button>
-        <button onClick={save}>Save</button>
-        <button disabled={!versioningEnabled} onClick={saveLocalVersion}>Save Version</button>
-        <button disabled={visualLocked} onClick={() => applyCommand(addSection(document))}>Add Section</button>
+        <button onClick={save}>{t.save}</button>
+        <button disabled={!versioningEnabled} onClick={saveLocalVersion}>{t.saveVersion}</button>
+        <button disabled={visualLocked} onClick={() => applyCommand(addSection(document))}>{t.addSection}</button>
         <button
           disabled={visualLocked || !selectedSection}
           onClick={() => selectedSection && applyCommand(addSection(document, { parentSectionId: selectedSection.id }))}
         >
-          Add Subsection
+          {t.addSubsection}
         </button>
         <button
           disabled={visualLocked || !selectedSection}
           onClick={() => selectedSection && applyCommand(duplicateSection(document, selectedSection.id))}
         >
-          Duplicate Section
+          {t.duplicateSection}
         </button>
         <button
           disabled={visualLocked || !selectedSection}
           onClick={() => selectedSection && applyCommand(deleteSection(document, selectedSection.id))}
         >
-          Delete Section
+          {t.deleteSection}
         </button>
-        <span>{dirty ? "Modified" : "Saved"} - {validation?.issues.filter((issue) => issue.severity === "error").length ?? 0} Errors - {validation?.issues.filter((issue) => issue.severity === "warning").length ?? 0} Warnings</span>
+        <span>{dirty ? t.modified : t.saved} - {validation?.issues.filter((issue) => issue.severity === "error").length ?? 0} {t.errors} - {validation?.issues.filter((issue) => issue.severity === "warning").length ?? 0} {t.warnings}</span>
       </header>
 
       <main className="ova-pte-grid">
         <aside className="ova-pte-sidebar">
-          <Panel title="Outline">
+          <Panel title={t.outline}>
             <SectionTree nodes={sections} selectedId={selectedSection?.id} onSelect={setSelectedSectionId} />
           </Panel>
-          <Panel title="Resources">
+          <Panel title={t.resources}>
             <ResourceStats
               document={document}
               validation={validation}
               selectedResource={selectedResource}
               onSelectResource={setSelectedResource}
+              t={t}
             />
           </Panel>
-          <Panel title="Issues">
-            <IssueList issues={validation?.issues ?? []} />
+          <Panel title={t.issues}>
+            <IssueList issues={validation?.issues ?? []} t={t} />
           </Panel>
         </aside>
 
@@ -485,16 +500,17 @@ export const OVAPortableTextEditor = forwardRef<
               onMoveBlock={(fromIndex, toIndex) =>
                 selectedSection && applyCommand(moveBlock(document, selectedSection.id, fromIndex, toIndex))
               }
+              t={t}
             />
           ) : (
             <div className="ova-pte-source">
               <div className="ova-pte-source-actions">
                 <span>{sourceState}</span>
-                <button onClick={applySource}>Apply</button>
+                <button onClick={applySource}>{t.apply}</button>
                 <button onClick={() => {
                   setSourceText(stringifyDocument(document, true));
                   setSourceState("SYNCED");
-                }}>Discard</button>
+                }}>{t.discard}</button>
               </div>
               <textarea
                 value={sourceText}
@@ -509,35 +525,36 @@ export const OVAPortableTextEditor = forwardRef<
         </section>
 
         <aside className="ova-pte-properties">
-          <Panel title="Properties">
+          <Panel title={t.properties}>
             <dl>
-              <dt>Schema</dt>
+              <dt>{t.schema}</dt>
               <dd>{document.schemaVersion}</dd>
-              <dt>Title</dt>
+              <dt>{t.title}</dt>
               <dd>{displayText(document.meta?.title, document.meta?.language ?? "en")}</dd>
-              <dt>Language</dt>
+              <dt>{t.language}</dt>
               <dd>{document.meta?.language ?? "en"}</dd>
-              <dt>Selected</dt>
-              <dd>{selectedSection?.id ?? "None"}</dd>
+              <dt>{t.selected}</dt>
+              <dd>{selectedSection?.id ?? t.none}</dd>
             </dl>
           </Panel>
-          <Panel title="Data">
+          <Panel title={t.data}>
             <DataEditor
               document={document}
               selectedResource={selectedResource}
               readOnly={visualLocked}
               onCommand={applyCommand}
+              t={t}
             />
           </Panel>
-          <Panel title="Find Results">
+          <Panel title={t.findResults}>
             <IssueList issues={searchResults.map((result) => ({
               code: result.kind,
               severity: "info",
               message: result.label,
               path: result.path
-            }))} />
+            }))} t={t} />
           </Panel>
-          <Panel title="Versions">
+          <Panel title={t.versions}>
             <VersionsPanel
               enabled={versioningEnabled}
               versions={versions}
@@ -553,6 +570,7 @@ export const OVAPortableTextEditor = forwardRef<
                 await deleteBrowserVersion(props.versioning, versionId);
                 await refreshVersions();
               }}
+              t={t}
             />
           </Panel>
         </aside>
@@ -604,7 +622,8 @@ function VisualSection({
   onAddParagraph,
   onDuplicateBlock,
   onDeleteBlock,
-  onMoveBlock
+  onMoveBlock,
+  t
 }: {
   node: SectionNode | undefined;
   readOnly: boolean;
@@ -614,6 +633,7 @@ function VisualSection({
   onDuplicateBlock: (index: number) => void;
   onDeleteBlock: (index: number) => void;
   onMoveBlock: (fromIndex: number, toIndex: number) => void;
+  t: EditorMessages;
 }) {
   const firstTextBlock = node?.section.body
     ?.flatMap((item) => item.blocks ?? [])
@@ -623,12 +643,12 @@ function VisualSection({
     .join("") ?? "";
 
   if (!node) {
-    return <div className="ova-pte-empty">No section selected.</div>;
+    return <div className="ova-pte-empty">{t.noSectionSelected}</div>;
   }
 
   return (
     <article className="ova-pte-document">
-      {readOnly && <div className="ova-pte-lock">Visual editing is locked until JSON changes are applied or discarded.</div>}
+      {readOnly && <div className="ova-pte-lock">{t.visualLocked}</div>}
       <input
         className="ova-pte-title-input"
         value={node.title}
@@ -642,7 +662,7 @@ function VisualSection({
         onChange={(event) => onFirstTextChange(event.target.value)}
       />
       <div className="ova-pte-section-actions">
-        <button disabled={readOnly} onClick={onAddParagraph}>Add Paragraph</button>
+        <button disabled={readOnly} onClick={onAddParagraph}>{t.addParagraph}</button>
       </div>
       <div className="ova-pte-block-list">
         {node.section.body?.flatMap((item) => item.blocks ?? []).map((block, index) => (
@@ -652,10 +672,26 @@ function VisualSection({
             {"tableRef" in block && block.tableRef ? <span>{block.tableRef}</span> : null}
             {"imageRef" in block && block.imageRef ? <span>{block.imageRef}</span> : null}
             <div className="ova-pte-block-actions">
-              <button disabled={readOnly || index === 0} onClick={() => onMoveBlock(index, index - 1)}>Up</button>
-              <button disabled={readOnly} onClick={() => onMoveBlock(index, index + 1)}>Down</button>
-              <button disabled={readOnly} onClick={() => onDuplicateBlock(index)}>Duplicate</button>
-              <button disabled={readOnly} onClick={() => onDeleteBlock(index)}>Delete</button>
+              <button
+                disabled={readOnly || index === 0}
+                title={t.upBlock}
+                onClick={() => onMoveBlock(index, index - 1)}
+              >
+                {t.upBlock}
+              </button>
+              <button
+                disabled={readOnly}
+                title={t.downBlock}
+                onClick={() => onMoveBlock(index, index + 1)}
+              >
+                {t.downBlock}
+              </button>
+              <button disabled={readOnly} title={t.duplicateBlock} onClick={() => onDuplicateBlock(index)}>
+                {t.duplicateBlock}
+              </button>
+              <button disabled={readOnly} title={t.deleteBlock} onClick={() => onDeleteBlock(index)}>
+                {t.deleteBlock}
+              </button>
             </div>
           </div>
         ))}
@@ -668,20 +704,22 @@ function ResourceStats({
   document,
   validation,
   selectedResource,
-  onSelectResource
+  onSelectResource,
+  t
 }: {
   document: OVAReportDocument;
   validation: ReturnType<typeof validateDocument> | undefined;
   selectedResource: { kind: "chart" | "table"; id: string } | undefined;
   onSelectResource: (resource: { kind: "chart" | "table"; id: string }) => void;
+  t: EditorMessages;
 }) {
   return (
     <>
       <ul className="ova-pte-stats">
-        <li>Charts <strong>{document.datasets?.charts?.length ?? 0}</strong></li>
-        <li>Tables <strong>{document.datasets?.tables?.length ?? 0}</strong></li>
-        <li>Images <strong>{document.assets?.images?.length ?? 0}</strong></li>
-        <li>Refs <strong>{validation?.referenceIndex.outgoing.length ?? 0}</strong></li>
+        <li>{t.charts} <strong>{document.datasets?.charts?.length ?? 0}</strong></li>
+        <li>{t.tables} <strong>{document.datasets?.tables?.length ?? 0}</strong></li>
+        <li>{t.images} <strong>{document.assets?.images?.length ?? 0}</strong></li>
+        <li>{t.refs} <strong>{validation?.referenceIndex.outgoing.length ?? 0}</strong></li>
       </ul>
       <div className="ova-pte-resource-list">
         {document.datasets?.charts?.slice(0, 30).map((chart) => {
@@ -692,7 +730,7 @@ function ResourceStats({
               className={selectedResource?.kind === "chart" && selectedResource.id === id ? "active" : ""}
               onClick={() => id && onSelectResource({ kind: "chart", id })}
             >
-              Chart: {displayText(chart.label as string | Record<string, string> | undefined) || id}
+              {t.chart}: {displayText(chart.label as string | Record<string, string> | undefined) || id}
             </button>
           );
         })}
@@ -704,7 +742,7 @@ function ResourceStats({
               className={selectedResource?.kind === "table" && selectedResource.id === id ? "active" : ""}
               onClick={() => id && onSelectResource({ kind: "table", id })}
             >
-              Table: {displayText(table.label as string | Record<string, string> | undefined) || id}
+              {t.table}: {displayText(table.label as string | Record<string, string> | undefined) || id}
             </button>
           );
         })}
@@ -717,21 +755,23 @@ function DataEditor({
   document,
   selectedResource,
   readOnly,
-  onCommand
+  onCommand,
+  t
 }: {
   document: OVAReportDocument;
   selectedResource: { kind: "chart" | "table"; id: string } | undefined;
   readOnly: boolean;
   onCommand: (result: CommandResult) => void;
+  t: EditorMessages;
 }) {
   if (!selectedResource) {
-    return <p className="ova-pte-muted">Select a chart or table resource</p>;
+    return <p className="ova-pte-muted">{t.selectResource}</p>;
   }
 
   if (selectedResource.kind === "chart") {
     const chart = document.datasets?.charts?.find((item) => item.id === selectedResource.id);
     if (!chart) {
-      return <p className="ova-pte-muted">Chart not found</p>;
+      return <p className="ova-pte-muted">{t.chartNotFound}</p>;
     }
 
     const chartType = String(chart.chartType ?? "unknown");
@@ -740,7 +780,7 @@ function DataEditor({
     return (
       <div className="ova-pte-data-editor">
         <label>
-          Chart Label
+          {t.chartLabel}
           <input
             value={displayText(chart.label as string | Record<string, string> | undefined, document.meta?.language ?? "en")}
             readOnly={readOnly}
@@ -749,7 +789,7 @@ function DataEditor({
             }
           />
         </label>
-        <p className="ova-pte-muted">Type: {chartType}</p>
+        <p className="ova-pte-muted">{t.type}: {chartType}</p>
         {slices.length > 0 ? (
           <SliceDataEditor
             document={document}
@@ -766,6 +806,7 @@ function DataEditor({
             series={series}
             readOnly={readOnly}
             onCommand={onCommand}
+            t={t}
           />
         ) : chartType === "line" ? (
           <LineDataEditor
@@ -774,6 +815,7 @@ function DataEditor({
             series={series}
             readOnly={readOnly}
             onCommand={onCommand}
+            t={t}
           />
         ) : chartType === "matrix_bubble" ? (
           <MatrixBubbleDataEditor
@@ -782,9 +824,10 @@ function DataEditor({
             series={series}
             readOnly={readOnly}
             onCommand={onCommand}
+            t={t}
           />
         ) : (
-          <p className="ova-pte-muted">This chart type is read-only in the current data editor.</p>
+          <p className="ova-pte-muted">{t.readOnlyChart}</p>
         )}
       </div>
     );
@@ -793,12 +836,12 @@ function DataEditor({
   const table = document.datasets?.tables?.find((item) => item.id === selectedResource.id);
   const rows = Array.isArray(table?.rows) ? table.rows.filter(isRecord) : [];
   if (!table) {
-    return <p className="ova-pte-muted">Table not found</p>;
+    return <p className="ova-pte-muted">{t.tableNotFound}</p>;
   }
 
   return (
     <div className="ova-pte-data-editor">
-      <p className="ova-pte-muted">Type: {String(table.tableType ?? "unknown")}</p>
+      <p className="ova-pte-muted">{t.type}: {String(table.tableType ?? "unknown")}</p>
       <div className="ova-pte-table-editor">
         {rows.slice(0, 20).map((row, rowIndex) => {
           const cells = Array.isArray(row.cells) ? row.cells.filter(isRecord) : [];
@@ -870,7 +913,8 @@ function BarDataEditor({
   chart,
   series,
   readOnly,
-  onCommand
+  onCommand,
+  t
 }: {
   document: OVAReportDocument;
   chartId: string;
@@ -878,12 +922,13 @@ function BarDataEditor({
   series: JSONObject[];
   readOnly: boolean;
   onCommand: (result: CommandResult) => void;
+  t: EditorMessages;
 }) {
   const categories = Array.isArray(chart.categories) ? chart.categories.filter(isRecord) : [];
   return (
     <div className="ova-pte-chart-table">
       <div className="ova-pte-chart-row ova-pte-chart-head">
-        <span>Category</span>
+        <span>{t.barCategory}</span>
         {series.map((item) => <span key={String(item.key)}>{displayText(item.label as string | Record<string, string> | undefined) || String(item.key)}</span>)}
       </div>
       {categories.slice(0, 30).map((category) => {
@@ -923,13 +968,15 @@ function LineDataEditor({
   chartId,
   series,
   readOnly,
-  onCommand
+  onCommand,
+  t
 }: {
   document: OVAReportDocument;
   chartId: string;
   series: JSONObject[];
   readOnly: boolean;
   onCommand: (result: CommandResult) => void;
+  t: EditorMessages;
 }) {
   const firstSeries = series[0];
   const seriesKey = String(firstSeries?.key ?? "");
@@ -937,7 +984,7 @@ function LineDataEditor({
   return (
     <div className="ova-pte-chart-table">
       <div className="ova-pte-chart-row ova-pte-chart-head">
-        <span>Label</span>
+        <span>{t.label}</span>
         <span>X</span>
         <span>Y</span>
       </div>
@@ -980,13 +1027,15 @@ function MatrixBubbleDataEditor({
   chartId,
   series,
   readOnly,
-  onCommand
+  onCommand,
+  t
 }: {
   document: OVAReportDocument;
   chartId: string;
   series: JSONObject[];
   readOnly: boolean;
   onCommand: (result: CommandResult) => void;
+  t: EditorMessages;
 }) {
   const firstSeries = series[0];
   const seriesKey = String(firstSeries?.key ?? "");
@@ -996,7 +1045,7 @@ function MatrixBubbleDataEditor({
       <div className="ova-pte-chart-row ova-pte-chart-head">
         <span>X</span>
         <span>Y</span>
-        <span>Size</span>
+        <span>{t.size}</span>
       </div>
       {points.slice(0, 40).map((point) => {
         const pointKey = String(point.key ?? "");
@@ -1019,9 +1068,9 @@ function MatrixBubbleDataEditor({
   );
 }
 
-function IssueList({ issues }: { issues: EditorIssue[] }) {
+function IssueList({ issues, t }: { issues: EditorIssue[]; t: EditorMessages }) {
   if (issues.length === 0) {
-    return <p className="ova-pte-muted">None</p>;
+    return <p className="ova-pte-muted">{t.none}</p>;
   }
 
   return (
@@ -1043,7 +1092,8 @@ function VersionsPanel({
   error,
   onLoad,
   onRename,
-  onDelete
+  onDelete,
+  t
 }: {
   enabled: boolean;
   versions: SavedVersionMeta[];
@@ -1051,9 +1101,10 @@ function VersionsPanel({
   onLoad: (id: string) => void;
   onRename: (id: string, label: string) => void | Promise<void>;
   onDelete: (id: string) => void | Promise<void>;
+  t: EditorMessages;
 }) {
   if (!enabled) {
-    return <p className="ova-pte-muted">Local versions disabled</p>;
+    return <p className="ova-pte-muted">{t.localVersionsDisabled}</p>;
   }
 
   if (error) {
@@ -1061,7 +1112,7 @@ function VersionsPanel({
   }
 
   if (versions.length === 0) {
-    return <p className="ova-pte-muted">No local versions</p>;
+    return <p className="ova-pte-muted">{t.noLocalVersions}</p>;
   }
 
   return (
@@ -1075,22 +1126,22 @@ function VersionsPanel({
           <div className="ova-pte-version-actions">
             <button
               onClick={() => {
-                const label = window.prompt("Rename local version", version.label);
+                const label = window.prompt(t.renameLocalVersion, version.label);
                 if (label !== null) {
                   void onRename(version.id, label);
                 }
               }}
             >
-              Rename
+              {t.rename}
             </button>
             <button
               onClick={() => {
-                if (window.confirm("Delete this local version?")) {
+                if (window.confirm(t.deleteLocalVersionConfirm)) {
                   void onDelete(version.id);
                 }
               }}
             >
-              Delete
+              {t.delete}
             </button>
           </div>
         </li>
