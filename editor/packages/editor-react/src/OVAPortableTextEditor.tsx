@@ -31,6 +31,7 @@ import {
   type EditorIssue,
   type OVAReportDocument,
   type SectionNode,
+  type SearchResult,
   type CommandResult,
   type JSONObject,
   type OVABlock,
@@ -479,6 +480,18 @@ export const OVAPortableTextEditor = forwardRef<
       return next;
     });
   };
+
+  const selectSearchResult = (result: SearchResult) => {
+    const target = resolveSearchTarget(result, sections, document);
+    if (!target) {
+      return;
+    }
+    setSelectedSectionId(target.sectionId);
+    setSelectedBlockIndex(target.blockIndex ?? 0);
+    setFocusTarget(target.blockIndex === undefined ? "section" : "block");
+    setExpandedSectionIds((current) => new Set(current).add(target.sectionId));
+  };
+
   return (
     <div className={["ova-pte-shell", props.className].filter(Boolean).join(" ")} style={props.style}>
       <header className="ova-pte-toolbar">
@@ -502,14 +515,6 @@ export const OVAPortableTextEditor = forwardRef<
           <Button onClick={() => fileInputRef.current?.click()}>{t.open}</Button>
           <Button onClick={copyJSON}>{t.copyJSON}</Button>
           <Button onClick={downloadJSON}>{t.download}</Button>
-        </ToolbarGroup>
-        <ToolbarGroup label={t.search} compact>
-          <input
-            aria-label={t.find}
-            placeholder={t.find}
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
         </ToolbarGroup>
         <ToolbarGroup label={t.history} compact>
           <Button disabled={past.length === 0} onClick={undo}>{t.undo}</Button>
@@ -623,6 +628,15 @@ export const OVAPortableTextEditor = forwardRef<
         </section>
 
         <aside className="ova-pte-properties">
+          <Panel title={t.search}>
+            <SearchPanel
+              query={query}
+              results={searchResults}
+              onQueryChange={setQuery}
+              onSelectResult={selectSearchResult}
+              t={t}
+            />
+          </Panel>
           <Panel title={t.context}>
             <SelectedContext
               document={document}
@@ -645,14 +659,6 @@ export const OVAPortableTextEditor = forwardRef<
               <dt>{t.selected}</dt>
               <dd>{selectedSection?.id ?? t.none}</dd>
             </dl>
-          </Panel>
-          <Panel title={t.findResults}>
-            <IssueList issues={searchResults.map((result) => ({
-              code: result.kind,
-              severity: "info",
-              message: result.label,
-              path: result.path
-            }))} t={t} />
           </Panel>
           <Panel title={t.versions}>
             <VersionsPanel
@@ -797,6 +803,47 @@ function NavigatorNode({
         </ul>
       )}
     </li>
+  );
+}
+
+function SearchPanel({
+  query,
+  results,
+  onQueryChange,
+  onSelectResult,
+  t
+}: {
+  query: string;
+  results: SearchResult[];
+  onQueryChange: (query: string) => void;
+  onSelectResult: (result: SearchResult) => void;
+  t: EditorMessages;
+}) {
+  return (
+    <div className="ova-pte-search-panel">
+      <input
+        aria-label={t.find}
+        placeholder={t.find}
+        value={query}
+        onChange={(event) => onQueryChange(event.target.value)}
+      />
+      <div className="ova-pte-search-meta">
+        {query.trim() ? `${results.length} ${t.results}` : t.searchPlaceholder}
+      </div>
+      {results.length > 0 ? (
+        <ul className="ova-pte-search-results">
+          {results.slice(0, 80).map((result, index) => (
+            <li key={`${result.path}-${index}`}>
+              <Button onClick={() => onSelectResult(result)}>
+                <span>{result.kind}</span>
+                <strong>{result.label || result.path}</strong>
+                <small>{result.path}</small>
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }
 
@@ -1505,6 +1552,94 @@ function VersionsPanel({
 
 function getSectionBlocks(node: SectionNode | undefined): OVABlock[] {
   return node?.section.body?.flatMap((item) => item.blocks ?? []) ?? [];
+}
+
+function resolveSearchTarget(
+  result: SearchResult,
+  sections: SectionNode[],
+  document: OVAReportDocument
+): { sectionId: string; blockIndex?: number } | undefined {
+  if (result.kind === "section") {
+    const section = findSectionByPath(sections, result.path);
+    return section ? { sectionId: section.id } : undefined;
+  }
+
+  if (result.kind === "text") {
+    return resolveBlockPathTarget(sections, result.path);
+  }
+
+  if (result.kind === "chart") {
+    const chart = resolveDatasetByPath(document.datasets?.charts, result.path);
+    const id = String(chart?.id ?? "");
+    return id ? findReferencingBlockTarget(sections, "chartRef", id) : undefined;
+  }
+
+  if (result.kind === "table") {
+    const table = resolveDatasetByPath(document.datasets?.tables, result.path);
+    const id = String(table?.id ?? "");
+    return id ? findReferencingBlockTarget(sections, "tableRef", id) : undefined;
+  }
+
+  return undefined;
+}
+
+function resolveBlockPathTarget(
+  sections: SectionNode[],
+  path: string
+): { sectionId: string; blockIndex: number } | undefined {
+  const match = /^(.*)\.body\[(\d+)\]\.blocks\[(\d+)\]$/.exec(path);
+  if (!match) {
+    return undefined;
+  }
+  const section = findSectionByPath(sections, match[1]);
+  if (!section) {
+    return undefined;
+  }
+  const bodyIndex = Number(match[2]);
+  const blockIndexInItem = Number(match[3]);
+  const body = section.section.body ?? [];
+  const flatOffset = body.slice(0, bodyIndex).reduce((total, item) => total + (item.blocks?.length ?? 0), 0);
+  return { sectionId: section.id, blockIndex: flatOffset + blockIndexInItem };
+}
+
+function resolveDatasetByPath(items: JSONObject[] | undefined, path: string): JSONObject | undefined {
+  const match = /\[(\d+)\]$/.exec(path);
+  if (!match) {
+    return undefined;
+  }
+  return items?.[Number(match[1])];
+}
+
+function findReferencingBlockTarget(
+  sections: SectionNode[],
+  refKey: "chartRef" | "tableRef",
+  refId: string
+): { sectionId: string; blockIndex: number } | undefined {
+  for (const section of sections) {
+    const blocks = getSectionBlocks(section);
+    const blockIndex = blocks.findIndex((block) => block[refKey] === refId);
+    if (blockIndex >= 0) {
+      return { sectionId: section.id, blockIndex };
+    }
+    const child = findReferencingBlockTarget(section.children, refKey, refId);
+    if (child) {
+      return child;
+    }
+  }
+  return undefined;
+}
+
+function findSectionByPath(nodes: SectionNode[], path: string | undefined): SectionNode | undefined {
+  for (const node of nodes) {
+    if (node.path === path) {
+      return node;
+    }
+    const child = findSectionByPath(node.children, path);
+    if (child) {
+      return child;
+    }
+  }
+  return undefined;
 }
 
 function countNestedBlocks(node: SectionNode | undefined): number {
