@@ -201,6 +201,9 @@ export const OVAPortableTextEditor = forwardRef<
     if (!document) {
       return;
     }
+    if (!window.confirm(t.saveConfirm)) {
+      return;
+    }
     await props.onSave?.(document);
     setDirty(false);
   };

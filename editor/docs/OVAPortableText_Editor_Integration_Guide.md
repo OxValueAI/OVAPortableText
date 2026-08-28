@@ -1,142 +1,114 @@
-# OVAPortableText 编辑器对接指南
+# OVAPortableText Editor Integration Guide / 编辑器对接指南
 
-## 推荐接入面
+## Simple Contract / 简单对接约定
 
-对外优先暴露 React 组件包：
+Host app passes one raw OVAPortableText JSON value into the editor.
 
-```ts
-import {
-  OVAPortableTextEditor,
-  type OVAPortableTextEditorHandle,
-  type OVAReportDocument
-} from "@ova/portable-text-editor-react";
+前端宿主项目只需要把一份原始 OVAPortableText JSON 传给编辑器。
+
+When the user clicks `Save`, the editor asks for confirmation, then calls `onSave(document)` with the current full JSON object.
+
+用户点击 `Save / 保存` 时，编辑器会先弹窗确认；确认后通过 `onSave(document)` 把当前完整 JSON 对象回传给宿主项目。
+
+```text
+raw JSON -> OVAPortableTextEditor -> user edits -> Save -> onSave(current JSON)
+原始 JSON -> 编辑器 -> 用户编辑 -> 保存 -> 回传当前 JSON
 ```
 
-宿主项目只需要传入 OVAPortableText JSON，并处理保存回调。
-
-## 最小示例
+## Minimal React Usage / 最小 React 用法
 
 ```tsx
-import { useRef } from "react";
-import {
-  OVAPortableTextEditor,
-  type OVAPortableTextEditorHandle,
-  type OVAReportDocument
-} from "@ova/portable-text-editor-react";
+import { OVAPortableTextEditor, type OVAReportDocument } from "@ova/portable-text-editor-react";
 
-export function ReportEditorPage({ initialReport }: { initialReport: OVAReportDocument }) {
-  const editorRef = useRef<OVAPortableTextEditorHandle>(null);
-
+export function ReportEditorPage({ reportJson }: { reportJson: OVAReportDocument }) {
   return (
     <OVAPortableTextEditor
-      ref={editorRef}
-      initialValue={initialReport}
+      initialValue={reportJson}
       initialLocale="zh"
       style={{ height: "calc(100vh - 64px)" }}
-      onSave={async (document) => {
+      onSave={async (currentJson) => {
         await fetch("/api/reports/current", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(document)
+          body: JSON.stringify(currentJson)
         });
-      }}
-      onDirtyChange={(dirty) => {
-        console.log("dirty", dirty);
-      }}
-      onValidationChange={(result) => {
-        console.log("validation issues", result.issues);
-      }}
-      onRequestFinalPreview={(document) => {
-        console.log("preview", document);
       }}
     />
   );
 }
 ```
 
-## Props
+## Props You Usually Need / 常用 Props
 
-- `initialValue`: 初始 OVAPortableText JSON，可传对象或 JSON 字符串。
-- `initialLocale`: `"zh"` 或 `"en"`，不传则跟随浏览器语言。
-- `readOnly`: 只读模式。
-- `className`: 宿主页面追加外层 class。
-- `style`: 宿主页面控制外层尺寸，嵌入页面时建议显式传高度。
-- `versioning`: 浏览器本地版本能力；不传则隐藏/禁用本地版本保存。
-- `onSave(document)`: 用户点击 Save 时触发，宿主在这里调后端保存。
-- `onDirtyChange(dirty)`: 文档脏状态变化。
-- `onValidationChange(result)`: 校验结果变化。
-- `onRequestFinalPreview(document)`: 用户点击最终预览时触发。
+- `initialValue`: raw JSON object or JSON string. / 原始 JSON 对象或 JSON 字符串。
+- `initialLocale`: `"zh"` or `"en"`. / 初始界面语言。
+- `style`: set editor height in the host page. / 在宿主页面控制编辑器高度。
+- `onSave(document)`: save callback fired after user confirmation. / 用户确认保存后触发的回调。
 
-## Ref API
+Optional:
 
-```ts
-await editorRef.current?.setValue(nextJson);
-const value = editorRef.current?.getValue();
-const json = editorRef.current?.getJSONString(true);
+- `readOnly`: disable visual editing. / 只读模式。
+- `onDirtyChange(dirty)`: receive unsaved-change state. / 接收是否有未保存修改。
+- `onValidationChange(result)`: receive validation result. / 接收校验结果。
+- `onRequestFinalPreview(document)`: handle final preview button. / 接管最终预览按钮。
+
+## Imperative API / 主动调用 API
+
+Use a ref only when the host needs to trigger actions outside the editor.
+
+只有宿主需要在编辑器外部主动触发行为时，才需要 ref。
+
+```tsx
+import { useRef } from "react";
+import { OVAPortableTextEditor, type OVAPortableTextEditorHandle } from "@ova/portable-text-editor-react";
+
+const editorRef = useRef<OVAPortableTextEditorHandle>(null);
+
+const currentJson = editorRef.current?.getValue();
+const currentText = editorRef.current?.getJSONString(true);
 const validation = editorRef.current?.validate();
-editorRef.current?.setMode("json");
+
+await editorRef.current?.setValue(nextRawJson);
 editorRef.current?.undo();
 editorRef.current?.redo();
-const dirty = editorRef.current?.isDirty();
 ```
 
-本地版本相关：
-
-```ts
-await editorRef.current?.saveVersion("before publish");
-const versions = await editorRef.current?.listVersions();
-await editorRef.current?.loadVersion(versionId);
-```
-
-## 宿主保存流程
-
-推荐流程：
+## Recommended Save Flow / 推荐保存流程
 
 ```text
-加载报告 JSON -> initialValue -> 用户编辑 -> onSave(document) -> PUT/POST 到业务后端
+1. Host fetches report JSON from backend.
+2. Host renders editor with initialValue.
+3. User edits inside the editor.
+4. User clicks Save.
+5. Editor shows a confirmation dialog.
+6. If confirmed, editor calls onSave(currentJson).
+7. Host sends currentJson to backend.
 ```
 
-如果宿主需要主动保存：
+```text
+1. 宿主从后端读取报告 JSON。
+2. 宿主用 initialValue 渲染编辑器。
+3. 用户在编辑器中修改。
+4. 用户点击保存。
+5. 编辑器弹窗确认。
+6. 用户确认后，编辑器调用 onSave(currentJson)。
+7. 宿主把 currentJson 发送到后端。
+```
+
+## Package Integration / 包接入
+
+In this monorepo, use the workspace package directly.
+
+在当前 monorepo 内，直接使用 workspace 包。
 
 ```ts
-const document = editorRef.current?.getValue();
-if (document) {
-  await saveReport(document);
-}
+import { OVAPortableTextEditor } from "@ova/portable-text-editor-react";
 ```
 
-## 尺寸约定
+For another frontend repository, use one of these practical options:
 
-编辑器默认按可视窗口高度工作。嵌入已有管理后台时，建议宿主给外层固定高度：
+在其他前端仓库中，建议用下面任一种简单方式：
 
-```tsx
-<OVAPortableTextEditor style={{ height: "calc(100vh - 56px)", minHeight: 720 }} />
-```
-
-## 本地版本配置
-
-```tsx
-<OVAPortableTextEditor
-  versioning={{
-    enabled: true,
-    documentKey: reportId,
-    namespace: "ova-report-editor"
-  }}
-/>
-```
-
-`documentKey` 应由宿主业务对象 ID 提供，避免不同报告的本地版本混在一起。
-
-## 包形态
-
-当前 monorepo 中可通过 workspace 使用：
-
-```json
-{
-  "dependencies": {
-    "@ova/portable-text-editor-react": "file:../path/to/editor/packages/editor-react"
-  }
-}
-```
-
-正式嵌入其他仓库时，建议把 `packages/editor-core` 和 `packages/editor-react` 发布到私有 npm registry，或在目标前端仓库中以 git submodule/workspace 方式接入。
+- private npm package / 私有 npm 包
+- git submodule / Git 子模块
+- copied `editor/packages/editor-core` and `editor/packages/editor-react` packages / 复制两个 package 到目标仓库
