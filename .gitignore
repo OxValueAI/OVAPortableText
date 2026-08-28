@@ -145,3 +145,16 @@ temp/
 *.tgz
 *.bz2
 *.rar
+
+# =========================
+# Node / frontend workspace
+# =========================
+node_modules/
+**/node_modules/
+.vite/
+**/.vite/
+coverage/
+**/coverage/
+*.tsbuildinfo
+editor/.tools/
+editor/**/dist/
