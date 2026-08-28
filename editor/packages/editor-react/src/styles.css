@@ -633,14 +633,19 @@
 }
 
 .ova-pte-slice-list,
-.ova-pte-table-editor,
 .ova-pte-chart-table {
   display: grid;
   gap: 6px;
 }
 
+.ova-pte-table-editor {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
 .ova-pte-slice-row,
-.ova-pte-table-row,
 .ova-pte-chart-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 72px;
@@ -648,8 +653,20 @@
   align-items: stretch;
 }
 
-.ova-pte-table-row {
-  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+.ova-pte-table-editor td {
+  height: 1px;
+  padding: 4px;
+  border: 1px solid #d9dde5;
+  vertical-align: top;
+  background: #ffffff;
+}
+
+.ova-pte-table-editor tr:first-child td {
+  background: #f8fafc;
+}
+
+.ova-pte-table-editor textarea {
+  min-height: 100%;
 }
 
 .ova-pte-chart-table {
@@ -664,7 +681,6 @@
   min-width: max-content;
 }
 
-.ova-pte-table-row textarea,
 .ova-pte-chart-row textarea,
 .ova-pte-chart-row input,
 .ova-pte-slice-row textarea,

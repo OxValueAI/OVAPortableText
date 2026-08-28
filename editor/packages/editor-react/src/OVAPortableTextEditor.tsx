@@ -1167,33 +1167,33 @@ function DataEditor({
   return (
     <div className="ova-pte-data-editor">
       <p className="ova-pte-muted">{t.type}: {String(table.tableType ?? "unknown")}</p>
-      <div className="ova-pte-table-editor">
-        {rows.slice(0, 20).map((row, rowIndex) => {
-          const cells = Array.isArray(row.cells) ? row.cells.filter(isRecord) : [];
-          const syncKey = cells.map((cell) => tableCellText(cell)).join("\u001f");
-          return (
-            <SyncedDataRow
-              className="ova-pte-table-row"
-              key={rowIndex}
-              syncKey={syncKey}
-              style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(120px, 1fr))` }}
-            >
-              {cells.map((cell, cellIndex) => (
-                <AutoGrowTextarea
-                  key={`${rowIndex}-${cellIndex}`}
-                  value={tableCellText(cell)}
-                  readOnly={readOnly}
-                  style={{
-                    gridColumn: `span ${getCellSpan(cell, "colSpan")}`,
-                    gridRow: `span ${getCellSpan(cell, "rowSpan")}`
-                  }}
-                  onChange={(value) => onCommand(updateGridTableCellText(document, selectedResource.id, rowIndex, cellIndex, value))}
-                />
-              ))}
-            </SyncedDataRow>
-          );
-        })}
-      </div>
+      <table className="ova-pte-table-editor">
+        <colgroup>
+          {Array.from({ length: columnCount }).map((_, index) => <col key={index} />)}
+        </colgroup>
+        <tbody>
+          {rows.slice(0, 20).map((row, rowIndex) => {
+            const cells = Array.isArray(row.cells) ? row.cells.filter(isRecord) : [];
+            return (
+              <tr key={rowIndex}>
+                {cells.map((cell, cellIndex) => (
+                  <td
+                    key={`${rowIndex}-${cellIndex}`}
+                    colSpan={getCellSpan(cell, "colSpan")}
+                    rowSpan={getCellSpan(cell, "rowSpan")}
+                  >
+                    <AutoGrowTextarea
+                      value={tableCellText(cell)}
+                      readOnly={readOnly}
+                      onChange={(value) => onCommand(updateGridTableCellText(document, selectedResource.id, rowIndex, cellIndex, value))}
+                    />
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

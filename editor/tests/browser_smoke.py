@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -19,6 +20,7 @@ ZH_VISUAL = "\u53ef\u89c6\u5316"
 ZH_MODIFIED = "\u5df2\u4fee\u6539"
 ZH_UNDO = "\u64a4\u9500"
 ZH_CONTEXT = "\u4e0a\u4e0b\u6587"
+ZH_TABLE_BLOCK = "\u8868\u683c\u533a\u5757"
 ZH_TEXT_BLOCK = "\u6587\u672c\u533a\u5757"
 
 
@@ -134,6 +136,8 @@ def run_with_playwright() -> None:
         expect(page.locator(".ova-pte-nav-block").first).to_be_hidden()
         assert_synced_data_rows_playwright(page)
         assert_colspan_table_cells_playwright(page)
+        assert_rowspan_table_cells_playwright(page)
+        assert_risk_scan_rowspan_playwright(page)
         assert_patent_list_blocks_playwright(page)
 
         page.locator(".ova-pte-locale button").nth(0).click()
@@ -170,9 +174,11 @@ def assert_synced_data_rows_playwright(page) -> None:
     for index in range(blocks.count()):
         blocks.nth(index).click()
         row = page.locator(
-            ".ova-pte-table-row, .ova-pte-slice-row, .ova-pte-chart-row:not(.ova-pte-chart-head)"
+            ".ova-pte-table-editor tr, .ova-pte-slice-row, .ova-pte-chart-row:not(.ova-pte-chart-head)"
         ).first
         if row.count() == 0:
+            continue
+        if row.evaluate("(element) => Array.from(element.querySelectorAll('td')).some((cell) => cell.rowSpan > 1)"):
             continue
         heights = row.evaluate(
             """
@@ -193,11 +199,9 @@ def assert_colspan_table_cells_playwright(page) -> None:
     blocks = page.locator(".ova-pte-nav-block")
     for index in range(blocks.count()):
         blocks.nth(index).click()
-        colspan = page.locator(".ova-pte-table-row textarea").evaluate_all(
+        colspan = page.locator(".ova-pte-table-editor td").evaluate_all(
             """
-            (fields) => fields.some((field) => field.style.gridColumn.includes('span 2')
-              || field.style.gridColumn.includes('span 3')
-              || field.style.gridColumn.includes('span 4'))
+            (fields) => fields.some((field) => field.colSpan > 1)
             """
         )
         if colspan:
@@ -211,7 +215,7 @@ def assert_patent_list_blocks_playwright(page) -> None:
     blocks = page.locator(".ova-pte-nav-block")
     for index in range(blocks.count()):
         blocks.nth(index).click()
-        patent_content_visible = page.locator(".ova-pte-table-row textarea").evaluate_all(
+        patent_content_visible = page.locator(".ova-pte-table-editor td textarea").evaluate_all(
             """
             (fields) => fields.some((field) => field.value.includes('Publication (Announcement) No.'))
             """
@@ -219,6 +223,60 @@ def assert_patent_list_blocks_playwright(page) -> None:
         if patent_content_visible:
             return
     raise AssertionError("Patent list block cell content was not rendered")
+
+
+def assert_rowspan_table_cells_playwright(page) -> None:
+    expand_all_sections(page)
+
+    blocks = page.locator(".ova-pte-nav-block")
+    for index in range(blocks.count()):
+        blocks.nth(index).click()
+        rowspan = page.locator(".ova-pte-table-editor td").evaluate_all(
+            """
+            (fields) => fields.some((field) => field.rowSpan > 1)
+            """
+        )
+        if rowspan:
+            return
+    raise AssertionError("No rendered table cell with rowSpan was found")
+
+
+def assert_risk_scan_rowspan_playwright(page) -> None:
+    expand_all_sections(page)
+    clicked_text = page.evaluate(
+        """
+        (tableBlockLabel) => {
+          const button = Array.from(document.querySelectorAll('.ova-pte-nav-block'))
+            .find((item) => item.innerText.includes('Risk Scan') && item.innerText.includes(tableBlockLabel));
+          if (!button) {
+            return null;
+          }
+          button.click();
+          return button.innerText;
+        }
+        """,
+        ZH_TABLE_BLOCK,
+    )
+    assert clicked_text, "Risk Scan table navigator block was not found"
+    rowspan = page.locator(".ova-pte-table-editor td").evaluate_all(
+        """
+        (fields) => fields.some((field) => field.rowSpan > 1)
+        """
+    )
+    if not rowspan:
+        spans = page.locator(".ova-pte-table-editor td").evaluate_all(
+            """
+            (fields) => fields.slice(0, 12).map((field) => ({
+              text: field.innerText.slice(0, 60),
+              rowSpan: field.rowSpan,
+              colSpan: field.colSpan
+            }))
+            """
+        )
+        focus_text = page.locator(".ova-pte-focused-editor").inner_text(timeout=1000)
+        raise AssertionError(
+            f"Risk Scan did not render native rowSpan cells: clicked={clicked_text!r}, spans={spans}, focus={focus_text[:240]!r}"
+        )
 
 
 def expand_all_sections(page) -> None:
