@@ -125,6 +125,10 @@ def run_with_playwright() -> None:
         expect(page.get_by_text("\u4e0a\u79fb\u533a\u5757").nth(0)).to_be_visible()
         expect(page.get_by_text(ZH_CONTEXT)).to_be_visible()
         expect(page.get_by_text(ZH_TEXT_BLOCK).nth(0)).to_be_visible()
+        page.locator(".ova-pte-search-panel input").fill("Risk Scan")
+        page.locator(".ova-pte-search-results button").filter(has_text=re.compile("Risk Scan")).first.click()
+        expect(page.locator(".ova-pte-nav-block.active")).to_contain_text("Risk Scan")
+        page.locator(".ova-pte-nav-block").filter(has_text=ZH_TEXT_BLOCK).first.click()
 
         text = page.locator(".ova-pte-focused-editor .ova-pte-inspector-textarea")
         original_text = text.input_value()
@@ -132,8 +136,7 @@ def run_with_playwright() -> None:
         expect(page.get_by_text(ZH_MODIFIED)).to_be_visible()
         page.get_by_role("button", name=ZH_UNDO).click()
         expect(text).to_have_value(original_text)
-        page.locator(".ova-pte-nav-toggle").first.click()
-        expect(page.locator(".ova-pte-nav-block").first).to_be_hidden()
+        assert_selected_block_parent_can_collapse(page)
         assert_synced_data_rows_playwright(page)
         assert_colspan_table_cells_playwright(page)
         assert_rowspan_table_cells_playwright(page)
@@ -165,6 +168,33 @@ def assert_independent_scroll_playwright(page) -> None:
     for pane in result:
         assert pane["overflowY"] == "auto", pane
         assert pane["clientHeight"] > 100, pane
+
+
+def assert_selected_block_parent_can_collapse(page) -> None:
+    collapsed = page.evaluate(
+        """
+        () => {
+          const block = document.querySelector('.ova-pte-nav-block.active');
+          const blockItem = block?.closest('li');
+          const parentSectionItem = blockItem?.parentElement?.closest('li');
+          const toggle = parentSectionItem?.querySelector(':scope > .ova-pte-nav-row .ova-pte-nav-toggle');
+          if (!toggle || toggle.disabled) {
+            return false;
+          }
+          toggle.click();
+          return true;
+        }
+        """
+    )
+    assert collapsed, "Selected block parent section could not be collapsed"
+    page.wait_for_function(
+        """
+        () => {
+          const block = document.querySelector('.ova-pte-nav-block.active');
+          return !block || block.offsetParent === null;
+        }
+        """
+    )
 
 
 def assert_synced_data_rows_playwright(page) -> None:
