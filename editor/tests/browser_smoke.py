@@ -133,6 +133,8 @@ def run_with_playwright() -> None:
         page.locator(".ova-pte-nav-toggle").first.click()
         expect(page.locator(".ova-pte-nav-block").first).to_be_hidden()
         assert_synced_data_rows_playwright(page)
+        assert_colspan_table_cells_playwright(page)
+        assert_patent_list_blocks_playwright(page)
 
         page.locator(".ova-pte-locale button").nth(0).click()
         expect(page.get_by_role("button", name="Visual")).to_be_visible()
@@ -162,15 +164,7 @@ def assert_independent_scroll_playwright(page) -> None:
 
 
 def assert_synced_data_rows_playwright(page) -> None:
-    for _ in range(6):
-        page.evaluate(
-            """
-            () => Array.from(document.querySelectorAll('.ova-pte-nav-toggle'))
-              .filter((button) => !button.disabled && button.textContent.trim() === '+')
-              .forEach((button) => button.click())
-            """
-        )
-        page.wait_for_timeout(50)
+    expand_all_sections(page)
 
     blocks = page.locator(".ova-pte-nav-block")
     for index in range(blocks.count()):
@@ -191,6 +185,52 @@ def assert_synced_data_rows_playwright(page) -> None:
         assert max(heights) - min(heights) <= 1, heights
         return
     raise AssertionError("No editable chart or table data row was found")
+
+
+def assert_colspan_table_cells_playwright(page) -> None:
+    expand_all_sections(page)
+
+    blocks = page.locator(".ova-pte-nav-block")
+    for index in range(blocks.count()):
+        blocks.nth(index).click()
+        colspan = page.locator(".ova-pte-table-row textarea").evaluate_all(
+            """
+            (fields) => fields.some((field) => field.style.gridColumn.includes('span 2')
+              || field.style.gridColumn.includes('span 3')
+              || field.style.gridColumn.includes('span 4'))
+            """
+        )
+        if colspan:
+            return
+    raise AssertionError("No rendered table cell with colSpan was found")
+
+
+def assert_patent_list_blocks_playwright(page) -> None:
+    expand_all_sections(page)
+
+    blocks = page.locator(".ova-pte-nav-block")
+    for index in range(blocks.count()):
+        blocks.nth(index).click()
+        patent_content_visible = page.locator(".ova-pte-table-row textarea").evaluate_all(
+            """
+            (fields) => fields.some((field) => field.value.includes('Publication (Announcement) No.'))
+            """
+        )
+        if patent_content_visible:
+            return
+    raise AssertionError("Patent list block cell content was not rendered")
+
+
+def expand_all_sections(page) -> None:
+    for _ in range(8):
+        page.evaluate(
+            """
+            () => Array.from(document.querySelectorAll('.ova-pte-nav-toggle'))
+              .filter((button) => !button.disabled && button.textContent.trim() === '+')
+              .forEach((button) => button.click())
+            """
+        )
+        page.wait_for_timeout(50)
 
 
 def main() -> int:

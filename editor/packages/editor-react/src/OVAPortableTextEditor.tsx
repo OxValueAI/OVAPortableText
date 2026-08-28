@@ -45,6 +45,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode
 } from "react";
 import { detectInitialLocale, UI_TEXT, type EditorLocale, type EditorMessages } from "./i18n";
@@ -733,6 +734,7 @@ function NavigatorNode({
 }) {
   const blocks = getSectionBlocks(node);
   const expanded = expandedIds.has(node.id);
+  const totalBlocks = countNestedBlocks(node);
   const hasChildren = node.children.length > 0 || blocks.length > 0;
 
   return (
@@ -752,7 +754,7 @@ function NavigatorNode({
         >
           <span>{node.level}</span>
           <strong>{node.title || node.id}</strong>
-          <small>{blocks.length} {t.blocks}</small>
+          <small>{totalBlocks} {t.blocks}</small>
         </Button>
       </div>
       {expanded && (
@@ -866,13 +868,14 @@ function FocusedEditor({
   }
 
   const blocks = getSectionBlocks(node);
+  const totalBlocks = countNestedBlocks(node);
   return (
     <article className="ova-pte-focused-editor ova-pte-section-composer">
       {readOnly && <div className="ova-pte-lock">{t.visualLocked}</div>}
       <div className="ova-pte-focus-header">
         <span>{t.currentSection}</span>
         <h1>{node.title || node.id}</h1>
-        <p>{node.level} / {blocks.length} {t.blocks} / {node.children.length} {t.childSections}</p>
+        <p>{node.level} / {totalBlocks} {t.blocks} / {node.children.length} {t.childSections}</p>
       </div>
       <label className="ova-pte-title-field">
         {t.sectionTitle}
@@ -924,11 +927,11 @@ function BlockEditor({
     return (
       <label className="ova-pte-block-editor-field">
         {t.textBlock}
-        <textarea
+        <AutoGrowTextarea
           className="ova-pte-inspector-textarea"
           value={text}
           readOnly={readOnly}
-          onChange={(event) => onTextChange(event.target.value)}
+          onChange={onTextChange}
         />
       </label>
     );
@@ -996,11 +999,13 @@ function AutoGrowTextarea({
   value,
   readOnly,
   className,
+  style,
   onChange
 }: {
   value: string;
   readOnly: boolean;
   className?: string;
+  style?: CSSProperties;
   onChange: (value: string) => void;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -1021,6 +1026,7 @@ function AutoGrowTextarea({
       value={value}
       readOnly={readOnly}
       rows={1}
+      style={style}
       onChange={(event) => onChange(event.target.value)}
     />
   );
@@ -1029,10 +1035,12 @@ function AutoGrowTextarea({
 function SyncedDataRow({
   className,
   children,
+  style,
   syncKey
 }: {
   className: string;
   children: ReactNode;
+  style?: CSSProperties;
   syncKey: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -1060,7 +1068,7 @@ function SyncedDataRow({
   }, [syncKey]);
 
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} className={className} style={style}>
       {children}
     </div>
   );
@@ -1148,6 +1156,10 @@ function DataEditor({
 
   const table = document.datasets?.tables?.find((item) => item.id === selectedResource.id);
   const rows = Array.isArray(table?.rows) ? table.rows.filter(isRecord) : [];
+  const columnCount = Math.max(1, ...rows.map((row) => {
+    const cells = Array.isArray(row.cells) ? row.cells.filter(isRecord) : [];
+    return cells.reduce((total, cell) => total + getCellSpan(cell, "colSpan"), 0);
+  }));
   if (!table) {
     return <p className="ova-pte-muted">{t.tableNotFound}</p>;
   }
@@ -1158,14 +1170,23 @@ function DataEditor({
       <div className="ova-pte-table-editor">
         {rows.slice(0, 20).map((row, rowIndex) => {
           const cells = Array.isArray(row.cells) ? row.cells.filter(isRecord) : [];
-          const syncKey = cells.map((cell) => String(cell.text ?? "")).join("\u001f");
+          const syncKey = cells.map((cell) => tableCellText(cell)).join("\u001f");
           return (
-            <SyncedDataRow className="ova-pte-table-row" key={rowIndex} syncKey={syncKey}>
+            <SyncedDataRow
+              className="ova-pte-table-row"
+              key={rowIndex}
+              syncKey={syncKey}
+              style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(120px, 1fr))` }}
+            >
               {cells.map((cell, cellIndex) => (
                 <AutoGrowTextarea
                   key={`${rowIndex}-${cellIndex}`}
-                  value={String(cell.text ?? "")}
+                  value={tableCellText(cell)}
                   readOnly={readOnly}
+                  style={{
+                    gridColumn: `span ${getCellSpan(cell, "colSpan")}`,
+                    gridRow: `span ${getCellSpan(cell, "rowSpan")}`
+                  }}
                   onChange={(value) => onCommand(updateGridTableCellText(document, selectedResource.id, rowIndex, cellIndex, value))}
                 />
               ))}
@@ -1477,6 +1498,13 @@ function getSectionBlocks(node: SectionNode | undefined): OVABlock[] {
   return node?.section.body?.flatMap((item) => item.blocks ?? []) ?? [];
 }
 
+function countNestedBlocks(node: SectionNode | undefined): number {
+  if (!node) {
+    return 0;
+  }
+  return getSectionBlocks(node).length + node.children.reduce((total, child) => total + countNestedBlocks(child), 0);
+}
+
 function resourceFromBlock(block: OVABlock): { kind: "chart" | "table"; id: string } | undefined {
   if (block.chartRef) {
     return { kind: "chart", id: block.chartRef };
@@ -1570,6 +1598,28 @@ function truncateLabel(value: string, maxLength = 86): string {
     return normalized;
   }
   return `${normalized.slice(0, maxLength - 1)}...`;
+}
+
+function tableCellText(cell: JSONObject): string {
+  if (typeof cell.text === "string") {
+    return cell.text;
+  }
+  if (!Array.isArray(cell.blocks)) {
+    return "";
+  }
+  return cell.blocks
+    .filter(isRecord)
+    .map((block) => plainBlockText(block.children))
+    .filter(Boolean)
+    .join("\n");
+}
+
+function getCellSpan(cell: JSONObject, key: "colSpan" | "rowSpan"): number {
+  const value = Number(cell[key]);
+  if (!Number.isFinite(value)) {
+    return 1;
+  }
+  return Math.max(1, Math.floor(value));
 }
 
 function findSection(nodes: SectionNode[], id: string | undefined): SectionNode | undefined {
