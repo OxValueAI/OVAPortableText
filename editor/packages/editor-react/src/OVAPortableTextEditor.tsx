@@ -72,6 +72,8 @@ export interface OVAPortableTextEditorProps {
   initialValue?: object | string;
   initialLocale?: EditorLocale;
   readOnly?: boolean;
+  className?: string;
+  style?: CSSProperties;
   versioning?: BrowserVersioningOptions;
   onSave?: (document: OVAReportDocument) => void | Promise<void>;
   onDirtyChange?: (dirty: boolean) => void;
@@ -442,7 +444,11 @@ export const OVAPortableTextEditor = forwardRef<
   }, [dirty]);
 
   if (!document) {
-    return <div className="ova-pte-shell ova-pte-empty">{t.openEmpty}</div>;
+    return (
+      <div className={["ova-pte-shell ova-pte-empty", props.className].filter(Boolean).join(" ")} style={props.style}>
+        {t.openEmpty}
+      </div>
+    );
   }
 
   const selectSection = (id: string) => {
@@ -471,7 +477,7 @@ export const OVAPortableTextEditor = forwardRef<
     });
   };
   return (
-    <div className="ova-pte-shell">
+    <div className={["ova-pte-shell", props.className].filter(Boolean).join(" ")} style={props.style}>
       <header className="ova-pte-toolbar">
         <input
           ref={fileInputRef}

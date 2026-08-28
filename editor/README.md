@@ -44,6 +44,7 @@ python tests/browser_smoke.py
 The script tries Selenium first, then falls back to Python Playwright with an installed local browser.
 
 The concise user manual is `docs/OVAPortableText_Editor_User_Manual.md`.
+The frontend integration guide is `docs/OVAPortableText_Editor_Integration_Guide.md`.
 The current UX redesign proposal is `docs/OVAPortableText_Editor_UX_Redesign_v0.2.md`.
 
 The current Golden Fixture is `fixtures/report-v1.3-company.json`.
