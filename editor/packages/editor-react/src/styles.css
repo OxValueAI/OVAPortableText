@@ -1,0 +1,762 @@
+.ova-pte-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: min(100vh, 100dvh);
+  min-height: 640px;
+  overflow: hidden;
+  color: #1d2433;
+  background: #f7f8fa;
+  border: 1px solid #d9dde5;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.ova-pte-empty {
+  display: grid;
+  min-height: 360px;
+  place-items: center;
+  color: #667085;
+}
+
+.ova-pte-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 68px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #d9dde5;
+  background: #ffffff;
+}
+
+.ova-pte-ui-button {
+  min-height: 32px;
+  border: 1px solid #c9d1df;
+  border-radius: 6px;
+  color: #1d2433;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.ova-pte-ui-button:hover:not(:disabled) {
+  border-color: #8ba8c7;
+  background: #f6f9fc;
+}
+
+.ova-pte-ui-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ova-pte-ui-button-primary {
+  border-color: #1f6fb2;
+  color: #ffffff;
+  background: #1f6fb2;
+}
+
+.ova-pte-ui-button-primary:hover:not(:disabled) {
+  border-color: #1a5d96;
+  background: #1a5d96;
+}
+
+.ova-pte-ui-button-danger {
+  border-color: #f2b8b5;
+  color: #b42318;
+}
+
+.ova-pte-ui-button-ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.ova-pte-toolbar button.active,
+.ova-pte-tree button.active {
+  border-color: #255e9c;
+  background: #e9f2ff;
+}
+
+.ova-pte-toolbar-group {
+  display: grid;
+  gap: 4px;
+  min-height: 46px;
+  padding: 5px 7px;
+  border: 1px solid #e5e9f0;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.ova-pte-toolbar-group.compact {
+  min-width: max-content;
+}
+
+.ova-pte-toolbar-label {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.ova-pte-toolbar-items {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ova-pte-segmented {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid #c9d1df;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.ova-pte-segmented button {
+  min-height: 30px;
+  border: 0;
+  border-radius: 0;
+  padding: 0 10px;
+}
+
+.ova-pte-segmented button + button {
+  border-left: 1px solid #c9d1df;
+}
+
+.ova-pte-locale {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid #c9d1df;
+  border-radius: 6px;
+}
+
+.ova-pte-locale button {
+  min-height: 30px;
+  border: 0;
+  border-radius: 0;
+}
+
+.ova-pte-locale button + button {
+  border-left: 1px solid #c9d1df;
+}
+
+.ova-pte-toolbar input {
+  min-width: 220px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid #c9d1df;
+  border-radius: 6px;
+}
+
+.ova-pte-toolbar .ova-pte-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  color: #667085;
+  font-size: 13px;
+}
+
+.ova-pte-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid #c6d8ea;
+  border-radius: 999px;
+  color: #194f82;
+  background: #eef6ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ova-pte-search-group {
+  flex: 0 1 260px;
+}
+
+.ova-pte-search-group input {
+  width: 100%;
+  min-width: 140px;
+}
+
+.ova-pte-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(520px, 760px) minmax(280px, 360px);
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ova-pte-sidebar,
+.ova-pte-properties {
+  min-height: 0;
+  overflow: auto;
+  border-right: 1px solid #d9dde5;
+  background: #ffffff;
+}
+
+.ova-pte-properties {
+  border-right: 0;
+  border-left: 1px solid #d9dde5;
+}
+
+.ova-pte-editor {
+  min-height: 0;
+  overflow: auto;
+  padding: 20px 18px;
+  background: #f4f6f8;
+}
+
+.ova-pte-panel {
+  padding: 14px;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.ova-pte-panel h2 {
+  margin: 0 0 10px;
+  color: #394150;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.ova-pte-tree,
+.ova-pte-tree ul,
+.ova-pte-stats,
+.ova-pte-issues {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.ova-pte-tree ul {
+  padding-left: 12px;
+}
+
+.ova-pte-tree button {
+  width: 100%;
+  text-align: left;
+}
+
+.ova-pte-tree ul {
+  padding-left: 18px;
+}
+
+.ova-pte-nav-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 4px;
+  margin: 3px 0;
+}
+
+.ova-pte-nav-toggle {
+  width: 28px;
+  min-height: 30px;
+  padding: 0;
+  font-weight: 800;
+}
+
+.ova-pte-nav-section,
+.ova-pte-nav-block {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 2px 6px;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 8px;
+  overflow: hidden;
+}
+
+.ova-pte-nav-block {
+  grid-template-columns: 24px minmax(0, 1fr);
+  margin: 2px 0 2px 32px;
+  border-style: dashed;
+}
+
+.ova-pte-nav-section strong,
+.ova-pte-nav-block strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ova-pte-nav-section small,
+.ova-pte-nav-block small {
+  grid-column: 2;
+  min-width: 0;
+  overflow: hidden;
+  color: #667085;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ova-pte-tree button span {
+  color: #667085;
+  font-size: 12px;
+}
+
+.ova-pte-document,
+.ova-pte-focused-editor {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #d9dde5;
+  border-radius: 8px;
+}
+
+.ova-pte-focused-editor,
+.ova-pte-section-composer {
+  display: grid;
+  gap: 16px;
+}
+
+.ova-pte-focus-header {
+  display: grid;
+  gap: 4px;
+  border-bottom: 1px solid #edf0f5;
+  padding-bottom: 14px;
+}
+
+.ova-pte-focus-header span {
+  color: #255e9c;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ova-pte-focus-header h1 {
+  margin: 0;
+  color: #101828;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.ova-pte-focus-header p {
+  margin: 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+.ova-pte-section-header {
+  display: grid;
+  gap: 8px;
+}
+
+.ova-pte-section-header label,
+.ova-pte-title-field,
+.ova-pte-block-editor-field {
+  display: grid;
+  gap: 6px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ova-pte-section-header > span {
+  color: #667085;
+  font-size: 12px;
+}
+
+.ova-pte-title-input {
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1px solid #d9dde5;
+  color: #101828;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.ova-pte-paragraph-input {
+  width: 100%;
+  min-height: 160px;
+  margin-top: 20px;
+  padding: 12px;
+  border: 1px solid #c9d1df;
+  border-radius: 6px;
+  color: #1d2433;
+  font: inherit;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.ova-pte-lock {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid #f6d29b;
+  border-radius: 6px;
+  color: #8a4b08;
+  background: #fff7ed;
+  font-size: 13px;
+}
+
+.ova-pte-section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ova-pte-block-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.ova-pte-block-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid #d9dde5;
+  border-radius: 6px;
+  background: #fbfcfe;
+  color: #1d2433;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ova-pte-block-card.active {
+  border-color: #255e9c;
+  background: #eef6ff;
+}
+
+.ova-pte-block-select {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #1d2433;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ova-pte-block-select > span,
+.ova-pte-block-card > span {
+  min-width: 0;
+  overflow: hidden;
+  color: #667085;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ova-pte-block-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.ova-pte-source {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 40px 1fr;
+}
+
+.ova-pte-source-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ova-pte-source textarea {
+  width: 100%;
+  min-height: 620px;
+  padding: 14px;
+  border: 1px solid #c9d1df;
+  border-radius: 6px;
+  font-family: "Cascadia Code", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ova-pte-stats li {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.ova-pte-resource-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.ova-pte-resource-list button {
+  min-height: 30px;
+  padding: 6px 8px;
+  overflow: hidden;
+  border: 1px solid #d9dde5;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1d2433;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ova-pte-resource-list button.active {
+  border-color: #255e9c;
+  background: #e9f2ff;
+}
+
+.ova-pte-issues {
+  display: grid;
+  gap: 8px;
+}
+
+.ova-pte-issues li {
+  padding-left: 8px;
+  border-left: 3px solid #98a2b3;
+}
+
+.ova-pte-issues li[data-severity="error"] {
+  border-color: #d92d20;
+}
+
+.ova-pte-issues li[data-severity="warning"] {
+  border-color: #dc6803;
+}
+
+.ova-pte-issues span,
+.ova-pte-issues small,
+.ova-pte-muted {
+  color: #667085;
+  font-size: 12px;
+}
+
+.ova-pte-error {
+  color: #b42318;
+  font-size: 13px;
+}
+
+.ova-pte-issues p {
+  margin: 2px 0;
+  font-size: 13px;
+}
+
+.ova-pte-properties dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.ova-pte-properties dt {
+  color: #667085;
+  font-size: 12px;
+}
+
+.ova-pte-properties dd {
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+}
+
+.ova-pte-data-editor {
+  display: grid;
+  gap: 10px;
+}
+
+.ova-pte-block-inspector {
+  display: grid;
+  gap: 12px;
+}
+
+.ova-pte-block-inspector dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.ova-pte-block-inspector dt {
+  color: #667085;
+  font-size: 12px;
+}
+
+.ova-pte-block-inspector dd {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+
+.ova-pte-block-inspector label {
+  display: grid;
+  gap: 6px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.ova-pte-inspector-textarea {
+  width: 100%;
+  min-height: 300px;
+  padding: 10px;
+  border: 1px solid #c9d1df;
+  border-radius: 6px;
+  color: #1d2433;
+  font: inherit;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.ova-pte-data-editor label {
+  display: grid;
+  gap: 4px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.ova-pte-data-editor input,
+.ova-pte-data-editor textarea {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 30px;
+  padding: 5px 7px;
+  border: 1px solid #c9d1df;
+  border-radius: 6px;
+  color: #1d2433;
+  font: inherit;
+}
+
+.ova-pte-autogrow {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  line-height: 1.45;
+  resize: none;
+  white-space: pre-wrap;
+}
+
+.ova-pte-slice-list,
+.ova-pte-chart-table {
+  display: grid;
+  gap: 6px;
+}
+
+.ova-pte-table-editor {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.ova-pte-slice-row,
+.ova-pte-chart-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.ova-pte-table-editor td {
+  height: 1px;
+  padding: 4px;
+  border: 1px solid #d9dde5;
+  vertical-align: top;
+  background: #ffffff;
+}
+
+.ova-pte-table-editor tr:first-child td {
+  background: #f8fafc;
+}
+
+.ova-pte-table-editor textarea {
+  min-height: 100%;
+}
+
+.ova-pte-chart-table {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.ova-pte-chart-row {
+  grid-auto-columns: minmax(82px, 1fr);
+  grid-auto-flow: column;
+  grid-template-columns: minmax(180px, 1.4fr);
+  min-width: max-content;
+}
+
+.ova-pte-chart-row textarea,
+.ova-pte-chart-row input,
+.ova-pte-slice-row textarea,
+.ova-pte-slice-row input {
+  min-height: 100%;
+}
+
+.ova-pte-chart-head {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ova-pte-chart-row span {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  overflow: visible;
+  padding: 6px 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ova-pte-versions {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.ova-pte-versions button {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d9dde5;
+  border-radius: 6px;
+  background: #ffffff;
+  text-align: left;
+}
+
+.ova-pte-versions span {
+  color: #667085;
+  font-size: 12px;
+}
+
+.ova-pte-version-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.ova-pte-version-actions button {
+  min-height: 26px;
+  width: auto;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+@media (max-width: 980px) {
+  .ova-pte-shell {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .ova-pte-grid {
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  .ova-pte-sidebar,
+  .ova-pte-properties {
+    max-height: 280px;
+    border: 0;
+    border-bottom: 1px solid #d9dde5;
+  }
+}
