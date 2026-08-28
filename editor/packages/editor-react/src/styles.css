@@ -508,6 +508,64 @@
   background: #e9f2ff;
 }
 
+.ova-pte-search-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.ova-pte-search-panel input {
+  width: 100%;
+  min-height: 34px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid #c9d1df;
+  border-radius: 6px;
+  color: #1d2433;
+  font: inherit;
+}
+
+.ova-pte-search-meta {
+  color: #667085;
+  font-size: 12px;
+}
+
+.ova-pte-search-results {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.ova-pte-search-results button {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 2px 8px;
+  width: 100%;
+  padding: 8px;
+}
+
+.ova-pte-search-results span {
+  color: #255e9c;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ova-pte-search-results strong,
+.ova-pte-search-results small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ova-pte-search-results small {
+  grid-column: 2;
+  color: #667085;
+  font-size: 11px;
+}
+
 .ova-pte-issues {
   display: grid;
   gap: 8px;
