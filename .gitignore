@@ -114,6 +114,9 @@ Thumbs.db
 # =========================
 docs/_build/
 
+# Local report design references
+/docs/startup_report_example/
+
 # =========================
 # Temporary files
 # =========================

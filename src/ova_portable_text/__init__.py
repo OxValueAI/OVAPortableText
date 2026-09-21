@@ -4,7 +4,7 @@ OVAPortableText 的公开导出入口。
 """
 
 from .base import OvaBaseModel
-from .block_objects import BlockObject, CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
+from .block_objects import FigureBlock, BlockObject, CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .content import (
     ALLOWED_DECORATOR_MARKS,
     ALLOWED_TEXT_STYLES,
@@ -160,7 +160,45 @@ from .section import (
     SectionRole,
 )
 from .theme import BlockLayout, BlockStyleDefault, LengthValue, ThemeConfig
-from .validator import assert_valid_document, validate_document
+from .validator import assert_valid_document, validate_document, validate_document_payload
 from .version import __version__
+
+from .chart_features import (
+    AxisBand, AxisDomain, AxisTick, BarMarkerTarget, ChartAnnotations, ChartMarker,
+    DataBasis, DataRole, DoughnutCenterContent, FlowEdge, FlowGroup, FlowNode,
+    FunnelStage, LanguageText, LineMarkerTarget, PartialDate, RangeMarkerTarget,
+    RangePoint, RangeSeries, ReferenceLine, Stage, TimelineEvent,
+)
+from .registry import (
+    FlowChartDataset, FunnelChartDataset, RangeCategory, RangeChartDataset,
+    StageProgressChartDataset, TimelineChartDataset,
+)
+from .chart_helpers import (
+    partial_date,
+    timeline_event,
+    timeline_chart_dataset,
+    stage,
+    stage_progress_chart_dataset,
+    flow_node,
+    flow_edge,
+    flow_group,
+    flow_chart_dataset,
+    funnel_stage,
+    funnel_chart_dataset,
+    range_point,
+    range_series,
+    range_chart_dataset,
+    axis_domain,
+    axis_tick,
+    reference_line,
+    axis_band,
+    line_marker_target,
+    bar_marker_target,
+    range_marker_target,
+    chart_marker,
+    chart_annotations,
+    doughnut_center_content,
+    figure_block,
+)
 
 __all__ = [name for name in globals() if not name.startswith("_")]

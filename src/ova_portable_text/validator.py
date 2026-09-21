@@ -33,7 +33,7 @@ def validate_document(document: Document) -> ValidationReport:
             message="`schemaVersion` is required.",
             path="schemaVersion",
             contextType="document",
-            suggestion="Set `schemaVersion` to `report.v1.3` unless you intentionally target another protocol version.",
+            suggestion="Set `schemaVersion` to `report.v1.4` unless you intentionally target another protocol version.",
         )
 
     if not isinstance(document.sections, list):
@@ -91,6 +91,8 @@ def validate_document(document: Document) -> ValidationReport:
         _validate_section_references(section, path=f"sections[{index}]", resolver=resolver, report=report)
 
     _validate_grid_table_dataset_references(document, resolver=resolver, report=report)
+    from .v14_validation import validate_v14
+    validate_v14(document, report)
 
     return report
 
@@ -845,3 +847,16 @@ def _validate_text_block_inline_references(block: TextBlock, *, path: str, secti
                     path=f"{child_path}.latex",
                     **_ctx(section=section, context_type="inline_math", location=f"{child_path}.latex", suggestion="Provide a non-empty LaTeX string."),
                 )
+
+
+def validate_document_payload(payload: dict) -> ValidationReport:
+    """Validate raw JSON-shaped input and map chart structure failures to protocol codes."""
+    from pydantic import ValidationError
+    from .v14_validation import add_model_errors
+    try:
+        document = Document.from_dict(payload)
+    except ValidationError as error:
+        report = ValidationReport()
+        add_model_errors(report, error)
+        return report
+    return validate_document(document)

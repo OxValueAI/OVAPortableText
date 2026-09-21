@@ -3,11 +3,18 @@ from __future__ import annotations
 import re
 from typing import Annotated, Any, Literal, TypeAlias
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator, WrapValidator
 
 from .base import OvaBaseModel
 from .block_objects import ChartBlock, ImageBlock
 from .text import TextBlock
+from .chart_features import (
+    AxisDomain, AxisTick, ChartAnnotations, DataBasis, DataRole,
+    DoughnutCenterContent, FlowEdge, FlowGroup, FlowNode, FunnelStage,
+    Key, LanguageText, PartialDate, RangeSeries, Stage, TimelineEvent,
+    V14Component, ExtendedChartComponent, fail,
+)
+from .chart_semantics import validate_cartesian, validate_new_chart
 
 
 class RegistryEntryBase(OvaBaseModel):
@@ -344,7 +351,8 @@ class PieChartDataset(RegistryEntryBase):
         return result or "slice"
 
 
-class DoughnutChartDataset(RegistryEntryBase):
+class DoughnutChartDataset(RegistryEntryBase, ExtendedChartComponent):
+    centerContent: DoughnutCenterContent | None = None
     chartType: Literal["doughnut"] = "doughnut"
     valueUnit: str | None = None
     total: int | float = 100
@@ -384,7 +392,9 @@ class DoughnutChartDataset(RegistryEntryBase):
         return self
 
 
-class ChartAxis(OvaBaseModel):
+class ChartAxis(ExtendedChartComponent):
+    domain: AxisDomain | None = None
+    ticks: list[AxisTick] | None = None
     label: dict[str, str] = Field(default_factory=dict)
     valueType: str | None = None
     unit: str | None = None
@@ -396,7 +406,8 @@ class ChartCategory(OvaBaseModel):
     description: dict[str, str] = Field(default_factory=dict)
 
 
-class BarDataPoint(OvaBaseModel):
+class BarDataPoint(ExtendedChartComponent):
+    dataRole: DataRole | None = None
     categoryKey: str
     value: int | float
     label: dict[str, str] = Field(default_factory=dict)
@@ -404,14 +415,23 @@ class BarDataPoint(OvaBaseModel):
     meta: dict[str, Any] = Field(default_factory=dict)
 
 
-class BarSeries(OvaBaseModel):
+class BarSeries(ExtendedChartComponent):
+    dataRole: DataRole | None = None
     key: str
     label: dict[str, str] = Field(default_factory=dict)
     description: dict[str, str] = Field(default_factory=dict)
     data: list[BarDataPoint] = Field(default_factory=list)
 
 
-class BarChartDataset(RegistryEntryBase):
+class BarChartDataset(RegistryEntryBase, ExtendedChartComponent):
+    dataBasis: DataBasis | None = None
+    annotations: ChartAnnotations | None = None
+
+    @model_validator(mode="after")
+    def validate_v14_semantics(self):
+        return validate_cartesian(self)
+
+    normalization: Literal["none", "percent"] | None = None
     chartType: Literal["bar"] = "bar"
     valueUnit: str | None = None
     orientation: Literal["vertical", "horizontal"] = "vertical"
@@ -453,7 +473,8 @@ class BarChartDataset(RegistryEntryBase):
         return self
 
 
-class LinePoint(OvaBaseModel):
+class LinePoint(ExtendedChartComponent):
+    dataRole: DataRole | None = None
     key: str | None = None
     xValue: str | int | float
     yValue: int | float
@@ -462,14 +483,22 @@ class LinePoint(OvaBaseModel):
     meta: dict[str, Any] = Field(default_factory=dict)
 
 
-class LineSeries(OvaBaseModel):
+class LineSeries(ExtendedChartComponent):
+    dataRole: DataRole | None = None
     key: str
     label: dict[str, str] = Field(default_factory=dict)
     description: dict[str, str] = Field(default_factory=dict)
     points: list[LinePoint] = Field(default_factory=list)
 
 
-class LineChartDataset(RegistryEntryBase):
+class LineChartDataset(RegistryEntryBase, ExtendedChartComponent):
+    dataBasis: DataBasis | None = None
+    annotations: ChartAnnotations | None = None
+
+    @model_validator(mode="after")
+    def validate_v14_semantics(self):
+        return validate_cartesian(self)
+
     chartType: Literal["line"] = "line"
     valueUnit: str | None = None
     xAxis: ChartAxis | None = None
@@ -547,6 +576,10 @@ class MatrixBubbleSeries(OvaBaseModel):
 
 
 class MatrixBubbleChartDataset(RegistryEntryBase):
+    @model_validator(mode="after")
+    def validate_axis_extensions(self):
+        return validate_cartesian(self)
+
     chartType: Literal["matrix_bubble"] = "matrix_bubble"
     xAxis: ChartAxis | None = None
     yAxis: ChartAxis | None = None
@@ -608,6 +641,78 @@ class MatrixBubbleChartDataset(RegistryEntryBase):
         return self
 
 
+class NewChartDataset(RegistryEntryBase, V14Component):
+    id: Key
+    anchor: Key | None = None
+
+    @model_validator(mode="after")
+    def validate_semantics(self):
+        return validate_new_chart(self)
+
+
+class TimelineChartDataset(NewChartDataset):
+    chartType: Literal["timeline"] = "timeline"
+    events: list[TimelineEvent] = Field(min_length=1)
+    asOf: str | None = None
+    spacing: Literal["ordinal", "temporal"] = "ordinal"
+
+    @field_validator("asOf")
+    @classmethod
+    def validate_as_of(cls, value):
+        if value is not None:
+            PartialDate(value=value, precision="day")
+        return value
+
+
+class StageProgressChartDataset(NewChartDataset):
+    chartType: Literal["stage_progress"] = "stage_progress"
+    stages: list[Stage] = Field(min_length=1)
+    currentStageKey: Key | None = None
+
+
+class FlowChartDataset(NewChartDataset):
+    chartType: Literal["flow"] = "flow"
+    nodes: list[FlowNode] = Field(min_length=1)
+    edges: list[FlowEdge]
+    groups: list[FlowGroup] | None = None
+
+
+class FunnelChartDataset(NewChartDataset):
+    chartType: Literal["funnel"] = "funnel"
+    relationship: Literal["containment"]
+    stages: list[FunnelStage] = Field(min_length=1)
+    valueUnit: Key | None = None
+
+
+class RangeCategory(V14Component):
+    key: Key
+    label: LanguageText
+    description: LanguageText | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def accept_chart_category(cls, value):
+        if isinstance(value, ChartCategory):
+            result = value.to_dict()
+            if not result.get("description"):
+                result.pop("description", None)
+            return result
+        return value
+
+
+class RangeChartDataset(NewChartDataset):
+    chartType: Literal["range"] = "range"
+    categories: list[RangeCategory] = Field(min_length=1)
+    series: list[RangeSeries] = Field(min_length=1)
+    orientation: Literal["horizontal", "vertical"] = "horizontal"
+    rangeDisplay: Literal["band"] = "band"
+    valueUnit: Key | None = None
+    xAxis: ChartAxis | None = None
+    yAxis: ChartAxis | None = None
+    annotations: ChartAnnotations | None = None
+    dataBasis: DataBasis | None = None
+
+
 class GenericChartDataset(RegistryEntryBase):
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -621,14 +726,32 @@ class GenericChartDataset(RegistryEntryBase):
         return value
 
 
-ChartDataset = (
-    PieChartDataset
-    | DoughnutChartDataset
-    | BarChartDataset
-    | LineChartDataset
-    | MatrixBubbleChartDataset
-    | GenericChartDataset
-)
+CHART_MODELS = {
+    model.model_fields["chartType"].default: model
+    for model in (PieChartDataset, DoughnutChartDataset, BarChartDataset,
+                  LineChartDataset, MatrixBubbleChartDataset, TimelineChartDataset,
+                  StageProgressChartDataset, FlowChartDataset, FunnelChartDataset,
+                  RangeChartDataset)
+}
+NEW_CHART_TYPES = frozenset({"timeline", "stage_progress", "flow", "funnel", "range"})
+
+
+def parse_chart(value, handler):
+    # Historical custom types are explicitly preserved by Document's version-aware reader.
+    if isinstance(value, GenericChartDataset) and getattr(value, '_legacy_custom', False):
+        return value
+    data = value.to_dict() if isinstance(value, OvaBaseModel) else value
+    kind = data.get("chartType") if isinstance(data, dict) else None
+    model = CHART_MODELS.get(kind, GenericChartDataset) if isinstance(kind, str) else GenericChartDataset
+    return model.model_validate(data)
+
+
+ChartDataset = Annotated[
+    PieChartDataset | DoughnutChartDataset | BarChartDataset | LineChartDataset
+    | MatrixBubbleChartDataset | TimelineChartDataset | StageProgressChartDataset
+    | FlowChartDataset | FunnelChartDataset | RangeChartDataset | GenericChartDataset,
+    WrapValidator(parse_chart),
+]
 
 
 class MetricValue(OvaBaseModel):
