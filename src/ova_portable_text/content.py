@@ -23,7 +23,7 @@ from typing import Literal, TypeAlias
 from pydantic import Field
 
 from .base import OvaBaseModel
-from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
+from .block_objects import FigureBlock, CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .text import (
     ALLOWED_DECORATOR_MARKS,
     ALLOWED_TEXT_STYLES,
@@ -38,7 +38,7 @@ from .text import (
     TextStyle,
 )
 
-BlockElement: TypeAlias = TextBlock | ImageBlock | ChartBlock | TableBlock | MathBlock | CalloutBlock
+BlockElement: TypeAlias = FigureBlock | TextBlock | ImageBlock | ChartBlock | TableBlock | MathBlock | CalloutBlock
 """
 Any block-level element allowed inside `content.blocks[]`.
 `content.blocks[]` 中允许出现的任意块级元素类型。
@@ -72,3 +72,15 @@ class ContentItem(OvaBaseModel):
         """
         self.blocks.append(block)
         return self
+
+    def figure_captions(self, figure_id: str) -> list[TextBlock]:
+        """Return only contiguous captions immediately following this figure."""
+        for index, block in enumerate(self.blocks):
+            if isinstance(block, FigureBlock) and block.id == figure_id:
+                captions = []
+                for following in self.blocks[index + 1:]:
+                    if not isinstance(following, TextBlock) or following.style != "figure_caption":
+                        break
+                    captions.append(following)
+                return captions
+        return []

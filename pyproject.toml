@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "OVAPortableText"
-version = "0.4.0"
+version = "0.5.0"
 description = "Python builder for generating OVAPortableText / Report Profile v1 JSON documents"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -46,6 +46,7 @@ include = [
   "/examples",
   "/docs",
   "/README.md",
+  "/PROTOCOL.md",
   "/CHANGELOG.md",
   "/LICENSE",
   "/pyproject.toml"
@@ -53,3 +54,6 @@ include = [
 
 [tool.ruff]
 line-length = 100
+
+[tool.hatch.build]
+exclude = ["/docs/startup_report_example/**"]

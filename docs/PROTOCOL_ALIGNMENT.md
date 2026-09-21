@@ -1,13 +1,13 @@
 # Protocol Alignment / 协议对齐说明
 
-This page explains how OVAPortableText 0.4.0 aligns with the current Report Profile v1.3 protocol maintained in this repository.  
-本文档说明 OVAPortableText 0.4.0 与当前仓库内维护的 Report Profile v1.3 正式协议之间的对齐关系。
+This page describes OVAPortableText 0.5.0, aligned to Report Profile v1.4.
+本文档说明 Python 包 0.5.0 的协议能力。新增图表、共享语义和 figure 的生成、读取与校验已实现；新建文档默认 report.v1.4，读取 v1.3 保留原版本。见 [v1.4 使用指南](PYTHON_V14.md)。渲染端独立验收。
 
 ---
 
 ## 1. Aligned top-level structure / 已对齐的顶层结构
 
-The package aligns to this top-level shape:  
+The package aligns to this top-level shape:
 当前包对齐如下顶层结构：
 
 - `schemaVersion`
@@ -20,14 +20,14 @@ The package aligns to this top-level shape:
 - `glossary`
 - `sections`
 
-`schemaVersion` defaults to `report.v1.3`.  
-`schemaVersion` 默认值为 `report.v1.3`。
+`schemaVersion` defaults to `report.v1.4`.
+`schemaVersion` 默认值为 `report.v1.4`。
 
 ---
 
 ## 2. Aligned structure-first authoring model / 已对齐的“结构优先” authoring 模型
 
-The package aligns to the protocol’s structure-first approach:  
+The package aligns to the protocol’s structure-first approach:
 当前包对齐协议里的“结构优先”思路：
 
 - formal document structure is represented by `sections`
@@ -93,7 +93,7 @@ Implemented as first-class models / 已作为一等模型实现：
 - `math_block`
 - `callout`
 
-These appear inside `content.blocks[]` as body instances.  
+These appear inside `content.blocks[]` as body instances.
 这些对象作为正文实例出现在 `content.blocks[]` 中。
 
 ---
@@ -110,16 +110,16 @@ Implemented / 已实现：
 - `assets.icons`
 - `assets.attachments`
 
-Image-like assets use the protocol’s `imageSource` model.  
+Image-like assets use the protocol’s `imageSource` model.
 图片类资源采用协议中的 `imageSource` 模型。
 
 ### Datasets / 数据集 registry
 
 Implemented / 已实现：
 
-- `datasets.charts` → currently formalized as pie chart datasets  
+- `datasets.charts` → currently formalized as pie chart datasets
   当前正式细化为 pie chart dataset
-- `datasets.tables` → supports both `record` and `grid`  
+- `datasets.tables` → supports both `record` and `grid`
   同时支持 `record` 与 `grid`
 - `datasets.metrics`
 
@@ -135,7 +135,7 @@ Implemented / 已实现：
 
 ## 6. Validation and resolver alignment / 校验与解析器对齐
 
-The package currently aligns to the protocol by validating:  
+The package currently aligns to the protocol by validating:
 当前包通过以下校验与协议对齐：
 
 - duplicate IDs
@@ -149,37 +149,46 @@ The package currently aligns to the protocol by validating:
 - pie chart dataset shape
 - bibliography / footnote / glossary reference integrity
 
-It also builds a resolver for globally addressable targets.  
+It also builds a resolver for globally addressable targets.
 同时会构建一个 resolver，用于全局可解析目标的索引与定位。
 
 ---
 
 ## 7. Current intentional boundary / 当前刻意保留的边界
 
-The package does **not** yet claim to fully implement every reserved taxonomy item named by the protocol.  
+The package does **not** yet claim to fully implement every reserved taxonomy item named by the protocol.
 当前包**并不**声称已经完整实现协议里所有预留 taxonomy 项。
 
 Examples of intentionally partial areas / 当前刻意保持部分实现的区域：
 
-- non-pie chart detailed schemas  
+- non-pie chart detailed schemas
   非 pie 图表的细化数据合同
-- metrics detailed schema  
+- metrics detailed schema
   metrics 的完整细字段合同
-- renderer-specific visual behavior  
+- renderer-specific visual behavior
   渲染器侧视觉行为
-- final PDF pagination / layout  
+- final PDF pagination / layout
   最终 PDF 分页 / 布局
 
 ---
 
 ## 8. Practical interpretation / 实际理解方式
 
-The package should be understood as:  
+The package should be understood as:
 可以把当前包理解为：
 
-- a **protocol authoring package**  
+- a **protocol authoring package**
   一个**协议 authoring 包**
-- a **validation and debugging layer**  
+- a **validation and debugging layer**
   一个**校验与调试层**
-- a **handoff boundary** between Python and the renderer  
+- a **handoff boundary** between Python and the renderer
   一个 Python 与渲染器之间的**交接边界层**
+
+## v1.4 新增覆盖
+
+- 强类型 timeline、stage_progress、flow、funnel、range，以及各自的局部语义约束。
+- line/bar/range 的 dataBasis、dataRole、数值轴量表和 annotations；bar percent；doughnut 中心文本。
+- figure → grid → chart/image 引用校验，共享布局使用路径，图号与 caption 邻接查询。
+- 已知图型明确分发，版本门控、旧自定义类型保留；无自动图型或图片降级。
+
+范围不包含误差棒／中心连线、图形布局算法、PDF 输出或渲染能力协商。所有渲染器仍需按正式协议完整呈现声明的语义。

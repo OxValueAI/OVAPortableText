@@ -7,8 +7,10 @@ from typing import Any, Iterable
 
 from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .document import Document, DocumentMeta
+from .chart_features import AxisDomain, AxisTick, ChartAnnotations, DataBasis, DataRole, DoughnutCenterContent
 from .inline import CitationRef, FootnoteRef, GlossaryTerm, HardBreak, InlineMath, XRef
 from .registry import (
+    ChartDataset,
     AttachmentAsset,
     BackgroundAsset,
     BarChartDataset,
@@ -20,7 +22,6 @@ from .registry import (
     ChartCategory,
     DoughnutChartDataset,
     FootnoteEntry,
-    GenericChartDataset,
     GlossaryEntry,
     GridTableCell,
     GridTableDataset,
@@ -70,6 +71,35 @@ from .text import (
 )
 
 
+from .chart_helpers import (
+    partial_date as partial_date,
+    timeline_event as timeline_event,
+    timeline_chart_dataset as timeline_chart_dataset,
+    stage as stage,
+    stage_progress_chart_dataset as stage_progress_chart_dataset,
+    flow_node as flow_node,
+    flow_edge as flow_edge,
+    flow_group as flow_group,
+    flow_chart_dataset as flow_chart_dataset,
+    funnel_stage as funnel_stage,
+    funnel_chart_dataset as funnel_chart_dataset,
+    range_point as range_point,
+    range_series as range_series,
+    range_chart_dataset as range_chart_dataset,
+    axis_domain as axis_domain,
+    axis_tick as axis_tick,
+    reference_line as reference_line,
+    axis_band as axis_band,
+    line_marker_target as line_marker_target,
+    bar_marker_target as bar_marker_target,
+    range_marker_target as range_marker_target,
+    chart_marker as chart_marker,
+    chart_annotations as chart_annotations,
+    doughnut_center_content as doughnut_center_content,
+    figure_block as figure_block,
+)
+
+
 def _lang_dict(
     label: dict[str, str] | None = None,
     *,
@@ -84,10 +114,20 @@ def _lang_dict(
     return {key: value for key, value in data.items() if value is not None}
 
 
-def create_document(*, title: str | None = None, language: str | None = None, theme: ThemeConfig | dict[str, Any] | None = None, strict_ids: bool = False, **meta_fields) -> Document:
+def create_document(
+    *,
+    schema_version: str = "report.v1.4",
+    title: str | None = None,
+    language: str | None = None,
+    theme: ThemeConfig | dict[str, Any] | None = None,
+    strict_ids: bool = False,
+    **meta_fields,
+) -> Document:
     meta = DocumentMeta(title=title, language=language, **meta_fields)
     theme_value = theme if isinstance(theme, ThemeConfig) else ThemeConfig(**(theme or {}))
-    return Document(meta=meta, theme=theme_value, strict_ids=strict_ids)
+    return Document(
+        schemaVersion=schema_version, meta=meta, theme=theme_value, strict_ids=strict_ids
+    )
 
 
 document = create_document
@@ -446,8 +486,10 @@ def doughnut_chart_dataset(
     value_unit: str | None = None,
     total: int | float = 100,
     show_remainder_track: bool = True,
+    center_content: DoughnutCenterContent | dict[str, Any] | None = None,
 ) -> DoughnutChartDataset:
     return DoughnutChartDataset(
+        **{k: v for k, v in {"centerContent": center_content}.items() if v is not None},
         id=id,
         slices=slices,
         label=label,
@@ -467,8 +509,15 @@ def chart_axis(
     zh: str | None = None,
     value_type: str | None = None,
     unit: str | None = None,
+    domain: AxisDomain | dict[str, Any] | None = None,
+    ticks: list[AxisTick | dict[str, Any]] | None = None,
 ) -> ChartAxis:
-    return ChartAxis(label=_lang_dict(label, en=en, zh=zh), valueType=value_type, unit=unit)
+    return ChartAxis(
+        **{k: v for k, v in {"domain": domain, "ticks": ticks}.items() if v is not None},
+        label=_lang_dict(label, en=en, zh=zh),
+        valueType=value_type,
+        unit=unit,
+    )
 
 
 def chart_category(
@@ -499,8 +548,10 @@ def bar_data_point(
     description_en: str | None = None,
     description_zh: str | None = None,
     meta: dict[str, Any] | None = None,
+    data_role: DataRole | None = None,
 ) -> BarDataPoint:
     return BarDataPoint(
+        **{k: v for k, v in {"dataRole": data_role}.items() if v is not None},
         categoryKey=category_key,
         value=value,
         label=_lang_dict(label, en=en, zh=zh),
@@ -519,8 +570,10 @@ def bar_series(
     description: dict[str, str] | None = None,
     description_en: str | None = None,
     description_zh: str | None = None,
+    data_role: DataRole | None = None,
 ) -> BarSeries:
     return BarSeries(
+        **{k: v for k, v in {"dataRole": data_role}.items() if v is not None},
         key=key,
         label=_lang_dict(label, en=en, zh=zh),
         description=_lang_dict(description, en=description_en, zh=description_zh),
@@ -541,8 +594,20 @@ def bar_chart_dataset(
     bar_mode: str = "grouped",
     x_axis: ChartAxis | dict[str, Any] | None = None,
     y_axis: ChartAxis | dict[str, Any] | None = None,
+    annotations: ChartAnnotations | dict[str, Any] | None = None,
+    data_basis: DataBasis | None = None,
+    normalization: str | None = None,
 ) -> BarChartDataset:
     return BarChartDataset(
+        **{
+            k: v
+            for k, v in {
+                "annotations": annotations,
+                "dataBasis": data_basis,
+                "normalization": normalization,
+            }.items()
+            if v is not None
+        },
         id=id,
         label=label,
         anchor=anchor,
@@ -569,8 +634,20 @@ def horizontal_bar_chart_dataset(
     bar_mode: str = "grouped",
     x_axis: ChartAxis | dict[str, Any] | None = None,
     y_axis: ChartAxis | dict[str, Any] | None = None,
+    annotations: ChartAnnotations | dict[str, Any] | None = None,
+    data_basis: DataBasis | None = None,
+    normalization: str | None = None,
 ) -> BarChartDataset:
     return bar_chart_dataset(
+        **{
+            k: v
+            for k, v in {
+                "annotations": annotations,
+                "data_basis": data_basis,
+                "normalization": normalization,
+            }.items()
+            if v is not None
+        },
         id=id,
         categories=categories,
         series=series,
@@ -597,8 +674,10 @@ def line_point(
     description_en: str | None = None,
     description_zh: str | None = None,
     meta: dict[str, Any] | None = None,
+    data_role: DataRole | None = None,
 ) -> LinePoint:
     return LinePoint(
+        **{k: v for k, v in {"dataRole": data_role}.items() if v is not None},
         key=key,
         xValue=x_value,
         yValue=y_value,
@@ -618,8 +697,10 @@ def line_series(
     description: dict[str, str] | None = None,
     description_en: str | None = None,
     description_zh: str | None = None,
+    data_role: DataRole | None = None,
 ) -> LineSeries:
     return LineSeries(
+        **{k: v for k, v in {"dataRole": data_role}.items() if v is not None},
         key=key,
         label=_lang_dict(label, en=en, zh=zh),
         description=_lang_dict(description, en=description_en, zh=description_zh),
@@ -637,8 +718,15 @@ def line_chart_dataset(
     value_unit: str | None = None,
     x_axis: ChartAxis | dict[str, Any] | None = None,
     y_axis: ChartAxis | dict[str, Any] | None = None,
+    annotations: ChartAnnotations | dict[str, Any] | None = None,
+    data_basis: DataBasis | None = None,
 ) -> LineChartDataset:
     return LineChartDataset(
+        **{
+            k: v
+            for k, v in {"annotations": annotations, "dataBasis": data_basis}.items()
+            if v is not None
+        },
         id=id,
         label=label,
         anchor=anchor,
@@ -747,8 +835,23 @@ def matrix_bubble_chart_dataset(
         series=series,
     )
 
-def chart_dataset(*, id: str, chart_type: str, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, **extra) -> GenericChartDataset:
-    return GenericChartDataset(id=id, chartType=chart_type, label=label, anchor=anchor, meta=meta or {}, **extra)
+def chart_dataset(
+    *,
+    id: str,
+    chart_type: str,
+    label: str | None = None,
+    anchor: str | None = None,
+    meta: dict[str, Any] | None = None,
+    **extra,
+) -> ChartDataset:
+    from .registry import parse_chart
+
+    fields = dict(id=id, chartType=chart_type, meta=meta or {}, **extra)
+    if label is not None:
+        fields["label"] = label
+    if anchor is not None:
+        fields["anchor"] = anchor
+    return parse_chart(fields, None)
 
 
 def pie_chart_from_parallel_arrays(*, id: str, area_en: list[str], area_zh: list[str] | None, value: list[int | float], description_en: list[str] | None = None, description_zh: list[str] | None = None, label: str | None = None, anchor: str | None = None, meta: dict[str, Any] | None = None, value_unit: str | None = None, sort_desc: bool = True) -> PieChartDataset:

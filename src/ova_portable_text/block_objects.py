@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from typing import Literal, TypeAlias
 
-from pydantic import Field, model_validator
+from pydantic import Field, StrictBool, model_validator
 
 from .base import OvaBaseModel
 from .text import TextBlock
+from .chart_features import Key, V14Component
 
 
 class OptionalReferenceableBlockBase(OvaBaseModel):
@@ -59,4 +60,12 @@ class CalloutBlock(OptionalReferenceableBlockBase):
         return self
 
 
-BlockObject: TypeAlias = ImageBlock | ChartBlock | TableBlock | MathBlock | CalloutBlock
+class FigureBlock(RequiredReferenceableBlockBase, V14Component):
+    type_: Literal["figure"] = Field(default="figure", alias="_type", serialization_alias="_type")
+    id: Key
+    anchor: Key | None = None
+    layoutRef: Key
+    keepTogether: StrictBool = True
+
+
+BlockObject: TypeAlias = FigureBlock | ImageBlock | ChartBlock | TableBlock | MathBlock | CalloutBlock

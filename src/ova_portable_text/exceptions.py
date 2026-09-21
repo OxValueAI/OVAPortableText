@@ -63,6 +63,10 @@ class ValidationIssue(OvaBaseModel):
     sectionId: str | None = None
     sectionTitle: str | None = None
     suggestion: str | None = None
+    chartId: str | None = None
+    figureId: str | None = None
+    usagePath: str | None = None
+    usagePaths: list[str] | None = None
 
     def to_text(self) -> str:
         """
@@ -117,6 +121,10 @@ class ValidationReport(OvaBaseModel):
         sectionId: str | None = None,
         sectionTitle: str | None = None,
         suggestion: str | None = None,
+        chartId: str | None = None,
+        figureId: str | None = None,
+        usagePath: str | None = None,
+        usagePaths: list[str] | None = None,
     ) -> "ValidationReport":
         """
         Append one issue into the report.
@@ -138,6 +146,10 @@ class ValidationReport(OvaBaseModel):
                 sectionId=sectionId,
                 sectionTitle=sectionTitle,
                 suggestion=suggestion,
+                chartId=chartId,
+                figureId=figureId,
+                usagePath=usagePath,
+                usagePaths=usagePaths,
             )
         )
         if severity == "error":

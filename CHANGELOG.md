@@ -2,7 +2,27 @@
 
 **All notable changes to this project will be documented in this file.**  ** **本项目的重要变更会记录在此文件中。
 
-## [Unreleased]
+## [0.5.0] - 2026-09-21
+
+### Protocol
+
+* froze the `report.v1.4` contract in `PROTOCOL.md` and `docs/protocol/v1.4.md`
+* defined five new chart types, shared chart semantics, and the `figure` composition block
+* added a complete generic v1.4 JSON example and a protocol freeze record
+
+### Python SDK
+
+* added timeline, stage_progress, flow, funnel and range models and authoring helpers
+* added data roles/basis, numeric domains/ticks, annotations, percent bars and doughnut center content
+* added figure composition with grid dependencies, shared figure numbering and adjacent captions
+* added strict known-chart dispatch, chart semantic diagnostics and raw-payload validation
+* report malformed chart containers and discriminators as structured validation errors instead of internal exceptions
+* preserved historical v1.3 custom chart types without implicit migration; new features require v1.4
+* changed the default schema to `report.v1.4`; explicit v1.3 authoring remains available
+* added v1.4 regression coverage, a runnable report example and migration/API guidance
+* excluded local report design materials from Git and distribution artifacts
+
+This package produces JSON; downstream rendering requires separate implementation and acceptance.
 
 ## [0.4.0] - 2026-05-14
 

@@ -185,3 +185,7 @@ restored.assert_valid()
 - `docs/API_REFERENCE.md`
 - `docs/EXAMPLES.md`
 - `examples/`
+
+## v1.4 图表与组合图
+
+新建文档默认 report.v1.4。新增图型和组合图用法见 [新版使用指南](PYTHON_V14.md) 和 [可执行示例](../examples/v14_report.py)。

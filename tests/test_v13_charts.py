@@ -24,8 +24,8 @@ from ova_portable_text import (
 )
 
 
-def test_default_schema_version_is_report_v13() -> None:
-    assert create_document(title="v1.3").to_dict()["schemaVersion"] == "report.v1.3"
+def test_explicit_schema_version_is_report_v13() -> None:
+    assert create_document(title="v1.3", schema_version="report.v1.3").to_dict()["schemaVersion"] == "report.v1.3"
 
 
 def test_pie_color_hint_is_preserved() -> None:
@@ -216,7 +216,7 @@ def test_legacy_size_metric_value_unit_input_roundtrips_to_unit_output() -> None
 
 
 def test_v13_chart_example_document_serializes_and_validates() -> None:
-    report = create_document(title="v1.3 charts", language="en")
+    report = create_document(title="v1.3 charts", language="en", schema_version="report.v1.3")
     report.add_chart_dataset(
         line_chart_dataset(
             id="chart-line",
