@@ -28,7 +28,7 @@ from typing import Literal, TypeAlias
 from pydantic import Field, model_validator
 
 from .base import OvaBaseModel
-from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
+from .block_objects import FigureBlock, CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .content import BlockElement, ContentItem, MarkDef, TextBlock, TextChild, TextStyle
 from .text import ListItemStyle
 from .theme import BlockLayout
@@ -371,6 +371,19 @@ class Section(OvaBaseModel):
         一步创建并追加一个 chart 块。
         """
         return self.append_block(ChartBlock(id=id, anchor=anchor, chartRef=chart_ref))
+
+    def append_figure(self, *, id: str, layout_ref: str, anchor: str | None = None, keep_together: bool = True) -> "Section":
+        fields = dict(id=id, layoutRef=layout_ref, keepTogether=keep_together)
+        if anchor is not None:
+            fields["anchor"] = anchor
+        return self.append_block(FigureBlock(**fields))
+
+    def append_figure_with_caption(self, *, id: str, layout_ref: str, caption: str, anchor: str | None = None, keep_together: bool = True) -> "Section":
+        from .helpers import figure_block, paragraph
+        return self.append_blocks(
+            figure_block(id=id, layout_ref=layout_ref, anchor=anchor, keep_together=keep_together),
+            paragraph(caption, style="figure_caption"),
+        )
 
     def append_table(self, *, table_ref: str, id: str | None = None, anchor: str | None = None) -> "Section":
         """

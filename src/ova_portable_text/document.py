@@ -25,10 +25,10 @@ This file therefore contains:
 from collections import Counter
 from typing import Any, Iterable
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, model_validator
 
 from .base import OvaBaseModel
-from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
+from .block_objects import FigureBlock, CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .content import ContentItem
 from .numbering import DocumentNumbering, NumberingConfig
 from .registry import (
@@ -104,15 +104,15 @@ class Document(OvaBaseModel):
     顶层报告文档对象。
 
     Important protocol alignment / 关键协议对齐点：
-    - `schemaVersion` defaults to `report.v1`
-      `schemaVersion` 默认值为 `report.v1`
+    - `schemaVersion` defaults to `report.v1.4`
+      `schemaVersion` 默认值为 `report.v1.4`
     - `theme` is preserved as a placeholder, but now has a lightweight typed model
       `theme` 仍然是占位层，但现在有一个轻量强类型模型
     - top-level registries should always exist, even when empty
       顶层 registry 即使为空也应存在
     """
 
-    schemaVersion: str = "report.v1.3"
+    schemaVersion: str = "report.v1.4"
     strict_ids: bool = Field(default=False, exclude=True, repr=False)
     meta: DocumentMeta = Field(default_factory=DocumentMeta)
     theme: ThemeConfig = Field(default_factory=ThemeConfig)
@@ -122,6 +122,45 @@ class Document(OvaBaseModel):
     footnotes: list[FootnoteEntry] = Field(default_factory=list)
     glossary: list[GlossaryEntry] = Field(default_factory=list)
     sections: list[Section] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def preserve_historical_custom_charts(cls, value):
+        from .registry import GenericChartDataset, NEW_CHART_TYPES
+        from .protocol_version import SUPPORTED_VERSIONS
+        if not isinstance(value, dict):
+            return value
+        version = value.get("schemaVersion", "report.v1.4")
+        if not isinstance(version, str) or version == "report.v1.4" or version not in SUPPORTED_VERSIONS:
+            return value
+        datasets = value.get("datasets")
+        if isinstance(datasets, dict):
+            if not isinstance(datasets.get("charts", []), (list, tuple)):
+                return value
+            charts = []
+            for chart in datasets.get("charts", []):
+                if isinstance(chart, dict) and isinstance(chart.get("chartType"), str) and chart["chartType"] in NEW_CHART_TYPES:
+                    chart = GenericChartDataset.model_validate(chart)
+                    chart._legacy_custom = True
+                charts.append(chart)
+            value = {**value, "datasets": {**datasets, "charts": charts}}
+        return value
+
+    @model_validator(mode="after")
+    def check_protocol_version(self):
+        from .protocol_version import version_issues
+        for path, message in version_issues(self):
+            from .chart_features import fail
+            fail(path, message, "unsupported_schema_version" if path == "schemaVersion" else "protocol.version_mismatch")
+        return self
+
+    def to_dict(self, *, exclude_none: bool = True):
+        self.check_protocol_version()
+        return super().to_dict(exclude_none=exclude_none)
+
+    def to_json(self, *, indent: int | None = 2, exclude_none: bool = True):
+        self.check_protocol_version()
+        return super().to_json(indent=indent, exclude_none=exclude_none)
 
     def _iter_section_target_ids(self, section: Section) -> Iterable[str]:
         """
@@ -138,7 +177,7 @@ class Document(OvaBaseModel):
         for item in section.body:
             if isinstance(item, ContentItem):
                 for block in item.blocks:
-                    if isinstance(block, (ImageBlock, ChartBlock, TableBlock, MathBlock, CalloutBlock)) and block.id is not None:
+                    if isinstance(block, (FigureBlock, ImageBlock, ChartBlock, TableBlock, MathBlock, CalloutBlock)) and block.id is not None:
                         yield block.id
             elif isinstance(item, SubsectionItem):
                 yield from self._iter_section_target_ids(item.section)
@@ -205,6 +244,12 @@ class Document(OvaBaseModel):
         Append one top-level section.
         追加一个顶层 section。
         """
+        if self.schemaVersion != "report.v1.4":
+            from .protocol_version import version_issues
+            candidate = self.model_copy(update={"sections": [section]})
+            for path, message in version_issues(candidate):
+                if path.startswith("sections["):
+                    raise ValueError(f"{path}: {message}")
         self._ensure_ids_are_available(
             self._iter_section_target_ids(section),
             context=f"section {section.id!r}",
@@ -327,6 +372,11 @@ class Document(OvaBaseModel):
         Append a `datasets.charts` entry.
         追加一个 `datasets.charts` 条目。
         """
+        from .protocol_version import chart_uses_v14
+        from .registry import parse_chart
+        if self.schemaVersion != "report.v1.4" and chart_uses_v14(chart):
+            raise ValueError("This chart requires schemaVersion=report.v1.4; no implicit upgrade is performed.")
+        chart = parse_chart(chart, None)
         self._ensure_ids_are_available([chart.id], context=f"chart dataset {chart.id!r}")
         self.datasets.append_chart(chart)
         return self

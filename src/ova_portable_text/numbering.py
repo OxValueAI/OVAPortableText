@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import Field
 
 from .base import OvaBaseModel
-from .block_objects import ChartBlock, ImageBlock, MathBlock, TableBlock
+from .block_objects import FigureBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .content import ContentItem
 from .section import Section, SubsectionItem
 
@@ -134,7 +134,11 @@ class DocumentNumbering(OvaBaseModel):
                 if isinstance(item, ContentItem):
                     for block_index, block in enumerate(item.blocks):
                         block_path = f"{item_path}.blocks[{block_index}]"
-                        if isinstance(block, (ImageBlock, ChartBlock)):
+                        if isinstance(block, (ImageBlock, ChartBlock, TableBlock, MathBlock)) and block.id is None:
+                            category = "figure" if isinstance(block, (ImageBlock, ChartBlock)) else ("table" if isinstance(block, TableBlock) else "equation")
+                            allocate_object_number(category=category, section_path_numbers=structural_numbers, local_counts=local_counts)
+                            continue
+                        if isinstance(block, (FigureBlock, ImageBlock, ChartBlock)):
                             items[block.id] = NumberedTarget(
                                 id=block.id,
                                 category="figure",

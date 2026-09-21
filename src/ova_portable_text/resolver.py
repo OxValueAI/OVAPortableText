@@ -19,7 +19,7 @@ from collections import Counter, defaultdict
 from pydantic import Field
 
 from .base import OvaBaseModel
-from .block_objects import CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
+from .block_objects import FigureBlock, CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
 from .content import ContentItem
 from .document import Document
 from .section import Section, SubsectionItem
@@ -145,7 +145,9 @@ class DocumentResolver(OvaBaseModel):
                             section_id=section.id,
                             section_title=section.title,
                         )
-                        if isinstance(block, ImageBlock):
+                        if isinstance(block, FigureBlock):
+                            add_target(id=block.id, target_type="figure", anchor=block.anchor, **common)
+                        elif isinstance(block, ImageBlock):
                             if block.id is not None:
                                 add_target(id=block.id, target_type="image", anchor=block.anchor, **common)
                         elif isinstance(block, ChartBlock):

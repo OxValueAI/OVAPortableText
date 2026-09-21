@@ -1,0 +1,822 @@
+{
+  "schemaVersion": "report.v1.4",
+  "meta": {
+    "title": "v1.4 正式协议通用示例",
+    "language": "zh"
+  },
+  "theme": {},
+  "assets": {
+    "images": [],
+    "logos": [],
+    "backgrounds": [],
+    "icons": [],
+    "attachments": []
+  },
+  "datasets": {
+    "charts": [
+      {
+        "id": "chart-milestones",
+        "chartType": "timeline",
+        "asOf": "2026-09-01",
+        "events": [
+          {
+            "key": "founded",
+            "start": {
+              "value": "2020",
+              "precision": "year"
+            },
+            "label": {
+              "zh": "企业成立"
+            }
+          },
+          {
+            "key": "pilot",
+            "start": {
+              "value": "2025-03",
+              "precision": "month"
+            },
+            "end": {
+              "value": "2025-06",
+              "precision": "month"
+            },
+            "label": {
+              "zh": "试点验证"
+            }
+          }
+        ]
+      },
+      {
+        "id": "chart-development",
+        "chartType": "stage_progress",
+        "stages": [
+          {
+            "key": "research",
+            "label": {
+              "zh": "研究"
+            },
+            "status": "completed"
+          },
+          {
+            "key": "prototype",
+            "label": {
+              "zh": "原型"
+            },
+            "status": "in_progress"
+          },
+          {
+            "key": "validation",
+            "label": {
+              "zh": "验证"
+            }
+          }
+        ],
+        "currentStageKey": "prototype"
+      },
+      {
+        "id": "chart-analysis-flow",
+        "chartType": "flow",
+        "nodes": [
+          {
+            "key": "input",
+            "role": "input",
+            "label": {
+              "zh": "分析数据"
+            }
+          },
+          {
+            "key": "model",
+            "role": "process",
+            "label": {
+              "zh": "评估模型"
+            },
+            "groupKey": "analysis"
+          },
+          {
+            "key": "output",
+            "role": "output",
+            "label": {
+              "zh": "评估结果"
+            }
+          }
+        ],
+        "edges": [
+          {
+            "key": "input-model",
+            "sourceKey": "input",
+            "targetKey": "model"
+          },
+          {
+            "key": "model-output",
+            "sourceKey": "model",
+            "targetKey": "output"
+          }
+        ],
+        "groups": [
+          {
+            "key": "analysis",
+            "label": {
+              "zh": "分析过程"
+            }
+          }
+        ]
+      },
+      {
+        "id": "chart-market-hierarchy",
+        "chartType": "funnel",
+        "relationship": "containment",
+        "valueUnit": "GBP",
+        "stages": [
+          {
+            "key": "tam",
+            "label": {
+              "en": "TAM"
+            },
+            "value": 100000000
+          },
+          {
+            "key": "sam",
+            "label": {
+              "en": "SAM"
+            },
+            "value": 20000000
+          },
+          {
+            "key": "som",
+            "label": {
+              "en": "SOM"
+            },
+            "value": 2000000
+          }
+        ]
+      },
+      {
+        "id": "chart-value-ranges",
+        "chartType": "range",
+        "orientation": "horizontal",
+        "rangeDisplay": "band",
+        "valueUnit": "GBP million",
+        "categories": [
+          {
+            "key": "method-a",
+            "label": {
+              "zh": "方法 A"
+            }
+          }
+        ],
+        "series": [
+          {
+            "key": "valuation",
+            "points": [
+              {
+                "key": "a",
+                "categoryKey": "method-a",
+                "low": 10,
+                "high": 15,
+                "center": 12
+              }
+            ]
+          }
+        ],
+        "dataBasis": "illustrative",
+        "xAxis": {
+          "valueType": "number",
+          "unit": "GBP million"
+        },
+        "annotations": {
+          "referenceLines": [
+            {
+              "key": "lower-reference",
+              "axis": "x",
+              "value": 10,
+              "role": "baseline",
+              "label": {
+                "zh": "示例下界"
+              }
+            }
+          ],
+          "markers": [
+            {
+              "key": "central-estimate",
+              "role": "highlight",
+              "target": {
+                "seriesKey": "valuation",
+                "pointKey": "a",
+                "anchor": "center"
+              },
+              "label": {
+                "zh": "中心估计"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "chart-outlook",
+        "chartType": "line",
+        "xAxis": {
+          "valueType": "year"
+        },
+        "yAxis": {
+          "valueType": "number",
+          "unit": "index"
+        },
+        "series": [
+          {
+            "key": "history",
+            "label": {
+              "zh": "历史"
+            },
+            "dataRole": "observed",
+            "points": [
+              {
+                "key": "h24",
+                "xValue": 2024,
+                "yValue": 20
+              },
+              {
+                "key": "h25",
+                "xValue": 2025,
+                "yValue": 30
+              }
+            ]
+          },
+          {
+            "key": "outlook",
+            "label": {
+              "zh": "预测"
+            },
+            "dataRole": "forecast",
+            "points": [
+              {
+                "key": "boundary",
+                "xValue": 2025,
+                "yValue": 30,
+                "dataRole": "observed"
+              },
+              {
+                "key": "f26",
+                "xValue": 2026,
+                "yValue": 45
+              }
+            ]
+          }
+        ],
+        "annotations": {
+          "bands": [
+            {
+              "key": "forecast-period",
+              "axis": "x",
+              "from": 2025,
+              "to": 2026,
+              "role": "forecast",
+              "label": {
+                "zh": "预测区间"
+              }
+            }
+          ]
+        },
+        "dataBasis": "illustrative"
+      },
+      {
+        "id": "chart-lifecycle-position",
+        "chartType": "line",
+        "xAxis": {
+          "valueType": "number",
+          "domain": {
+            "min": 0,
+            "max": 3
+          }
+        },
+        "yAxis": {
+          "valueType": "number",
+          "unit": "index",
+          "domain": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        "dataBasis": "illustrative",
+        "series": [
+          {
+            "key": "lifecycle",
+            "label": {
+              "zh": "生命周期示意"
+            },
+            "points": [
+              {
+                "key": "start",
+                "xValue": 0,
+                "yValue": 5
+              },
+              {
+                "key": "position",
+                "xValue": 1.5,
+                "yValue": 45
+              },
+              {
+                "key": "end",
+                "xValue": 3,
+                "yValue": 95
+              }
+            ]
+          }
+        ],
+        "annotations": {
+          "bands": [
+            {
+              "key": "early",
+              "axis": "x",
+              "from": 0,
+              "to": 1,
+              "role": "stage",
+              "label": {
+                "zh": "早期"
+              }
+            },
+            {
+              "key": "growth",
+              "axis": "x",
+              "from": 1,
+              "to": 2,
+              "role": "stage",
+              "label": {
+                "zh": "成长"
+              }
+            },
+            {
+              "key": "mature",
+              "axis": "x",
+              "from": 2,
+              "to": 3,
+              "role": "stage",
+              "label": {
+                "zh": "成熟"
+              }
+            }
+          ],
+          "markers": [
+            {
+              "key": "current",
+              "target": {
+                "seriesKey": "lifecycle",
+                "pointKey": "position"
+              },
+              "role": "current_position",
+              "label": {
+                "zh": "当前定位"
+              },
+              "description": {
+                "zh": "依据所提供证据作定性定位，坐标不代表实测评分。"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "chart-readiness",
+        "chartType": "bar",
+        "orientation": "horizontal",
+        "barMode": "grouped",
+        "valueUnit": "TRL",
+        "xAxis": {
+          "valueType": "number",
+          "unit": "TRL",
+          "domain": {
+            "min": 1,
+            "max": 9
+          }
+        },
+        "yAxis": {
+          "valueType": "category"
+        },
+        "categories": [
+          {
+            "key": "system",
+            "label": {
+              "zh": "集成系统"
+            }
+          }
+        ],
+        "series": [
+          {
+            "key": "assessment",
+            "label": {
+              "zh": "技术就绪度"
+            },
+            "dataRole": "estimated",
+            "data": [
+              {
+                "categoryKey": "system",
+                "value": 4
+              }
+            ]
+          }
+        ],
+        "annotations": {
+          "referenceLines": [
+            {
+              "key": "gate",
+              "axis": "x",
+              "value": 6,
+              "role": "threshold",
+              "label": {
+                "zh": "代表性系统示范门槛"
+              }
+            }
+          ]
+        },
+        "dataBasis": "illustrative"
+      },
+      {
+        "id": "chart-screening",
+        "chartType": "bar",
+        "orientation": "horizontal",
+        "barMode": "stacked",
+        "normalization": "percent",
+        "valueUnit": "count",
+        "xAxis": {
+          "valueType": "number",
+          "unit": "percent",
+          "domain": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        "categories": [
+          {
+            "key": "dimension-a",
+            "label": {
+              "zh": "风险维度 A"
+            }
+          }
+        ],
+        "series": [
+          {
+            "key": "flagged",
+            "label": {
+              "zh": "已触发"
+            },
+            "data": [
+              {
+                "categoryKey": "dimension-a",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "key": "unflagged",
+            "label": {
+              "zh": "未触发"
+            },
+            "data": [
+              {
+                "categoryKey": "dimension-a",
+                "value": 3
+              }
+            ]
+          }
+        ],
+        "dataBasis": "illustrative"
+      },
+      {
+        "id": "chart-sensitivity",
+        "chartType": "bar",
+        "orientation": "horizontal",
+        "barMode": "stacked",
+        "valueUnit": "GBP million delta",
+        "xAxis": {
+          "valueType": "number",
+          "label": {
+            "zh": "相对基准的估值变化"
+          }
+        },
+        "categories": [
+          {
+            "key": "factor-a",
+            "label": {
+              "zh": "假设 A 的扰动"
+            }
+          }
+        ],
+        "series": [
+          {
+            "key": "downside",
+            "label": {
+              "zh": "不利情景"
+            },
+            "dataRole": "estimated",
+            "data": [
+              {
+                "categoryKey": "factor-a",
+                "value": -2
+              }
+            ]
+          },
+          {
+            "key": "upside",
+            "label": {
+              "zh": "有利情景"
+            },
+            "dataRole": "estimated",
+            "data": [
+              {
+                "categoryKey": "factor-a",
+                "value": 3
+              }
+            ]
+          }
+        ],
+        "annotations": {
+          "referenceLines": [
+            {
+              "key": "baseline",
+              "axis": "x",
+              "value": 0,
+              "role": "baseline",
+              "label": {
+                "zh": "基准情景"
+              }
+            }
+          ]
+        },
+        "dataBasis": "illustrative"
+      },
+      {
+        "id": "chart-share",
+        "chartType": "pie",
+        "valueUnit": "percent",
+        "slices": [
+          {
+            "key": "a",
+            "label": {
+              "zh": "类别 A"
+            },
+            "value": 60
+          },
+          {
+            "key": "b",
+            "label": {
+              "zh": "类别 B"
+            },
+            "value": 40
+          }
+        ]
+      },
+      {
+        "id": "chart-capability",
+        "chartType": "doughnut",
+        "total": 100,
+        "valueUnit": "percent",
+        "slices": [
+          {
+            "key": "technical",
+            "label": {
+              "zh": "技术"
+            },
+            "value": 70
+          },
+          {
+            "key": "commercial",
+            "label": {
+              "zh": "商业"
+            },
+            "value": 30
+          }
+        ],
+        "centerContent": {
+          "primary": {
+            "zh": "示例团队"
+          },
+          "secondary": {
+            "zh": "能力构成"
+          }
+        }
+      },
+      {
+        "id": "chart-matrix",
+        "chartType": "matrix_bubble",
+        "xCategories": [
+          {
+            "key": "technology-a",
+            "label": {
+              "zh": "技术 A"
+            }
+          }
+        ],
+        "yCategories": [
+          {
+            "key": "region-a",
+            "label": {
+              "zh": "区域 A"
+            }
+          }
+        ],
+        "sizeMetric": {
+          "label": {
+            "zh": "样本数量"
+          },
+          "unit": "count"
+        },
+        "series": [
+          {
+            "key": "samples",
+            "label": {
+              "zh": "样本"
+            },
+            "points": [
+              {
+                "key": "point-a",
+                "xCategoryKey": "technology-a",
+                "yCategoryKey": "region-a",
+                "sizeValue": 5
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "tables": [
+      {
+        "id": "layout-comparison-panel",
+        "tableType": "grid",
+        "columnCount": 2,
+        "layout": {
+          "columnSpecs": [
+            {
+              "width": {
+                "mode": "weight",
+                "value": 1
+              }
+            },
+            {
+              "width": {
+                "mode": "weight",
+                "value": 2
+              }
+            }
+          ]
+        },
+        "rows": [
+          {
+            "cells": [
+              {
+                "text": "技术就绪度评估：分数与门槛见右图。"
+              },
+              {
+                "blocks": [
+                  {
+                    "_type": "chart",
+                    "chartRef": "chart-readiness"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "metrics": []
+  },
+  "bibliography": [],
+  "footnotes": [],
+  "glossary": [],
+  "sections": [
+    {
+      "id": "sec-draft-examples",
+      "level": 1,
+      "title": "图表与组合示例",
+      "numbering": "auto",
+      "body": [
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "通用协议设计示例。数值仅供说明，不构成业务分析。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "chart",
+              "id": "fig-draft-chart-1",
+              "chartRef": "chart-milestones"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-draft-chart-2",
+              "chartRef": "chart-development"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-draft-chart-3",
+              "chartRef": "chart-analysis-flow"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-draft-chart-4",
+              "chartRef": "chart-market-hierarchy"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-draft-chart-5",
+              "chartRef": "chart-value-ranges"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-draft-chart-6",
+              "chartRef": "chart-outlook"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-draft-chart-7",
+              "chartRef": "chart-lifecycle-position"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-draft-chart-8",
+              "chartRef": "chart-readiness"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-draft-chart-9",
+              "chartRef": "chart-screening"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-draft-chart-10",
+              "chartRef": "chart-sensitivity"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-example-chart-share",
+              "chartRef": "chart-share"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-example-chart-capability",
+              "chartRef": "chart-capability"
+            },
+            {
+              "_type": "chart",
+              "id": "fig-example-chart-matrix",
+              "chartRef": "chart-matrix"
+            },
+            {
+              "_type": "figure",
+              "id": "fig-comparison-panel",
+              "layoutRef": "layout-comparison-panel",
+              "keepTogether": true
+            },
+            {
+              "_type": "block",
+              "style": "figure_caption",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "指标说明与就绪度图的组合示例。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "本段为独立正文，不属于上图标题。",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "参见组合图：",
+                  "marks": []
+                },
+                {
+                  "_type": "xref",
+                  "targetType": "figure",
+                  "targetId": "fig-comparison-panel"
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

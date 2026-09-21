@@ -26,7 +26,7 @@ def test_doughnut_chart_dataset_serializes_v12_fields():
 
 
 def test_section_v12_fields_roundtrip_and_optional_chart_id():
-    report = create_document(title="v1.2 Section")
+    report = create_document(title="v1.2 Section", schema_version="report.v1.3")
     report.add_chart_dataset(
         doughnut_chart_dataset(
             id="chart-1",

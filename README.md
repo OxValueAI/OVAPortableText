@@ -1,7 +1,9 @@
 # OVAPortableText
 
-**OVAPortableText** is a Python authoring package for building JSON documents that conform to the **OVA Report Profile v1.0** protocol.  
-**OVAPortableText** 是一个 Python 端的协议生成包，用于创建符合 **OVA Report Profile v1.0** 协议的 JSON 文档。
+> Python **0.5.0** 已实现 [`report.v1.4`](PROTOCOL.md) 的生成、读取和校验，默认新建 v1.4 文档并兼容读取 v1.3。新增五种图表、共享图表语义和组合 `figure`。见 [新版使用指南](docs/PYTHON_V14.md) 与 [完整 Python 示例](examples/v14_report.py)。渲染效果由下游渲染器独立验收。
+
+**OVAPortableText** is a Python authoring package for building JSON documents that conform to the **OVA Report Profile v1.4** protocol.
+**OVAPortableText** 是一个 Python 端的协议生成包，用于创建符合 **OVA Report Profile v1.4** 协议的 JSON 文档。
 
 It is **not** a PDF renderer. Its job is to help Python code produce a typed, validated, protocol-aligned document payload that can be handed off to a downstream renderer.  
 它**不是** PDF 渲染器。它的职责是帮助 Python 代码以强类型、可校验、可维护的方式生成协议 JSON，再交给下游渲染器处理。
