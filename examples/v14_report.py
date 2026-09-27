@@ -26,7 +26,9 @@ from ova_portable_text import (
 
 
 def build_report():
-    report = create_document(title="Example company report", language="en")
+    report = create_document(
+        title="Example company report", language="en", schema_version="report.v1.4"
+    )
     timeline = timeline_chart_dataset(
         id="chart-history",
         as_of="2026-09-01",

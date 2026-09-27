@@ -1,7 +1,7 @@
 # API Reference / API 参考
 
-This page is a practical map of the public API in OVAPortableText `v0.5.0`, aligned to `report.v1.4`.
-本文档是 OVAPortableText `v0.5.0` 的实用 API 地图，对齐 `report.v1.4`。
+This page is a practical map of the public API in OVAPortableText `v0.6.0`, aligned to `report.v1.5`.
+本文档是 OVAPortableText `v0.6.0` 的实用 API 地图，对齐 `report.v1.5`。
 
 ---
 
@@ -17,7 +17,7 @@ This page is a practical map of the public API in OVAPortableText `v0.5.0`, alig
 
 Default schema version:
 
-- `Document.schemaVersion == "report.v1.4"`
+- `Document.schemaVersion == "report.v1.5"`
 
 Common arguments / 常用参数：
 
@@ -385,3 +385,7 @@ Use the resolver when you need to inspect what is globally addressable in the do
 ## v1.4 additions
 
 See [Python v1.4 guide](PYTHON_V14.md) for the new typed models, helpers, version gates, figure captions, and `validate_document_payload`.
+
+## v1.5 valuation_result
+
+Python 0.6.0 adds native valuation-result banners and defaults to report.v1.5. Explicit report.v1.4 remains supported. See [v1.5 guide](PYTHON_V15.md) for typed amounts, base currency units, helpers and the renderer contract.

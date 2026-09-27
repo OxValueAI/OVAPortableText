@@ -104,15 +104,15 @@ class Document(OvaBaseModel):
     顶层报告文档对象。
 
     Important protocol alignment / 关键协议对齐点：
-    - `schemaVersion` defaults to `report.v1.4`
-      `schemaVersion` 默认值为 `report.v1.4`
+    - `schemaVersion` defaults to `report.v1.5`
+      `schemaVersion` 默认值为 `report.v1.5`
     - `theme` is preserved as a placeholder, but now has a lightweight typed model
       `theme` 仍然是占位层，但现在有一个轻量强类型模型
     - top-level registries should always exist, even when empty
       顶层 registry 即使为空也应存在
     """
 
-    schemaVersion: str = "report.v1.4"
+    schemaVersion: str = "report.v1.5"
     strict_ids: bool = Field(default=False, exclude=True, repr=False)
     meta: DocumentMeta = Field(default_factory=DocumentMeta)
     theme: ThemeConfig = Field(default_factory=ThemeConfig)
@@ -126,12 +126,12 @@ class Document(OvaBaseModel):
     @model_validator(mode="before")
     @classmethod
     def preserve_historical_custom_charts(cls, value):
-        from .registry import GenericChartDataset, NEW_CHART_TYPES
-        from .protocol_version import SUPPORTED_VERSIONS
+        from .registry import GenericChartDataset, NEW_CHART_TYPES, V15_CHART_TYPES
+        from .protocol_version import SUPPORTED_VERSIONS, chart_type_supported
         if not isinstance(value, dict):
             return value
-        version = value.get("schemaVersion", "report.v1.4")
-        if not isinstance(version, str) or version == "report.v1.4" or version not in SUPPORTED_VERSIONS:
+        version = value.get("schemaVersion", "report.v1.5")
+        if not isinstance(version, str) or version == "report.v1.5" or version not in SUPPORTED_VERSIONS:
             return value
         datasets = value.get("datasets")
         if isinstance(datasets, dict):
@@ -139,7 +139,12 @@ class Document(OvaBaseModel):
                 return value
             charts = []
             for chart in datasets.get("charts", []):
-                if isinstance(chart, dict) and isinstance(chart.get("chartType"), str) and chart["chartType"] in NEW_CHART_TYPES:
+                if (
+                    isinstance(chart, dict)
+                    and isinstance(chart.get("chartType"), str)
+                    and chart["chartType"] in (NEW_CHART_TYPES | V15_CHART_TYPES)
+                    and not chart_type_supported(chart["chartType"], version)
+                ):
                     chart = GenericChartDataset.model_validate(chart)
                     chart._legacy_custom = True
                 charts.append(chart)
@@ -244,7 +249,7 @@ class Document(OvaBaseModel):
         Append one top-level section.
         追加一个顶层 section。
         """
-        if self.schemaVersion != "report.v1.4":
+        if self.schemaVersion not in {"report.v1.4", "report.v1.5"}:
             from .protocol_version import version_issues
             candidate = self.model_copy(update={"sections": [section]})
             for path, message in version_issues(candidate):
@@ -372,11 +377,12 @@ class Document(OvaBaseModel):
         Append a `datasets.charts` entry.
         追加一个 `datasets.charts` 条目。
         """
-        from .protocol_version import chart_uses_v14
+        from .protocol_version import chart_version_issue
         from .registry import parse_chart
-        if self.schemaVersion != "report.v1.4" and chart_uses_v14(chart):
-            raise ValueError("This chart requires schemaVersion=report.v1.4; no implicit upgrade is performed.")
         chart = parse_chart(chart, None)
+        issue = chart_version_issue(chart, self.schemaVersion)
+        if issue:
+            raise ValueError(issue)
         self._ensure_ids_are_available([chart.id], context=f"chart dataset {chart.id!r}")
         self.datasets.append_chart(chart)
         return self

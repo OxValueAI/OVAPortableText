@@ -33,7 +33,7 @@ def validate_document(document: Document) -> ValidationReport:
             message="`schemaVersion` is required.",
             path="schemaVersion",
             contextType="document",
-            suggestion="Set `schemaVersion` to `report.v1.4` unless you intentionally target another protocol version.",
+            suggestion="Set `schemaVersion` to `report.v1.5` unless you intentionally target another protocol version.",
         )
 
     if not isinstance(document.sections, list):

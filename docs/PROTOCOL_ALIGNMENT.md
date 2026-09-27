@@ -1,7 +1,7 @@
 # Protocol Alignment / 协议对齐说明
 
-This page describes OVAPortableText 0.5.0, aligned to Report Profile v1.4.
-本文档说明 Python 包 0.5.0 的协议能力。新增图表、共享语义和 figure 的生成、读取与校验已实现；新建文档默认 report.v1.4，读取 v1.3 保留原版本。见 [v1.4 使用指南](PYTHON_V14.md)。渲染端独立验收。
+This page describes OVAPortableText 0.6.0, aligned to Report Profile v1.5.
+本文档说明 Python 包 0.6.0 的协议能力。新增图表、共享语义和 figure 的生成、读取与校验已实现；新建文档默认 report.v1.5，读取旧版本保留原版本。估值横幅见 [v1.5 使用指南](PYTHON_V15.md)，其余图表见 [v1.4 指南](PYTHON_V14.md)。渲染端独立验收。
 
 ---
 
@@ -20,8 +20,8 @@ The package aligns to this top-level shape:
 - `glossary`
 - `sections`
 
-`schemaVersion` defaults to `report.v1.4`.
-`schemaVersion` 默认值为 `report.v1.4`。
+`schemaVersion` defaults to `report.v1.5`.
+`schemaVersion` 默认值为 `report.v1.5`。
 
 ---
 
@@ -192,3 +192,7 @@ The package should be understood as:
 - 已知图型明确分发，版本门控、旧自定义类型保留；无自动图型或图片降级。
 
 范围不包含误差棒／中心连线、图形布局算法、PDF 输出或渲染能力协商。所有渲染器仍需按正式协议完整呈现声明的语义。
+
+## v1.5 valuation_result
+
+Python 0.6.0 adds native valuation-result banners and defaults to report.v1.5. Explicit report.v1.4 remains supported. See [v1.5 guide](PYTHON_V15.md) for typed amounts, base currency units, helpers and the renderer contract.

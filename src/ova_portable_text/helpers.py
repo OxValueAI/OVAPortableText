@@ -116,7 +116,7 @@ def _lang_dict(
 
 def create_document(
     *,
-    schema_version: str = "report.v1.4",
+    schema_version: str = "report.v1.5",
     title: str | None = None,
     language: str | None = None,
     theme: ThemeConfig | dict[str, Any] | None = None,

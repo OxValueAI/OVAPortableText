@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "report.v1.5",
+  "meta": {
+    "title": "Valuation result",
+    "language": "en"
+  },
+  "theme": {
+    "blockStyleDefaults": {}
+  },
+  "assets": {
+    "images": [],
+    "logos": [],
+    "backgrounds": [],
+    "icons": [],
+    "attachments": []
+  },
+  "datasets": {
+    "charts": [
+      {
+        "id": "valuation-result",
+        "anchor": "valuation-result",
+        "meta": {},
+        "chartType": "valuation_result",
+        "subject": {
+          "en": "Clean Food Group Limited"
+        },
+        "valuation": {
+          "kind": "range",
+          "low": 20100000,
+          "high": 28400000
+        },
+        "currency": "GBP",
+        "valueBasis": "equity_value",
+        "asOf": "2026-08-05",
+        "dataBasis": "illustrative",
+        "capitalBasis": "pre_money",
+        "title": {
+          "en": "Valuation range"
+        },
+        "notes": {
+          "en": "Illustrative design sample; not an independently verified valuation."
+        },
+        "displayScale": "million",
+        "displayPrecision": 1
+      }
+    ],
+    "tables": [],
+    "metrics": []
+  },
+  "bibliography": [],
+  "footnotes": [],
+  "glossary": [],
+  "sections": [
+    {
+      "id": "summary",
+      "level": 1,
+      "title": "Valuation conclusion",
+      "numbering": "auto",
+      "anchor": "summary",
+      "body": [
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "id": "valuation-banner",
+              "anchor": "valuation-banner",
+              "_type": "chart",
+              "chartRef": "valuation-result"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -201,4 +201,8 @@ from .chart_helpers import (
     figure_block,
 )
 
+from .valuation import ValuationPoint, ValuationRange, ValuationAmount
+from .registry import ValuationResultChartDataset
+from .chart_helpers import valuation_result_chart_dataset, valuation_point, valuation_range
+
 __all__ = [name for name in globals() if not name.startswith("_")]

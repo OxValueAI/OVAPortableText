@@ -188,4 +188,8 @@ restored.assert_valid()
 
 ## v1.4 图表与组合图
 
-新建文档默认 report.v1.4。新增图型和组合图用法见 [新版使用指南](PYTHON_V14.md) 和 [可执行示例](../examples/v14_report.py)。
+新建文档默认 report.v1.5。新增图型和组合图用法见 [新版使用指南](PYTHON_V14.md) 和 [可执行示例](../examples/v14_report.py)。
+
+## v1.5 valuation_result
+
+Python 0.6.0 adds native valuation-result banners and defaults to report.v1.5. Explicit report.v1.4 remains supported. See [v1.5 guide](PYTHON_V15.md) for typed amounts, base currency units, helpers and the renderer contract.
