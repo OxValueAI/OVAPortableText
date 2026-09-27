@@ -1,4 +1,4 @@
-"""Authoring helpers for report.v1.4 (snake_case arguments, protocol JSON output)."""
+"""Authoring helpers for report.v1.4/v1.5 (snake_case arguments, protocol JSON output)."""
 
 from __future__ import annotations
 
@@ -35,7 +35,9 @@ from .registry import (
     RangeChartDataset,
     StageProgressChartDataset,
     TimelineChartDataset,
+    ValuationResultChartDataset,
 )
+from .valuation import ValuationAmount, ValuationPoint, ValuationRange
 
 ModelT = TypeVar("ModelT", bound=OvaBaseModel)
 
@@ -348,4 +350,31 @@ def figure_block(
 ) -> FigureBlock:
     return _build(
         FigureBlock, id=id, layoutRef=layout_ref, anchor=anchor, keepTogether=keep_together
+    )
+
+
+def valuation_point(value: int | float) -> ValuationPoint:
+    """A point estimate in currency base units."""
+    return ValuationPoint(value=value)
+
+
+def valuation_range(low: int | float, high: int | float) -> ValuationRange:
+    """A concluded range in currency base units, not a confidence interval."""
+    return ValuationRange(low=low, high=high)
+
+
+def valuation_result_chart_dataset(
+    *, id: str, subject: dict[str, str], valuation: ValuationAmount | dict[str, Any],
+    currency: str, value_basis: str, as_of: str, data_basis: str,
+    capital_basis: str | None = None, title: dict[str, str] | None = None,
+    notes: dict[str, str] | None = None, display_scale: str = "unit",
+    display_precision: int = 1, label: str | None = None,
+    anchor: str | None = None, meta: dict[str, Any] | None = None,
+) -> ValuationResultChartDataset:
+    """Build the report.v1.5 result banner; display scale never rescales stored amounts."""
+    return _build(
+        ValuationResultChartDataset, id=id, subject=subject, valuation=valuation,
+        currency=currency, valueBasis=value_basis, asOf=as_of, dataBasis=data_basis,
+        capitalBasis=capital_basis, title=title, notes=notes, displayScale=display_scale,
+        displayPrecision=display_precision, label=label, anchor=anchor, meta=meta,
     )

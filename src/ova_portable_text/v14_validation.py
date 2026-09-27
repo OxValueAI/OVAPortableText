@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from .block_objects import ChartBlock, FigureBlock, ImageBlock, TableBlock
 from .content import ContentItem
-from .protocol_version import version_issues
+from .protocol_version import version_issues, chart_type_supported
 from .registry import CHART_MODELS, GenericChartDataset, GridTableDataset
 from .section import SubsectionItem
 
@@ -75,7 +75,7 @@ def validate_v14(document, report):
         if model is None or (
             isinstance(chart, GenericChartDataset)
             and getattr(chart, "_legacy_custom", False)
-            and document.schemaVersion != "report.v1.4"
+            and not chart_type_supported(chart.chartType, document.schemaVersion)
         ):
             continue
         path = f"datasets.charts[{i}]"

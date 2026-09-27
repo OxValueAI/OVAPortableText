@@ -2,6 +2,19 @@
 
 **All notable changes to this project will be documented in this file.**  ** **本项目的重要变更会记录在此文件中。
 
+## [0.6.0] - 2026-09-27
+
+### Protocol and Python SDK
+
+* froze `report.v1.5` with native `valuation_result` banners for point and range estimates
+* added typed valuation amounts, currency base-unit semantics, display scale/precision, valuation/capital basis, date and sample-data classification
+* added strict helpers, known-type dispatch, full-document diagnostics, reference/grid support and JSON round trips
+* default new documents to v1.5 while preserving explicit v1.4 and older documents without implicit migration
+* preserve historical custom `valuation_result` payloads under their original schema; require explicit conversion before upgrading
+* added a runnable example, a protocol fixture, a renderer contract and migration guidance
+
+The package creates JSON. The downstream renderer must implement the valuation banner; no silent fallback is provided.
+
 ## [0.5.0] - 2026-09-21
 
 ### Protocol

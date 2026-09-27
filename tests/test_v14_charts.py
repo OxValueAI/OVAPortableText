@@ -430,7 +430,7 @@ def test_version_gates_on_authoring_and_save_without_implicit_upgrade():
     assert old.schemaVersion == "report.v1.3"
     with pytest.raises(ValidationError):
         Document(schemaVersion="report.v9")
-    assert create_document().schemaVersion == "report.v1.4"
+    assert create_document().schemaVersion == "report.v1.5"
 
 
 def test_figure_shared_layout_identity_dependency_and_caption_boundaries():

@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import Annotated, Any, Literal, TypeAlias
 
-from pydantic import ConfigDict, Field, field_validator, model_validator, WrapValidator
+from pydantic import ConfigDict, Field, StrictInt, StrictStr, field_validator, model_validator, WrapValidator
 
 from .base import OvaBaseModel
 from .block_objects import ChartBlock, ImageBlock
@@ -15,6 +15,7 @@ from .chart_features import (
     V14Component, ExtendedChartComponent, fail,
 )
 from .chart_semantics import validate_cartesian, validate_new_chart
+from .valuation import ValuationAmount
 
 
 class RegistryEntryBase(OvaBaseModel):
@@ -713,6 +714,35 @@ class RangeChartDataset(NewChartDataset):
     dataBasis: DataBasis | None = None
 
 
+class ValuationResultChartDataset(NewChartDataset):
+    """One valuation result; amounts always use currency base units."""
+
+    chartType: Literal["valuation_result"] = "valuation_result"
+    subject: LanguageText
+    valuation: ValuationAmount
+    currency: Annotated[StrictStr, Field(pattern=r"^[A-Z]{3}$")]
+    valueBasis: Literal["equity_value", "enterprise_value", "asset_value"]
+    asOf: StrictStr
+    dataBasis: DataBasis
+    capitalBasis: Literal["pre_money", "post_money"] | None = None
+    title: LanguageText | None = None
+    notes: LanguageText | None = None
+    displayScale: Literal["unit", "thousand", "million", "billion"] = "unit"
+    displayPrecision: Annotated[StrictInt, Field(ge=0, le=6)] = 1
+
+    @field_validator("asOf")
+    @classmethod
+    def valid_date(cls, value):
+        PartialDate(value=value, precision="day")
+        return value
+
+    @model_validator(mode="after")
+    def compatible_basis(self):
+        if self.capitalBasis is not None and self.valueBasis != "equity_value":
+            fail("capitalBasis", "Pre/post-money applies only to equity_value.")
+        return self
+
+
 class GenericChartDataset(RegistryEntryBase):
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -731,9 +761,10 @@ CHART_MODELS = {
     for model in (PieChartDataset, DoughnutChartDataset, BarChartDataset,
                   LineChartDataset, MatrixBubbleChartDataset, TimelineChartDataset,
                   StageProgressChartDataset, FlowChartDataset, FunnelChartDataset,
-                  RangeChartDataset)
+                  RangeChartDataset, ValuationResultChartDataset)
 }
 NEW_CHART_TYPES = frozenset({"timeline", "stage_progress", "flow", "funnel", "range"})
+V15_CHART_TYPES = frozenset({"valuation_result"})
 
 
 def parse_chart(value, handler):
@@ -749,7 +780,8 @@ def parse_chart(value, handler):
 ChartDataset = Annotated[
     PieChartDataset | DoughnutChartDataset | BarChartDataset | LineChartDataset
     | MatrixBubbleChartDataset | TimelineChartDataset | StageProgressChartDataset
-    | FlowChartDataset | FunnelChartDataset | RangeChartDataset | GenericChartDataset,
+    | FlowChartDataset | FunnelChartDataset | RangeChartDataset
+    | ValuationResultChartDataset | GenericChartDataset,
     WrapValidator(parse_chart),
 ]
 
