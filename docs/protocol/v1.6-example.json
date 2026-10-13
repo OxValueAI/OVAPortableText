@@ -1,0 +1,511 @@
+{
+  "schemaVersion": "report.v1.6",
+  "meta": {
+    "title": "Pagination, orientation and caption example",
+    "language": "en",
+    "date": "2026-10-13",
+    "documentType": "protocol_example"
+  },
+  "theme": {
+    "page": {
+      "orientation": "portrait"
+    },
+    "blockStyleDefaults": {
+      "figure_caption": {
+        "layout": {
+          "textAlign": "center"
+        }
+      },
+      "table_caption": {
+        "layout": {
+          "textAlign": "left"
+        }
+      }
+    }
+  },
+  "assets": {
+    "images": [],
+    "logos": [],
+    "backgrounds": [],
+    "icons": [],
+    "attachments": []
+  },
+  "datasets": {
+    "charts": [
+      {
+        "id": "valuation-result",
+        "anchor": "valuation-result",
+        "meta": {},
+        "chartType": "valuation_result",
+        "subject": {
+          "en": "Clean Food Group Limited"
+        },
+        "valuation": {
+          "kind": "range",
+          "low": 20100000,
+          "high": 28400000
+        },
+        "currency": "GBP",
+        "valueBasis": "equity_value",
+        "asOf": "2026-08-05",
+        "dataBasis": "illustrative",
+        "capitalBasis": "pre_money",
+        "title": {
+          "en": "Valuation range"
+        },
+        "notes": {
+          "en": "Illustrative design sample; not an independently verified valuation."
+        },
+        "displayScale": "million",
+        "displayPrecision": 1
+      }
+    ],
+    "tables": [
+      {
+        "id": "financial-data",
+        "tableType": "record",
+        "columns": [
+          {
+            "key": "period",
+            "header": "Period"
+          },
+          {
+            "key": "amount",
+            "header": "Amount (GBP)"
+          }
+        ],
+        "rows": [
+          {
+            "period": "Year 1",
+            "amount": 1200000
+          },
+          {
+            "period": "Year 2",
+            "amount": 1500000
+          }
+        ],
+        "layout": {
+          "cellDefaults": {
+            "align": "left",
+            "verticalAlign": "middle"
+          },
+          "columnSpecs": [
+            {
+              "width": {
+                "mode": "auto"
+              },
+              "align": "left"
+            },
+            {
+              "width": {
+                "mode": "weight",
+                "value": 2
+              },
+              "align": "right",
+              "header": {
+                "align": "center"
+              }
+            }
+          ],
+          "headerDefaults": {
+            "align": "center"
+          }
+        }
+      },
+      {
+        "id": "overview-grid",
+        "tableType": "grid",
+        "columnCount": 2,
+        "layout": {
+          "cellDefaults": {
+            "align": "left",
+            "verticalAlign": "top"
+          },
+          "columnSpecs": [
+            {
+              "width": {
+                "mode": "auto"
+              }
+            },
+            {
+              "width": {
+                "mode": "weight",
+                "value": 2
+              },
+              "align": "right"
+            }
+          ],
+          "headerDefaults": {
+            "align": "center"
+          }
+        },
+        "rows": [
+          {
+            "cells": [
+              {
+                "text": "Overview",
+                "header": true,
+                "colSpan": 2,
+                "align": "center"
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "text": "Illustrative valuation",
+                "verticalAlign": "middle"
+              },
+              {
+                "blocks": [
+                  {
+                    "_type": "chart",
+                    "chartRef": "valuation-result"
+                  },
+                  {
+                    "_type": "block",
+                    "style": "figure_caption",
+                    "children": [
+                      {
+                        "_type": "span",
+                        "text": "Illustrative only",
+                        "marks": []
+                      }
+                    ],
+                    "markDefs": [],
+                    "layout": {
+                      "textAlign": "left"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "metrics": []
+  },
+  "bibliography": [],
+  "footnotes": [],
+  "glossary": [],
+  "sections": [
+    {
+      "id": "sec-intro",
+      "level": 1,
+      "title": "Portrait introduction",
+      "numbering": "auto",
+      "body": [
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "The document begins in portrait. The next chart starts a new page.",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "table",
+              "id": "same-direction-table",
+              "tableRef": "financial-data",
+              "page": {
+                "orientation": "portrait"
+              }
+            },
+            {
+              "_type": "chart",
+              "id": "result-chart",
+              "chartRef": "valuation-result",
+              "pagination": {
+                "pageBreakBefore": "always"
+              }
+            },
+            {
+              "_type": "block",
+              "style": "figure_caption",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "Illustrative valuation result",
+                  "marks": []
+                }
+              ],
+              "markDefs": [],
+              "caption": {
+                "targetRef": "result-chart",
+                "position": "after"
+              },
+              "layout": {
+                "textAlign": "right"
+              }
+            }
+          ]
+        },
+        {
+          "itemType": "subsection",
+          "section": {
+            "id": "sec-wide",
+            "level": 2,
+            "title": "Landscape subsection",
+            "numbering": "auto",
+            "body": [
+              {
+                "itemType": "content",
+                "blocks": [
+                  {
+                    "_type": "block",
+                    "style": "table_caption",
+                    "children": [
+                      {
+                        "_type": "span",
+                        "text": "Overview grid",
+                        "marks": []
+                      }
+                    ],
+                    "markDefs": [],
+                    "caption": {
+                      "targetRef": "wide-table",
+                      "position": "before"
+                    },
+                    "layout": {
+                      "textAlign": "center"
+                    }
+                  },
+                  {
+                    "_type": "table",
+                    "id": "wide-table",
+                    "tableRef": "overview-grid"
+                  }
+                ]
+              }
+            ],
+            "page": {
+              "orientation": "landscape"
+            }
+          }
+        },
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "Portrait resumes after the landscape subsection.",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        }
+      ],
+      "pagination": {
+        "pageBreakBefore": "always"
+      }
+    },
+    {
+      "id": "sec-financial",
+      "level": 1,
+      "title": "Financial analysis",
+      "numbering": "auto",
+      "body": [
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "The following table and its two captions occupy dedicated landscape pages.",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "table_caption",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "Illustrative financial summary",
+                  "marks": []
+                }
+              ],
+              "markDefs": [],
+              "caption": {
+                "targetRef": "financial-instance",
+                "position": "before"
+              },
+              "layout": {
+                "textAlign": "center"
+              }
+            },
+            {
+              "_type": "table",
+              "id": "financial-instance",
+              "tableRef": "financial-data",
+              "page": {
+                "orientation": "landscape"
+              },
+              "pagination": {
+                "pageBreakBefore": "always",
+                "pageBreakAfter": "always"
+              }
+            },
+            {
+              "_type": "block",
+              "style": "table_caption",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "Amounts in GBP; fictional example data.",
+                  "marks": []
+                }
+              ],
+              "markDefs": [],
+              "caption": {
+                "targetRef": "financial-instance",
+                "position": "after"
+              },
+              "layout": {
+                "textAlign": "right"
+              }
+            },
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "Portrait resumes here after the dedicated table pages.",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        },
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "figure_caption",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "Composite overview",
+                  "marks": []
+                }
+              ],
+              "markDefs": [],
+              "caption": {
+                "targetRef": "overview-figure",
+                "position": "before"
+              },
+              "layout": {
+                "textAlign": "left"
+              }
+            },
+            {
+              "_type": "figure",
+              "id": "overview-figure",
+              "layoutRef": "overview-grid",
+              "keepTogether": true,
+              "page": {
+                "orientation": "landscape"
+              }
+            },
+            {
+              "_type": "chart",
+              "id": "adjacent-landscape-chart",
+              "chartRef": "valuation-result",
+              "page": {
+                "orientation": "landscape"
+              }
+            }
+          ]
+        },
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "The next figure demonstrates the retained implicit caption convention.",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            },
+            {
+              "_type": "figure",
+              "id": "legacy-figure",
+              "layoutRef": "overview-grid",
+              "keepTogether": true
+            },
+            {
+              "_type": "block",
+              "style": "figure_caption",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "Implicit caption following its figure.",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        }
+      ],
+      "pagination": {
+        "pageBreakBefore": "always"
+      }
+    },
+    {
+      "id": "sec-end",
+      "level": 1,
+      "title": "Final landscape page",
+      "numbering": "auto",
+      "body": [
+        {
+          "itemType": "content",
+          "blocks": [
+            {
+              "_type": "block",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "text": "This section ends the document in landscape. No blank portrait page is appended.",
+                  "marks": []
+                }
+              ],
+              "markDefs": []
+            }
+          ]
+        }
+      ],
+      "page": {
+        "orientation": "landscape"
+      }
+    }
+  ]
+}

@@ -18,7 +18,7 @@ def _path(parts):
     return result
 
 
-def add_model_errors(report, error, *, prefix="", chart_id=None):
+def add_model_errors(report, error, *, prefix="", chart_id=None, layout_mode=False):
     for item in error.errors():
         suffix = _path(item["loc"])
         context = item.get("ctx", {})
@@ -27,8 +27,18 @@ def add_model_errors(report, error, *, prefix="", chart_id=None):
             suffix += ("." if suffix else "") + local
         path = prefix + ("." if prefix and suffix else "") + suffix
         code = item["type"]
-        if not code.startswith(("chart.", "figure.", "protocol.", "unsupported_schema_version")):
-            if code == "missing":
+        if not code.startswith(("chart.", "figure.", "protocol.", "layout.", "caption.", "unsupported_schema_version")):
+            layout_fields = {"page", "pagination", "caption", "cellDefaults", "headerDefaults"}
+            layout_path = (
+                any(part in layout_fields for part in item["loc"])
+                or prefix.startswith("theme")
+                or any(part in prefix for part in (
+                    ".page", ".caption", ".cellDefaults", ".headerDefaults", ".columnSpecs"
+                ))
+            )
+            if layout_mode and layout_path:
+                code = "layout.invalid_value"
+            elif code == "missing":
                 code = "chart.required_field"
             elif "Duplicate " in item["msg"]:
                 code = "chart.duplicate_key"
@@ -40,7 +50,7 @@ def add_model_errors(report, error, *, prefix="", chart_id=None):
             code=code,
             message=item["msg"],
             path=path or prefix,
-            contextType="chart_dataset",
+            contextType="layout" if code.startswith(("layout.", "caption.")) else "chart_dataset",
             contextId=chart_id,
             chartId=chart_id,
         )

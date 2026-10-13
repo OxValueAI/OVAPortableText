@@ -59,6 +59,7 @@ from .section import (
     SectionRole,
 )
 from .theme import BlockLayout, LengthValue, ThemeConfig
+from .page_layout import PageSettings, ObjectPagination, CellAlignment, CaptionBinding
 from .text import (
     AnnotationMarkDef,
     LinkMarkDef,
@@ -144,6 +145,7 @@ def section(
     navigation: SectionNavigation | dict[str, Any] | None = None,
     pagination: SectionPagination | dict[str, Any] | None = None,
     presentation: SectionPresentation | dict[str, Any] | None = None,
+    page: PageSettings | dict | None = None,
 ) -> Section:
     return Section(
         id=id,
@@ -155,6 +157,7 @@ def section(
         navigation=navigation,
         pagination=pagination,
         presentation=presentation,
+        **({"page": page} if page is not None else {}),
     )
 
 
@@ -248,17 +251,14 @@ def inline_math(latex: str) -> InlineMath:
     return InlineMath(latex=latex)
 
 
-def image_block(*, image_ref: str, id: str | None = None, anchor: str | None = None) -> ImageBlock:
-    return ImageBlock(id=id, anchor=anchor, imageRef=image_ref)
+def image_block(*, image_ref: str, id: str | None = None, anchor: str | None = None, page: PageSettings | dict | None = None, pagination: ObjectPagination | dict | None = None) -> ImageBlock:
+    return ImageBlock(id=id, anchor=anchor, imageRef=image_ref, **{k: v for k, v in dict(page=page, pagination=pagination).items() if v is not None})
 
+def chart_block(*, id: str, chart_ref: str, anchor: str | None = None, page: PageSettings | dict | None = None, pagination: ObjectPagination | dict | None = None) -> ChartBlock:
+    return ChartBlock(id=id, anchor=anchor, chartRef=chart_ref, **{k: v for k, v in dict(page=page, pagination=pagination).items() if v is not None})
 
-def chart_block(*, id: str, chart_ref: str, anchor: str | None = None) -> ChartBlock:
-    return ChartBlock(id=id, anchor=anchor, chartRef=chart_ref)
-
-
-def table_block(*, id: str, table_ref: str, anchor: str | None = None) -> TableBlock:
-    return TableBlock(id=id, anchor=anchor, tableRef=table_ref)
-
+def table_block(*, id: str, table_ref: str, anchor: str | None = None, page: PageSettings | dict | None = None, pagination: ObjectPagination | dict | None = None) -> TableBlock:
+    return TableBlock(id=id, anchor=anchor, tableRef=table_ref, **{k: v for k, v in dict(page=page, pagination=pagination).items() if v is not None})
 
 def math_block(*, id: str, latex: str, anchor: str | None = None) -> MathBlock:
     return MathBlock(id=id, anchor=anchor, latex=latex)
@@ -394,16 +394,31 @@ def block_layout(
     )
 
 
-def table_column_spec_auto() -> TableColumnSpec:
-    return TableColumnSpec(width=TableColumnWidth(mode="auto"))
+def table_column_spec_auto(*, align: str | None = None, vertical_align: str | None = None, header: CellAlignment | dict | None = None) -> TableColumnSpec:
+    return TableColumnSpec(width=TableColumnWidth(mode="auto"), **{
+        k: v for k, v in dict(align=align, verticalAlign=vertical_align, header=header).items() if v is not None
+    })
 
 
-def table_column_spec_weight(value: int | float) -> TableColumnSpec:
-    return TableColumnSpec(width=TableColumnWidth(mode="weight", value=value))
+def table_column_spec_weight(value: int | float, *, align: str | None = None, vertical_align: str | None = None, header: CellAlignment | dict | None = None) -> TableColumnSpec:
+    return TableColumnSpec(width=TableColumnWidth(mode="weight", value=value), **{
+        k: v for k, v in dict(align=align, verticalAlign=vertical_align, header=header).items() if v is not None
+    })
 
 
-def table_layout(*column_specs: TableColumnSpec) -> TableLayout:
-    return TableLayout(columnSpecs=list(column_specs))
+def table_layout(*column_specs: TableColumnSpec, cell_defaults: CellAlignment | dict | None = None, header_defaults: CellAlignment | dict | None = None) -> TableLayout:
+    return TableLayout(columnSpecs=list(column_specs), **{
+        k: v for k, v in dict(cellDefaults=cell_defaults, headerDefaults=header_defaults).items() if v is not None
+    })
+
+
+def caption_block(*parts: str | TextChild, target_ref: str, position: str, style: TextStyle = "figure_caption", layout: BlockLayout | dict | None = None) -> TextBlock:
+    """Create an explicitly bound v1.6 caption; content order is validated on the document."""
+    if style not in {"figure_caption", "table_caption"}:
+        raise ValueError("Explicit captions require figure_caption or table_caption.")
+    block = paragraph(*parts, style=style, layout=layout)
+    block.caption = CaptionBinding(targetRef=target_ref, position=position)
+    return block
 
 
 def table_column(*, key: str, header: str) -> TableColumn:

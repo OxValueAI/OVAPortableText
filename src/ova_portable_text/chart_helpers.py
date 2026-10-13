@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from .page_layout import PageSettings, ObjectPagination
+
 from typing import Any, TypeVar
 
 from .base import OvaBaseModel
@@ -346,10 +348,12 @@ def doughnut_center_content(
 
 
 def figure_block(
-    *, id: str, layout_ref: str, anchor: str | None = None, keep_together: bool = True
+    *, id: str, layout_ref: str, anchor: str | None = None, keep_together: bool = True,
+    page: PageSettings | dict | None = None, pagination: ObjectPagination | dict | None = None,
 ) -> FigureBlock:
     return _build(
-        FigureBlock, id=id, layoutRef=layout_ref, anchor=anchor, keepTogether=keep_together
+        FigureBlock, id=id, layoutRef=layout_ref, anchor=anchor, keepTogether=keep_together,
+        page=page, pagination=pagination,
     )
 
 

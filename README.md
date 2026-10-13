@@ -1,9 +1,9 @@
 # OVAPortableText
 
-> Python **0.6.0** 已实现 [`report.v1.5`](PROTOCOL.md)，新增 `valuation_result` 原生估值结果横幅。支持单值/区间、币种、估值口径、投前/投后、基准日及显示倍率；默认新建 v1.5，兼容旧版本。见 [v1.5 使用指南](docs/PYTHON_V15.md) 与 [可运行示例](examples/v15_valuation_result.py)。渲染端需独立实现横幅。
+> Python **0.7.0** 已实现 [`report.v1.6`](PROTOCOL.md)：对象前后分页、页面方向、表格/表头对齐及显式 caption 前后组。默认仍创建 v1.5，新能力显式启用 v1.6。见 [使用指南](docs/PYTHON_V16.md)、[JSON 示例](docs/protocol/v1.6-example.json)和[冻结记录](docs/protocol/v1.6-freeze.md)。本次冻结覆盖协议与 SDK；渲染器当前无法测试，渲染验收延期。
 
-**OVAPortableText** is a Python authoring package for building JSON documents that conform to the **OVA Report Profile v1.5** protocol.
-**OVAPortableText** 是一个 Python 端的协议生成包，用于创建符合 **OVA Report Profile v1.5** 协议的 JSON 文档。
+**OVAPortableText** is a Python authoring package for building JSON documents that conform to the **OVA Report Profile v1.6** protocol.
+**OVAPortableText** 是一个 Python 端的协议生成包，用于创建符合 **OVA Report Profile v1.6** 协议的 JSON 文档。
 
 It is **not** a PDF renderer. Its job is to help Python code produce a typed, validated, protocol-aligned document payload that can be handed off to a downstream renderer.  
 它**不是** PDF 渲染器。它的职责是帮助 Python 代码以强类型、可校验、可维护的方式生成协议 JSON，再交给下游渲染器处理。
@@ -50,8 +50,8 @@ The package ends at **structured JSON generation + validation + debugging suppor
 
 ## 3. Current protocol scope implemented by the package / 当前包已实现的协议范围
 
-This package intentionally implements the **stable, author-facing subset** of Report Profile v1.0.  
-当前包刻意只实现了 Report Profile v1.0 中**已经稳定、适合作者侧使用的那部分能力**。
+This package implements the authoring and validation contracts through Report Profile v1.6; new documents default to v1.5 for compatibility.
+当前包实现到 Report Profile v1.6 的构建与校验合同；为保持兼容，新文档默认 v1.5。以下为基础能力概览，新增能力见 v1.6 使用指南。
 
 Currently implemented / 当前已实现：
 
@@ -407,11 +407,11 @@ twine check dist/*
 
 ### 11.3 Release note / 发布说明
 
-The current package version is **0.1.3**.  
-当前包版本为 **0.1.3**。
+The current package version is **0.7.0**.
+当前包版本为 **0.7.0**。
 
-This branch of the package is aligned to the current Report Profile v1.0 protocol draft used in this repository.  
-当前这版包对齐的是本仓库内维护的 Report Profile v1.0 协议版本。
+This release supports the frozen Report Profile v1.6 protocol; renderer acceptance remains separate.
+当前版本支持本仓库冻结的 Report Profile v1.6 协议；渲染器验收独立进行。
 
 ---
 

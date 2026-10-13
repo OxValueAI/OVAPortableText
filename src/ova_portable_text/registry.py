@@ -8,6 +8,7 @@ from pydantic import ConfigDict, Field, StrictInt, StrictStr, field_validator, m
 from .base import OvaBaseModel
 from .block_objects import ChartBlock, ImageBlock
 from .text import TextBlock
+from .page_layout import CellAlignment
 from .chart_features import (
     AxisDomain, AxisTick, ChartAnnotations, DataBasis, DataRole,
     DoughnutCenterContent, FlowEdge, FlowGroup, FlowNode, FunnelStage,
@@ -133,10 +134,17 @@ class TableColumnWidth(OvaBaseModel):
 
 
 class TableColumnSpec(OvaBaseModel):
+    _v16_fields = ("align", "verticalAlign", "header")
+    align: Literal["left", "center", "right"] | None = None
+    verticalAlign: Literal["top", "middle", "bottom"] | None = None
+    header: CellAlignment | None = None
     width: TableColumnWidth
 
 
 class TableLayout(OvaBaseModel):
+    _v16_fields = ("cellDefaults", "headerDefaults")
+    cellDefaults: CellAlignment | None = None
+    headerDefaults: CellAlignment | None = None
     columnSpecs: list[TableColumnSpec] = Field(default_factory=list)
 
 

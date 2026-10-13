@@ -7,6 +7,7 @@ from pydantic import Field, field_validator, model_validator
 from .base import OvaBaseModel
 from .inline import CitationRef, FootnoteRef, GlossaryTerm, HardBreak, InlineMath, InlineObject, XRef
 from .theme import BlockLayout
+from .page_layout import CaptionBinding
 
 ALLOWED_TEXT_STYLES = {
     "normal",
@@ -73,6 +74,8 @@ TextChild: TypeAlias = Span | HardBreak | XRef | CitationRef | FootnoteRef | Glo
 
 
 class TextBlock(OvaBaseModel):
+    _v16_fields = ("caption",)
+    caption: CaptionBinding | None = None
     type_: Literal["block"] = Field(default="block", alias="_type", serialization_alias="_type")
     style: TextStyle = "normal"
     children: list[TextChild] = Field(default_factory=list)

@@ -73,14 +73,29 @@ class ContentItem(OvaBaseModel):
         self.blocks.append(block)
         return self
 
-    def figure_captions(self, figure_id: str) -> list[TextBlock]:
-        """Return only contiguous captions immediately following this figure."""
+    def captions_for(self, target_id: str, *, position: str | None = None) -> list[TextBlock]:
+        """Resolve explicit groups; retain the old figure-only implicit fallback."""
+        if position not in (None, "before", "after"):
+            raise ValueError("position must be before or after")
+        explicit = [b for b in self.blocks if isinstance(b, TextBlock)
+                    and b.caption is not None and b.caption.targetRef == target_id]
+        if explicit:
+            return [b for b in explicit if position is None or b.caption.position == position]
+        if position == "before":
+            return []
         for index, block in enumerate(self.blocks):
-            if isinstance(block, FigureBlock) and block.id == figure_id:
+            if isinstance(block, FigureBlock) and block.id == target_id:
                 captions = []
                 for following in self.blocks[index + 1:]:
-                    if not isinstance(following, TextBlock) or following.style != "figure_caption":
+                    if (not isinstance(following, TextBlock)
+                            or following.style != "figure_caption" or following.caption is not None):
                         break
                     captions.append(following)
                 return captions
         return []
+
+    def figure_captions(self, figure_id: str) -> list[TextBlock]:
+        """Resolve a figure's captions, including opt-in explicit groups."""
+        if not any(isinstance(b, FigureBlock) and b.id == figure_id for b in self.blocks):
+            return []
+        return self.captions_for(figure_id)

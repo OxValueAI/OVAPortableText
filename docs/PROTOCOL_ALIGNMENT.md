@@ -1,5 +1,7 @@
 # Protocol Alignment / 协议对齐说明
 
+Python 0.7.0 已实现 [v1.6 正式协议](protocol/v1.6.md)的 SDK 部分，见 [v1.6 指南](PYTHON_V16.md) 和 [冻结记录](protocol/v1.6-freeze.md)。新版本默认仍创建 v1.5；下列既有能力说明与 v1.5 相容。渲染器当前无法测试，渲染与编辑器验收另行记录。
+
 This page describes OVAPortableText 0.6.0, aligned to Report Profile v1.5.
 本文档说明 Python 包 0.6.0 的协议能力。新增图表、共享语义和 figure 的生成、读取与校验已实现；新建文档默认 report.v1.5，读取旧版本保留原版本。估值横幅见 [v1.5 使用指南](PYTHON_V15.md)，其余图表见 [v1.4 指南](PYTHON_V14.md)。渲染端独立验收。
 

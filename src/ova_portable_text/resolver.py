@@ -80,6 +80,20 @@ class DocumentResolver(OvaBaseModel):
     duplicates: dict[str, list[ResolvedTarget]] = Field(default_factory=dict)
     duplicateAnchors: dict[str, list[ResolvedTarget]] = Field(default_factory=dict)
 
+    def resolve_caption(self, caption, content) -> ResolvedTarget | None:
+        """Resolve an explicit binding by instance id in its local content flow."""
+        from .block_objects import ImageBlock, ChartBlock, TableBlock, FigureBlock
+        from .text import TextBlock
+        if not isinstance(caption, TextBlock) or caption.caption is None:
+            return None
+        if not any(block is caption for block in content.blocks):
+            return None
+        target_id = caption.caption.targetRef
+        if target_id in self.duplicates:
+            return None
+        matches = [b for b in content.blocks if isinstance(b, (ImageBlock, ChartBlock, TableBlock, FigureBlock)) and b.id == target_id]
+        return self.targetsById.get(target_id) if len(matches) == 1 else None
+
     @classmethod
     def from_document(cls, document: Document) -> "DocumentResolver":
         """
