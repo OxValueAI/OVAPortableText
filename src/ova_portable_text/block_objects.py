@@ -6,6 +6,7 @@ from pydantic import Field, StrictBool, model_validator
 
 from .base import OvaBaseModel
 from .text import TextBlock
+from .page_layout import PageSettings, ObjectPagination
 from .chart_features import Key, V14Component
 
 
@@ -32,16 +33,25 @@ class RequiredReferenceableBlockBase(OvaBaseModel):
 
 
 class ImageBlock(OptionalReferenceableBlockBase):
+    _v16_fields = ("page", "pagination")
+    page: PageSettings | None = None
+    pagination: ObjectPagination | None = None
     type_: Literal["image"] = Field(default="image", alias="_type", serialization_alias="_type")
     imageRef: str
 
 
 class ChartBlock(OptionalReferenceableBlockBase):
+    _v16_fields = ("page", "pagination")
+    page: PageSettings | None = None
+    pagination: ObjectPagination | None = None
     type_: Literal["chart"] = Field(default="chart", alias="_type", serialization_alias="_type")
     chartRef: str
 
 
 class TableBlock(OptionalReferenceableBlockBase):
+    _v16_fields = ("page", "pagination")
+    page: PageSettings | None = None
+    pagination: ObjectPagination | None = None
     type_: Literal["table"] = Field(default="table", alias="_type", serialization_alias="_type")
     tableRef: str
 
@@ -61,6 +71,9 @@ class CalloutBlock(OptionalReferenceableBlockBase):
 
 
 class FigureBlock(RequiredReferenceableBlockBase, V14Component):
+    _v16_fields = ("page", "pagination")
+    page: PageSettings | None = None
+    pagination: ObjectPagination | None = None
     type_: Literal["figure"] = Field(default="figure", alias="_type", serialization_alias="_type")
     id: Key
     anchor: Key | None = None

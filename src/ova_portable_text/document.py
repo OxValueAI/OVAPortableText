@@ -25,7 +25,7 @@ This file therefore contains:
 from collections import Counter
 from typing import Any, Iterable
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, SerializeAsAny, field_validator, model_validator
 
 from .base import OvaBaseModel
 from .block_objects import FigureBlock, CalloutBlock, ChartBlock, ImageBlock, MathBlock, TableBlock
@@ -55,7 +55,8 @@ from .section import (
     SectionRole,
     SubsectionItem,
 )
-from .theme import ThemeConfig
+from .theme import ThemeConfig, PageThemeConfig
+from .page_layout import PageSettings
 
 
 class DocumentMeta(OvaBaseModel):
@@ -115,13 +116,25 @@ class Document(OvaBaseModel):
     schemaVersion: str = "report.v1.5"
     strict_ids: bool = Field(default=False, exclude=True, repr=False)
     meta: DocumentMeta = Field(default_factory=DocumentMeta)
-    theme: ThemeConfig = Field(default_factory=ThemeConfig)
+    theme: SerializeAsAny[ThemeConfig] = Field(default_factory=ThemeConfig)
     assets: AssetsRegistry = Field(default_factory=AssetsRegistry)
     datasets: DatasetsRegistry = Field(default_factory=DatasetsRegistry)
     bibliography: list[BibliographyEntry] = Field(default_factory=list)
     footnotes: list[FootnoteEntry] = Field(default_factory=list)
     glossary: list[GlossaryEntry] = Field(default_factory=list)
     sections: list[Section] = Field(default_factory=list)
+
+    @field_validator("theme", mode="before")
+    @classmethod
+    def parse_v16_theme(cls, value, info):
+        if info.data.get("schemaVersion") == "report.v1.6":
+            if isinstance(value, ThemeConfig):
+                raw = value.to_dict()
+                if "page" in value.model_fields_set and getattr(value, "page", None) is None:
+                    raw["page"] = None
+                value = raw
+            return PageThemeConfig.model_validate(value)
+        return value
 
     @model_validator(mode="before")
     @classmethod
@@ -131,7 +144,7 @@ class Document(OvaBaseModel):
         if not isinstance(value, dict):
             return value
         version = value.get("schemaVersion", "report.v1.5")
-        if not isinstance(version, str) or version == "report.v1.5" or version not in SUPPORTED_VERSIONS:
+        if not isinstance(version, str) or version in {"report.v1.5", "report.v1.6"} or version not in SUPPORTED_VERSIONS:
             return value
         datasets = value.get("datasets")
         if isinstance(datasets, dict):
@@ -249,7 +262,7 @@ class Document(OvaBaseModel):
         Append one top-level section.
         追加一个顶层 section。
         """
-        if self.schemaVersion not in {"report.v1.4", "report.v1.5"}:
+        if self.schemaVersion != "report.v1.6":
             from .protocol_version import version_issues
             candidate = self.model_copy(update={"sections": [section]})
             for path, message in version_issues(candidate):
@@ -283,6 +296,7 @@ class Document(OvaBaseModel):
         navigation: SectionNavigation | dict | None = None,
         pagination: SectionPagination | dict | None = None,
         presentation: SectionPresentation | dict | None = None,
+        page: PageSettings | dict | None = None,
         append: bool = True,
     ) -> Section:
         """
@@ -307,6 +321,7 @@ class Document(OvaBaseModel):
             navigation=navigation,
             pagination=pagination,
             presentation=presentation,
+            **({"page": page} if page is not None else {}),
         )
         if append:
             self.append_section(section)

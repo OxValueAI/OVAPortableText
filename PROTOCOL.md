@@ -1,6 +1,8 @@
-# OVA Portable Text v1.5 正式协议
+# OVA Portable Text v1.6 正式协议
 
-状态：正式冻结；冻结日期：2026-09-27。Python 包 0.6.0 实现 report.v1.5；v1.4 冻结归档保持不变。渲染器仍需独立实现和验收。
+状态：协议与 Python SDK 正式冻结；冻结日期：2026-10-13。Python 0.7.0 实现 report.v1.6，默认仍创建 v1.5，显式启用 v1.6。按本次发布决定，渲染器当前无法测试，其验收延期；本冻结不声称任何渲染器已通过 v1.6 验收。v1.5 及更早归档保持不变。
+
+当前协议归档：[v1.6](docs/protocol/v1.6.md)；[冻结记录](docs/protocol/v1.6-freeze.md)。兼容归档：[v1.5](docs/protocol/v1.5.md)。
 
 ## 1. 文档定位与阅读方式
 
@@ -22,7 +24,7 @@
 - 协议维护者
 - 校验器开发者
 
-本版新增 valuation_result 的完整合同见第 22 节；第 21 节的 v1.4 图表与组合能力由本版完整继承。
+本版新增分页、页面方向、表格对齐及 caption 关联与位置，完整合同见第 23 节；第 21～22 节的 v1.4/v1.5 能力完整继承。第 23 节仅补充新增字段的规则，不改变未使用新增配置的旧内容行为。
 
 ### 1.1 本文推荐阅读顺序
 
@@ -40,7 +42,7 @@
    - `footnotes`
    - `glossary`
    - `sections`
-4. 最后看第 15～20 章，理解统一引用模型、回退策略、校验要求与非目标。
+4. 阅读第 15～20 章的引用、回退与校验要求，再阅读第 21～23 章的版本扩展合同。
 
 ### 1.2 协议范围
 
@@ -57,6 +59,7 @@
 * `datasets.charts` 中十一种图表的正式结构：`pie / doughnut / bar / line / matrix_bubble / timeline / stage_progress / flow / funnel / range / valuation_result`
 * 第 21 节的数据性质、坐标注释、量表、百分比归一化、圆环中心内容和组合 figure 实例
 * section 级目录参与控制、章节角色、分页提示与展示提示
+* 第 23 节的正文实例分页、页面方向、表格对齐继承及显式 caption 绑定（v1.6）
 * bibliography / footnotes / glossary 的基础条目结构
 * 渲染器最低实现要求与回退规则
 
@@ -64,7 +67,7 @@
 
 * 第 10.4.3 节十一种正式图型之外的图表结构（包括误差棒、转化漏斗、双轴图）
 * 视觉主题细节
-* 页面级排版算法（除 section 起始前的显式分页提示外）
+* 页面级排版算法（但第 23 节定义的显式分页、方向作用域和 caption 边界约束必须遵守）
 * 页眉页脚
 * `manual` numbering 的详细对象结构
 * 标题富文本
@@ -623,7 +626,7 @@ Portable Text 负责提供通用富文本骨架。
 
 ```json
 {
-  "schemaVersion": "report.v1.5",
+  "schemaVersion": "report.v1.6",
   "meta": {},
   "theme": {},
   "assets": {},
@@ -665,11 +668,11 @@ Portable Text 负责提供通用富文本骨架。
 
 `schemaVersion` 表示当前文档所遵循的协议版本。渲染器必须按该值分发解析逻辑。
 
-当前版本固定值： `report.v1.5`
+本版协议值： `report.v1.6`；SDK 默认仍创建 `report.v1.5` 以保持兼容，使用新增能力时必须显式选择 v1.6。
 
 ### 6.3 渲染器要求
 
-- 必须识别 `report.v1.5`
+- 声称支持本版协议的实现必须识别 `report.v1.6`，并按第 23 节校验和处理新增能力
 - 遇到未知版本时，应返回清晰错误，而不是静默按旧版本解析
 
 ---
@@ -942,7 +945,7 @@ value 为：
 - 颜色系统
 - 字体族
 - 具体字号
-- 页面尺寸
+- 页面尺寸（页面方向另见第 23.4 节）
 - 页边距
 - 页眉页脚
 - 通用页面级分页算法
@@ -952,7 +955,7 @@ value 为：
 说明：
 
 - v1.2 **正式定义**了 `section.pagination.pageBreakBefore`，但它只表示“该 section 开始前是否显式另起一页”
-- 它并不等同于完整分页算法，也不覆盖 section 中途断页、孤行控制、跨页 keep-with-next 等更复杂排版行为
+- 它并不等同于完整分页算法；v1.6 新增正文实例分页与 caption 边界约束，见第 23 节，仍不定义通用孤行控制算法
 
 
 ---
@@ -2483,9 +2486,11 @@ v1.4 为 line/bar/range 的数值轴增加 domain 和 ticks，见第 21.1.3 节�
 | `meta`      | object | 否       | 附加元信息       | 当前不商定内部字段            |
 | `tableType` | string | 是       | 表格模式         | 枚举值：`"record"` ，`"grid"` |
 | `rows`      | array  | 是       | 行数据数组       | 具体结构取决于`tableType`     |
-| `layout`    | object | 否       | 表格布局提示     | 当前版本主要用于列宽分配      |
+| `layout`    | object | 否       | 表格布局提示     | 列宽及第 23.5 节对齐默认值与覆盖 |
 
 ##### 10.5.4.1 caption 与 table 的关系
+
+v1.6 可使用第 23.6 节的显式前置/后置绑定；以下相邻后置模式仍可用于无显式绑定的旧内容。
 
 当前版本延续统一原则：
 
@@ -2500,6 +2505,8 @@ table
 table_caption
 
 ##### 10.5.4.2 `layout`
+
+v1.6 另增 cellDefaults、headerDefaults 和列级表头对齐，见第 23.5 节；以下为继承的列宽合同。
 
 `datasets.tables[]` 可选包含 `layout` 对象（勿与段落 `layout` 字段混淆），用于表达表格级布局提示。
 
@@ -2533,7 +2540,7 @@ table_caption
 
 ##### 10.5.4.3 `columnSpecs[]`
 
-每个 `columnSpecs[]` 元素描述一列的宽度分配提示。
+每个 `columnSpecs[]` 元素描述一列的宽度分配提示；v1.6 还可提供 align、verticalAlign 和 header，见第 23.5 节。
 
 最小结构：
 
@@ -2651,9 +2658,8 @@ table_caption
 * `columns[].key` 在同一张表内必须唯一
 * `columns[].header`  **允许重复** ，不要求唯一
 * 渲染器应以 `columns[].key` 识别列，以 `columns[].header` 展示列标题
+* 列对齐见第 23.5 节，列宽见第 10.5.4 节；这些配置位于 layout.columnSpecs，不在 columns 中。
 * 当前版本不细化：
-* 列对齐方式
-* 列宽
 * 列类型
 * 排序规则
 * 合并单元格能力
@@ -3313,7 +3319,8 @@ table_caption
 | `anchor`       | string  | 否       | 章节锚点                      | 省略时可回退为`id`                                         |
 | `sectionRole`  | string  | 否       | 章节角色                      | 见 14.4.6                                                  |
 | `navigation`   | object  | 否       | 章节导航控制                  | 见 14.4.7                                                  |
-| `pagination`   | object  | 否       | 章节分页提示                  | 见 14.4.8                                                  |
+| `pagination`   | object  | 否       | 章节分页提示                  | 见 14.4.8 和 23.3                                           |
+| `page`         | object  | 否       | 章节子树页面方向              | v1.6 新增，见 23.4                                          |
 | `presentation` | object  | 否       | section 级展示提示            | 见 14.4.9                                                  |
 | `body`         | array   | 是       | 当前章节内部的 body item 列表 | 见 14.5                                                    |
 
@@ -3417,7 +3424,7 @@ table_caption
 
 #### 14.4.8 `pagination`
 
-`pagination` 用于表达 section 起始前的分页提示。
+`pagination` 用于表达 section 起始前的分页提示。v1.6 还允许正文 image/chart/table/figure 使用同名字段，见第 23.3 节。
 
 当前版本正式支持的最小结构：
 
@@ -4014,6 +4021,8 @@ table_caption
 
 #### 14.9.7 caption 的推荐实现
 
+v1.6 显式绑定的位置、相邻组与分页规则见第 23.6 节；以下为未显式绑定内容的旧版阅读顺序约定。
+
 当前版本推荐 caption 继续优先作为相邻文本块，而不是硬塞进对象字段：
 
 * `image` 后可紧跟 `figure_caption`
@@ -4171,13 +4180,13 @@ table_caption
 ### 16.1 未知字段
 
 - 未知扩展字段可兼容保留或忽略并给出诊断，不应仅因其存在导致整份文档失败
-- 第 21 节已定义的字段不得被当作未知字段忽略；出现在错误位置的正式字段必须诊断
+- 第 21～23 节已定义的字段不得被当作未知字段忽略；出现在错误位置的正式字段必须诊断
 
 ### 16.2 未知枚举值
 
 - 应记录兼容日志
 - 对旧文本样式等非关键展示枚举，可采用已有安全回退
-- 对第 21 节正式字段的未知枚举必须报告错误，不能猜测或改成默认值
+- 对第 21～23 节正式字段的未知枚举必须报告错误，不能猜测或改成默认值
 
 例如：
 
@@ -4263,7 +4272,7 @@ table_caption
 
 ## 18. 渲染器最低实现要求
 
-为保证 v1.5 能真正落地，渲染器至少应实现以下能力：
+以下为继承的 v1.5 最低能力；声称支持 v1.6 时还必须满足第 23.7～23.8 节的校验与分页输出要求：
 
 1. 识别顶层结构并遍历 `sections`
 2. 识别 `content` 与 `subsection` 两类 body item
@@ -4307,7 +4316,7 @@ table_caption
 - 页边距
 - 页眉页脚
 - 背景图铺设方式
-- 分页算法
+- 具体分页算法（仍须满足第 23 节的显式约束）
 - 复杂公式排版实现
 - 视觉主题细节
 
@@ -4882,7 +4891,7 @@ stacked 的正数从零向正方向累加，负数从零向负方向独立累加
 
 figure 的新增需要同步 BlockElement、正文解析、resolver、编号器、编辑器选择／复制／删除和渲染器；现有代码尚无此能力。必须检查布局中 chartRef/imageRef 的间接依赖，不能只检查正文直接 chartRef。不得用静态截图作为组合图实现验收的替代。
 
-组合实例的 caption 关联采用最小相邻约定：同一 content.blocks 中紧接 figure 的连续 `style=figure_caption` 文本块，按输入顺序作为它的说明；遇到其他块或 content 结束即终止，不跨 content/section 搜索，也不从文字数字猜测归属。没有紧邻 caption 时组合仍合法，模板可只显示图号。caption 的文字仍独立保存，编号器不改写其 span 内容。新约定仅针对新增 figure，不追溯改变旧 chart/image 的 caption 处理。
+v1.6 存在显式 caption 绑定时按第 23.6 节处理；无显式绑定时，组合实例的 caption 关联采用最小相邻约定：同一 content.blocks 中紧接 figure 的连续 `style=figure_caption` 文本块，按输入顺序作为它的说明；遇到其他块或 content 结束即终止，不跨 content/section 搜索，也不从文字数字猜测归属。没有紧邻 caption 时组合仍合法，模板可只显示图号。caption 的文字仍独立保存，编号器不改写其 span 内容。新约定仅针对新增 figure，不追溯改变旧 chart/image 的 caption 处理。
 
 编号只按正文阅读顺序遍历实例，不能按 registry 顺序分配；figure 与普通 chart/image 共用 figure 计数，不给 grid 或数据集分配正文图号。复制或移动 figure 时一并处理紧邻 caption；保留布局资源共享关系，除非显式选择独立副本。删除一个实例不隐式删除仍被其他实例使用的资源。
 
@@ -5151,7 +5160,7 @@ band 说明区间，不覆盖边界点显式声明的 observed 身份。
 
 ## 22. v1.5 `valuation_result` 估值结果横幅
 
-本节为 v1.5 新增的正式合同。v1.5 完整继承第 21 节的 v1.4 能力；该节的“必须声明 v1.4”对 v1.5 文档解释为“至少具备 v1.4 能力的已支持版本”。本节新类型必须声明 `schemaVersion: "report.v1.5"`，不得写入声称 v1.4 的新生成文档。
+本节为 v1.5 新增的正式合同。v1.5 完整继承第 21 节的 v1.4 能力；该节的“必须声明 v1.4”对 v1.5 文档解释为“至少具备 v1.4 能力的已支持版本”。本节新类型要求 report.v1.5，亦可用于继承该能力的 report.v1.6；不得写入声称 v1.4 的新生成文档。
 
 ### 22.1 用途与实例
 
@@ -5226,6 +5235,217 @@ Python 0.6.0 默认创建 report.v1.5；显式创建 report.v1.4 继续可用。
 公开 API：`ValuationResultChartDataset`、`ValuationPoint`、`ValuationRange`、`ValuationAmount`；helper：`valuation_result_chart_dataset(...)`、`valuation_point(value)`、`valuation_range(low, high)`。helper 使用 snake_case 参数，输出使用本节 camelCase 字段。模型、版本边界、整文档校验、引用及 JSON 往返均须验证。
 
 完整示例见 [v1.5 JSON](docs/protocol/v1.5-example.json)，Python 创建与渲染接入说明见 [使用指南](docs/PYTHON_V15.md)。SDK 生成和校验通过，不代表任何现有编辑器或渲染器已经实现横幅。
+
+## 23. v1.6 分页、页面方向、表格对齐与 caption
+
+### 23.1 状态与设计边界
+
+本节为 2026-10-13 冻结的 v1.6 新增合同；Python 0.7.0 实现见 [实现记录](docs/protocol/v1.6-implementation.md)。渲染器当前无法测试，验收延期，详见 [冻结记录](docs/protocol/v1.6-freeze.md)。完整继承 v1.5。本次新增字段不改变旧字段合同；已有 section.pagination、grid 单元格对齐、必填列宽、文本布局和无显式绑定 caption 的既有语义不变。只有使用新增字段的内容才启用对应新规则；未使用新增配置的内容沿用既有渲染行为。新字段仅用于 `schemaVersion = "report.v1.6"`，不得写入声称 v1.5 或更早版本的新生成文档。第 22 节的 valuation_result 在 v1.6 中继续合法。
+
+本节定义作者可声明的排版约束，不定义纸张尺寸、页边距、字号、颜色或具体分页算法。页面设置属于文档、章节或正文实例，不属于 chart/table 数据集；共享同一个数据集的实例可以采用不同页面设置。
+
+### 23.2 字段总览
+
+所有新增字段均可省略；出现时不得为 null。封闭对象的未知字段和非法枚举是校验错误，不适用“忽略未知字段”的通用回退。
+
+| 位置 | 新增或扩展字段 | 合同 |
+| --- | --- | --- |
+| `theme` | `page` | 文档默认页面方向 |
+| `section` | `page` | 章节子树的页面方向 |
+| 正文 `image / chart / table / figure` 实例 | `pagination`、`page` | 实例前后分页、局部页面方向，二者独立 |
+| `datasets.tables[].layout` | `cellDefaults`、`headerDefaults` | 普通单元格和表头的对齐默认值 |
+| `datasets.tables[].layout.columnSpecs[]` | `align`、`verticalAlign`、`header` | 列数据及表头对齐默认值；保留必填 width |
+| `_type="block"` caption 文本块 | `caption` | 显式目标引用和前置/后置位置 |
+
+`PageSettings = { orientation: "portrait" | "landscape" }`，orientation 必填。
+`ObjectPagination = { pageBreakBefore?: "auto" | "always", pageBreakAfter?: "auto" | "always" }`，两项分别缺省 auto，空对象合法。仅适用于上述正文对象；已有 SectionPagination 保持只有 pageBreakBefore，不新增 section.pageBreakAfter。
+`CellAlignment = { align?: "left" | "center" | "right", verticalAlign?: "top" | "middle" | "bottom" }`，空对象表示无覆盖。
+`CaptionBinding = { targetRef: 非空字符串, position: "before" | "after" }`，两项必填。
+以上对象均为封闭对象。
+
+### 23.3 章节和正文实例分页
+
+保留 `section.pagination.pageBreakBefore` 的既有语义。仅为正文 image/chart/table/figure 实例新增 ObjectPagination：
+
+```json
+{
+  "_type": "table",
+  "id": "table-financial-instance",
+  "tableRef": "table-financial-data",
+  "pagination": {
+    "pageBreakBefore": "always",
+    "pageBreakAfter": "always"
+  }
+}
+```
+
+- pageBreakBefore=always：对象组的首个可见内容必须从新页可用内容区域开始；包括显式前置 caption。
+- pageBreakAfter=always：对象组结束后的下一个可见内容必须从新页开始；包括显式后置 caption 结束后，而不是对象本体结束后。
+- auto：不提出该边界的强制分页要求，正常溢出仍可分页，方向切换规则仍须执行。
+- 对象组由对象与其显式前后 caption 组组成；figure 也可包含按既有约定关联的隐式后置 caption。对普通 chart/image/table，不自动推断旧 caption 归属；需要一起分页时显式绑定。
+- 两项同时 always 才明确请求对象组独占一段页面；只设置 before 时，同方向的后续正文可以使用剩余区域。独占不等于只占一页，长表仍可合法跨页。
+- 新增对象分页与已有章节起始分页、方向切换产生的同一边界必须合并。目标方向的空白新页可直接使用，文档首部不补空白页；文档末尾的 after 不生成尾页。“空白”指尚无正文，页眉页脚不计入。
+- 新字段不改变已有空章节处理规则，不给无新增配置的旧内容引入新的分页行为。
+- 本版不新增通用 page_break 块。普通文本、math_block、callout、content 包装及 registry 条目不能携带上述实例分页字段。
+- 单元格内部 chart/image 不能设置 pagination 或 page；需要分页或横向时设置外层正文 table/figure 实例。
+
+### 23.4 页面方向、继承与恢复
+
+文档默认设置示例：
+
+```json
+"theme": { "page": { "orientation": "portrait" } }
+```
+
+为保持旧模板兼容，未声明 `theme.page` 时继续使用渲染器模板原有默认方向，不强制将旧内容改成纵向。新增文档建议显式输出上述 portrait 配置，以保证默认纵向；局部 page 退出后恢复章节方向或文档有效默认方向。渲染器在使用局部 page 时必须能确定该有效默认方向，不能自行猜测。portrait 表示物理页高大于页宽，landscape 表示页宽大于页高；渲染器使用同一模板纸张尺寸的长短边切换方向。方形纸张无法满足方向语义时须报告配置错误。本字段不是旋转文字、图片或图表坐标轴。
+
+**章节范围：**
+
+1. `section.page` 覆盖父章节方向；未声明则继承父章节，顶层继承 theme。方向按章节树作用域计算，不能沿兄弟章节泄漏。
+2. 从章节可见标题起，正文和未覆盖方向的子章节均使用该方向，直到退出该章节子树。
+3. 进入或退出作用域后，如果下一个可见内容所需方向与当前页不同，必须从对应方向的新页开始，即使 pageBreakBefore 为 auto。前页无正文时直接采用所需方向，不保留空白页。
+4. 相同方向的章节边界不自动分页；若需要新起一页，仍设置 pageBreakBefore=always。
+5. 退出横向子章节后，父章节后续正文恢复父方向；退出横向顶层章节后，未声明方向的兄弟章节恢复文档默认方向。文档结束时只恢复逻辑状态，不制造尾页。
+
+**正文实例范围：**
+
+```json
+{
+  "_type": "chart",
+  "id": "chart-wide-instance",
+  "chartRef": "chart-wide-data",
+  "page": { "orientation": "landscape" }
+}
+```
+
+实例 page 只覆盖对象组的页面方向，不隐含独占页面。对象组包含第 23.3 节定义的关联 caption；未声明 page 时继承所在章节方向。实例结束后恢复逻辑作用域，由下一个可见内容实际需要的方向决定是否换页。
+
+- 方向不同，必须从所需方向的新页开始；方向相同，仅声明 page 不产生额外分页。显式写出当前方向与不写的分页效果相同。
+- 如需同方向对象也独占页面，显式设置 ObjectPagination 的 before/after 均为 always。auto 不能取消实际方向变化所要求的换页。
+- 相邻两个横向对象组之间没有可见纵向内容时，不生成中间纵向页。若没有显式分页且版面容得下，可以共享横向页；任一侧的边界设置 always 时必须分开。不得跨越可见章节标题、普通段落或未绑定 caption 合并方向范围。
+- 跨页表格、组合 figure 及其延续页面保持实例方向，直到对象和全部关联 caption 结束。后续普通内容恢复所属章节方向；文档结束只恢复逻辑状态，不制造尾页。
+- 前一实例 after、后一实例 before、章节起始分页与方向变化按同一阅读边界合并，最多产生一次换页；原有章节分页字段含义不变。
+- 同一实例内部不允许不同分图各自切换方向。若对象无法合法拆分且超过页面，正式输出须明确报告版面无法容纳，不得裁掉内容或无限添加空页。figure 原有 keepTogether 规则继续生效。
+
+### 23.5 表格单元格对齐
+
+grid 继续使用现有 `cells[].align / verticalAlign`；其既有语义不变。本版只新增表级、列级及表头默认值，不改变 record.rows 的业务数据形状，也不改变原有列宽规则。
+
+```json
+"layout": {
+  "cellDefaults": { "align": "left", "verticalAlign": "middle" },
+  "headerDefaults": { "align": "center" },
+  "columnSpecs": [
+    { "width": { "mode": "auto" }, "align": "left" },
+    {
+      "width": { "mode": "weight", "value": 2 },
+      "align": "right",
+      "header": { "align": "center" }
+    }
+  ]
+}
+```
+
+- cellDefaults、headerDefaults 和 columnSpecs[].header 均为 CellAlignment；header 中不能包含 width 或嵌套 header。空对象表示不提供覆盖。
+- cellDefaults 是全表通用默认值，适用于 grid/record；headerDefaults 在表头上覆盖通用默认值。record 表头为 columns[].header；grid 仅以单元格 header=true 判定，不根据第一行或文字内容推断。
+- columnSpecs[] 新增 align、verticalAlign 作为本列通用默认值，header 作为本列表头专用覆盖。width 仍必填，只需要对齐时使用 `{ "mode": "auto" }`。非空数组长度、逻辑列数和既有宽度算法保持不变。
+- 普通单元格新增默认值的逐属性优先级：**grid 单元格已有显式值 > 列通用值 > 表通用值 > 原有渲染默认值**。
+- 表头逐属性优先级：**grid 单元格已有显式值 > 列 header > 表 headerDefaults > 列通用值 > 表 cellDefaults > 原有渲染默认值**。表头专用设置优先于通用设置，保证“标题居中、金额右对齐”可独立表达。
+- align 与 verticalAlign 分别解析，声明其中一项不重置另一项。新增默认值只填补旧单元格未显式声明的属性；未使用新增字段时，不改变任何旧单元格、文本块或主题的解析行为。
+- 对 grid 富文本块，不重新规定已有 cell.align、block.layout 和 theme 之间的优先级。新增继承来的 align 仅在没有旧单元格显式 align、文本块显式 textAlign 和对应主题 textAlign 时，作为文本水平对齐的补充默认值；不能覆盖已有文本布局。图片和图表可使用新增默认对齐，但不能改变其坐标轴或数据标签对齐。
+- 跨列 grid 单元格从起始逻辑列继承新增列默认值；起始列计算计入 rowSpan 占位。已有 colSpan、rowSpan、header、align、verticalAlign 的含义不变。
+- 暂不纳入前版草案的 record.layout.cellOverrides；该字段不是 v1.5 已有能力，也不是本次修订后的 v1.6 正式字段。需要任意单元格级例外、合并或富文本时使用已有 grid 能力。未来如需 record 单元格覆盖，须另行设计稳定行标识，不能只用易随排序变化的 rowIndex。
+- 不新增固定行高、百分比高度或隐式数字对齐；满宽图表的水平对齐可能没有可见位移。
+
+### 23.6 caption 关联、位置与对齐
+
+caption 继续作为独立 `_type="block"` 文本保存，编号语义归属对象实例。新增可选 caption 对象：
+
+```json
+{
+  "_type": "block",
+  "style": "table_caption",
+  "caption": { "targetRef": "table-financial-instance", "position": "before" },
+  "layout": { "textAlign": "center" },
+  "children": [{ "_type": "span", "text": "Financial summary", "marks": [] }],
+  "markDefs": []
+}
+```
+
+**引用及位置约束：**
+
+1. targetRef 必须引用同一正文 `content.blocks[]` 中 image/chart/table/figure 的实例 id，不接受 registry id、anchor 别名或跨 content/section 目标。被引用实例必须显式提供非空且全局唯一的 id。
+2. table 的显式 caption 必须使用 table_caption；image/chart/figure 使用 figure_caption。普通 caption、equation_caption、列表项不允许携带本绑定。单元格内部 caption 仍按既有内容顺序渲染，本版不允许携带本绑定。
+3. position 必填 before 或 after，指阅读顺序中对象之前或之后，不是绝对页面坐标。前置 caption 必须在数组中位于对象前方，后置必须在后方；渲染器不得通过重排来修复错误输入。
+4. 同一目标可同时拥有 before 和 after 两组显式 caption，每侧最多一个连续组，每组可含多段文本。前组紧邻对象之前，后组紧邻对象之后；各组内不能插入其他对象、无绑定文本或其他目标的 caption。每段只绑定一个目标；同一对象仍只有一个身份和编号。
+5. 所有显式绑定先校验，再执行旧相邻关联。对存在显式绑定的目标，禁止追加隐式 caption；其他未绑定文本仍正常显示，但不属于该对象。对无显式绑定的 figure，保留 v1.4 的连续后置 figure_caption 约定，遇到任何显式绑定的文本即停止隐式收集。chart/image/table 无显式绑定时不新增自动推断规则，保留旧版阅读顺序行为。
+6. 复制、移动或删除对象时，编辑器必须将显式 caption 组作为关联内容处理；复制需生成新实例 id 并重写 targetRef，不得更改共享资源 id。取消关联需要显式编辑，不能留下悬空引用。
+
+**对齐与分页：**
+
+- caption 对齐复用 `block.layout.textAlign`，支持 left/center/right，也保留既有 justify；全局默认仍来自 `theme.blockStyleDefaults.figure_caption / table_caption`。块级 > 主题 > 模板。不新增平行的 captionAlign 字段。
+- 对象分页和实例 page 的范围包括显式 caption 组，以及按既有规则关联的 figure 隐式 caption 组。前置 caption 不能遗留在上一页，后置 caption 不能落在恢复方向后的普通正文页。
+- 以下同页约束只针对新增的显式 caption 绑定，不追溯改变旧隐式 caption 的排版规则。存在新对象分页或方向设置的隐式 figure caption 随对象组应用新页面边界，但不因此获得新的强制逐行同页规则。
+- 对象与显式前后 caption 整体可放入一个可用页面时，应保持同页；放不下时允许合法拆分。前置组最后一行必须与对象首个有效内容片段同页；后置组第一行必须与末个有效片段同页。
+- 对有数据行的表格，首个有效片段须包含首个数据行片段（以及适用的表头），末个有效片段须包含最后数据行片段；只放表头或重复表头不算满足约束。record 数据行由 rows 定义；grid 中至少包含一个 header=false 单元格起始或 rowSpan 延续占位的逻辑行视为数据行。允许沿用渲染器原有行拆分策略，本规则不新增行可拆分能力。只有表头或无数据行的表格使用其实际可见表格片段；完全没有可见表格内容时，显式绑定须报告无内容可关联。
+- 不可拆分图表/图片的有效片段是整个对象；可拆分 figure 按原有合法拆分规则，首尾片段不能只是编号或续图标识。渲染器必须为 caption 边界预留空间；若不可拆对象仍无法满足，报告带实例 id 的排版错误，不得静默丢弃 caption。
+- 跨页对象的 caption 只出现一次：before 位于首个片段之前，after 位于最后片段之后。续表/续图标识由渲染器生成，不能复制成新的正文 caption 或新编号。
+- 一个 caption 组中的多个文本块保持输入顺序，各自可设不同对齐。编号器不改写 caption 的 span 文本，也不依据标题文字中的数字建立关联。
+
+### 23.7 校验、能力声明与版本边界
+
+正式 v1.6 实现至少应执行以下结构与语义检查，并提供明确的 JSON 字段路径。结构校验通过不代表给定纸张、字体和边距下排版可行；尺寸、有效内容片段、caption 同页及溢出检查在渲染阶段完成，并提供实例 id 与具体原因：
+
+| 错误类别 | 必须拒绝的输入 |
+| --- | --- |
+| 版本 | 向旧版本作者模型写入新字段；把未知版本当成 v1.5 解析 |
+| 页面 | orientation 为 horizontal、vertical、null 或其他非法值；page 缺失 orientation |
+| 位置 | 将 page/pagination 放在 dataset、单元格对象或普通文本上 |
+| 对齐 | 非法 align/verticalAlign；columnSpecs 缺 width 或长度错误；headerDefaults/header 结构错误；使用已撤回的 layout.cellOverrides |
+| 对象分页 | 非法 before/after 枚举；在 section.pagination 中写入 pageBreakAfter |
+| caption 引用 | 目标不存在、不是合法正文对象、id 重复、跨内容流、引用数据集 |
+| caption 顺序 | position 与数组顺序矛盾、任一侧组不连续、跨目标穿插；同一目标前后各一组合法 |
+| caption 类型 | style 与目标不匹配、列表 caption、单元格内显式绑定 |
+
+页面与 caption 字段即使位于允许扩展的 theme/meta 等对象中，放错位置也不能获得正式语义。theme.page 是正式字段，不能当成任意字典跳过校验。
+
+未知扩展保留策略不等于支持新能力。未实现新字段的渲染器必须在能力预检或正式分页输出时明确失败，不得静默忽略分页、方向、对齐或 caption 关联后声称支持 v1.6。无分页的 Web 预览可以按原阅读顺序显示内容并明确提示页面约束未预览，但不能据此通过 PDF 排版验收。
+
+旧版文档仍按原版合同读取，不隐式升级或重解释历史扩展字段。升级必须显式选择 v1.6 并重新校验；旧 figure 的后置 caption 无须改写即可继续工作。降级必须移除或转换新能力并告知损失，不能只改 schemaVersion。
+
+Python 0.7.0 已实现本节 SDK 模型、构建、校验和显式引用解析，默认仍创建 v1.5，显式选择 v1.6 才启用新合同。完整示例已作为新 SDK 测试输入。编辑器已有实现仍以 v1.3 为基线；PDF 排版和编辑器操作未验收，不因 SDK 校验通过而宣称已支持。见 [Python 指南](docs/PYTHON_V16.md) 与 [实现及联调记录](docs/protocol/v1.6-implementation.md)。
+
+### 23.8 验收矩阵与示例
+
+| 场景 | 必须验证的结果 |
+| --- | --- |
+| 文档首部、连续章节和实例 always | 从页首开始，无多余空白页 |
+| 普通纵向章节中的横向子章节 | 子章节及后代横向；退出后父正文恢复纵向 |
+| 文档默认横向，子章节显式纵向 | 双向覆盖均成立，无纵向硬编码 |
+| 同方向章节 page、同方向实例 page | 单独声明方向均不额外分页；旧章节 before 语义不变 |
+| 对象 before/after 同时 always | 前置 caption、对象、后置 caption 独占页面段；与方向字段独立 |
+| 相邻横向对象及交叠分页请求 | 无强制分页时可同页；after/before/方向边界合并，无中间纵向空页 |
+| 横向 table 跨页 | 全部表格页横向，结束后恢复，只有一个表号 |
+| 横向 figure + 显式前置 caption | caption 同在横向页，对象及标题顺序、图号正确 |
+| 实例位于章节末尾或文档末尾 | 下一可见内容决定恢复方向，无恢复空页 |
+| 同一对象 before 与 after 均有多段 caption | 每侧连续、共同应用页面范围、只产生一个对象编号 |
+| 跨页表格的显式 caption | 前标题不只跟表头、后说明不只跟重复表头；原有行拆分规则不变 |
+| 前置 caption 后的实例 always | 在 caption 前分页，不在 caption 与对象间分页 |
+| grid 合并单元格 | 按逻辑起始列继承，对齐不受 cells 数组位置误导 |
+| record 表级/列级/表头默认值 | 标题居中、数字右对齐，两属性独立继承，业务值不变 |
+| grid 内已有文本与主题布局 | 新默认值不覆盖已有 cell/block/theme 设置，未用新字段结果不变 |
+| 旧版兼容基线 | v1.5 档案、SDK、章节分页、列宽及无绑定 caption 无变化 |
+| 旧 figure 隐式 caption 与新显式绑定相邻 | 不重复归属，不跨显式绑定收集 |
+| 不可拆对象过大、无效引用、不支持的能力 | 有路径或实例 id 的明确诊断，无丢失或伪成功 |
+
+完整 JSON 示例见 [v1.6 示例](docs/protocol/v1.6-example.json)。本次冻结范围为协议合同及 Python SDK；SDK 模型、helper、版本边界、引用解析和往返测试已完成。按发布决定，渲染器当前无法测试，caption 编辑操作与分页渲染截图验收另行完成；未完成前不得声称相应编辑器或渲染器已通过本节验收。验收矩阵仍是下游实现的要求，不因本次冻结而取消。
+
+## v1.6 更新说明（相对于 v1.5）
+
+- 新增正文对象前后分页及文档/章节/实例页面方向，方向与独占分页独立表达。
+- 新增表级、列级和表头对齐默认值，保留旧单元格及列宽规则；暂缓 record 单元格覆盖。
+- 新增 caption 显式目标，允许前后各一组，复用文本对齐；有效内容片段约束仅用于新显式绑定。
+- 保留 v1.5 归档及 SDK 默认版本；Python 0.7.0 实现 v1.6 SDK；协议与 SDK 已冻结，渲染及编辑器验收延期且独立记录。
 
 ## v1.5 更新说明（相对于 v1.4）
 

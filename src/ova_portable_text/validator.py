@@ -93,6 +93,8 @@ def validate_document(document: Document) -> ValidationReport:
     _validate_grid_table_dataset_references(document, resolver=resolver, report=report)
     from .v14_validation import validate_v14
     validate_v14(document, report)
+    from .v16_validation import validate_v16
+    validate_v16(document, report)
 
     return report
 
@@ -857,6 +859,6 @@ def validate_document_payload(payload: dict) -> ValidationReport:
         document = Document.from_dict(payload)
     except ValidationError as error:
         report = ValidationReport()
-        add_model_errors(report, error)
+        add_model_errors(report, error, layout_mode=payload.get("schemaVersion") == "report.v1.6")
         return report
     return validate_document(document)
