@@ -2,6 +2,22 @@
 
 **All notable changes to this project will be documented in this file.**  ** **本项目的重要变更会记录在此文件中。
 
+## [0.7.0] - 2026-10-13
+
+### SDK
+
+* added opt-in report.v1.6 page, object pagination, table/header alignment and explicit caption models and helpers
+* added version boundaries, mutable-model validation, local caption resolution and two-sided group authoring while keeping report.v1.5 as the default
+* preserved historical theme extensions and legacy caption helpers; added SDK tests, a runnable example and a renderer handoff checklist
+* froze the protocol and Python SDK for release; renderer testing is unavailable and explicitly deferred, with no renderer compatibility claim
+
+### Protocol
+
+* designed `report.v1.6` pagination, page orientation scopes, table alignment inheritance, and explicit caption binding/placement
+* refined only the new v1.6 contract: independent object before/after pagination, header alignment defaults, two-sided explicit captions, and deferred positional record cell overrides; existing v1.5 behavior and required column widths remain unchanged
+* updated the main protocol and added the complete v1.6 protocol, JSON example, validation requirements, and renderer acceptance matrix
+* retained Python 0.6.0 / report.v1.5 runtime defaults and frozen protocol archives; v1.6 renderer and editor acceptance remain pending
+
 ## [0.6.0] - 2026-09-27
 
 ### Protocol and Python SDK

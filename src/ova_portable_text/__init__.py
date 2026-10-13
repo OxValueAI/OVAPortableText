@@ -205,4 +205,9 @@ from .valuation import ValuationPoint, ValuationRange, ValuationAmount
 from .registry import ValuationResultChartDataset
 from .chart_helpers import valuation_result_chart_dataset, valuation_point, valuation_range
 
+from .page_layout import (PageSettings, ObjectPagination, CellAlignment, CaptionBinding,
+                          page_settings, object_pagination, cell_alignment, caption_binding)
+from .theme import PageThemeConfig
+from .helpers import caption_block
+
 __all__ = [name for name in globals() if not name.startswith("_")]

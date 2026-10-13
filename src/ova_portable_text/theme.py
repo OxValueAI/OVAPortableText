@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, Field, field_validator
 
 from .base import OvaBaseModel
+from .page_layout import PageSettings
 
 
 class LengthValue(OvaBaseModel):
@@ -42,3 +43,9 @@ class ThemeConfig(OvaBaseModel):
     pageTemplateFamily: str | None = None
     brandAssetRefs: list[str] | None = None
     coverTemplateRef: str | None = None
+
+
+class PageThemeConfig(ThemeConfig):
+    """v1.6 theme; old ThemeConfig preserves historical extension dictionaries."""
+    _v16_fields = ("page",)
+    page: PageSettings | None = None

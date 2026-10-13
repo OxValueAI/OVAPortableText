@@ -9,9 +9,9 @@ This module contains the common base class used by almost all public models.
 """
 
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, ClassVar, TypeVar
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 ModelT = TypeVar("ModelT", bound="OvaBaseModel")
 
@@ -33,6 +33,17 @@ class OvaBaseModel(BaseModel):
     """
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
+    _v16_fields: ClassVar[tuple[str, ...]] = ()
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_null_v16_fields(cls, value):
+        if isinstance(value, dict):
+            for name in cls._v16_fields:
+                if name in value and value[name] is None:
+                    from .chart_features import fail
+                    fail(name, "Omit optional fields instead of supplying null.", "layout.invalid_value")
+        return value
 
     def to_dict(self, *, exclude_none: bool = True) -> dict[str, Any]:
         """

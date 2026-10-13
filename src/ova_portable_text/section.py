@@ -32,6 +32,7 @@ from .block_objects import FigureBlock, CalloutBlock, ChartBlock, ImageBlock, Ma
 from .content import BlockElement, ContentItem, MarkDef, TextBlock, TextChild, TextStyle
 from .text import ListItemStyle
 from .theme import BlockLayout
+from .page_layout import PageSettings, ObjectPagination
 
 
 NumberingMode: TypeAlias = Literal["auto", "none", "manual"]
@@ -73,6 +74,8 @@ class Section(OvaBaseModel):
     - `SubsectionItem` for nested formal sections / 嵌套正式子章节
     """
 
+    _v16_fields = ("page",)
+    page: PageSettings | None = None
     id: str
     level: int
     title: str
@@ -358,22 +361,23 @@ class Section(OvaBaseModel):
         """
         return self.append_paragraph(*parts, style="equation_caption", mark_defs=mark_defs)
 
-    def append_image(self, *, image_ref: str, id: str | None = None, anchor: str | None = None) -> "Section":
+    def append_image(self, *, image_ref: str, id: str | None = None, anchor: str | None = None, page: PageSettings | dict | None = None, pagination: ObjectPagination | dict | None = None) -> "Section":
         """
         Create and append an image block in one step.
         一步创建并追加一个 image 块。
         """
-        return self.append_block(ImageBlock(id=id, anchor=anchor, imageRef=image_ref))
+        return self.append_block(ImageBlock(id=id, anchor=anchor, imageRef=image_ref, **{k: v for k, v in dict(page=page, pagination=pagination).items() if v is not None}))
 
-    def append_chart(self, *, chart_ref: str, id: str | None = None, anchor: str | None = None) -> "Section":
+    def append_chart(self, *, chart_ref: str, id: str | None = None, anchor: str | None = None, page: PageSettings | dict | None = None, pagination: ObjectPagination | dict | None = None) -> "Section":
         """
         Create and append a chart block in one step.
         一步创建并追加一个 chart 块。
         """
-        return self.append_block(ChartBlock(id=id, anchor=anchor, chartRef=chart_ref))
+        return self.append_block(ChartBlock(id=id, anchor=anchor, chartRef=chart_ref, **{k: v for k, v in dict(page=page, pagination=pagination).items() if v is not None}))
 
-    def append_figure(self, *, id: str, layout_ref: str, anchor: str | None = None, keep_together: bool = True) -> "Section":
+    def append_figure(self, *, id: str, layout_ref: str, anchor: str | None = None, keep_together: bool = True, page: PageSettings | dict | None = None, pagination: ObjectPagination | dict | None = None) -> "Section":
         fields = dict(id=id, layoutRef=layout_ref, keepTogether=keep_together)
+        fields.update({k: v for k, v in dict(page=page, pagination=pagination).items() if v is not None})
         if anchor is not None:
             fields["anchor"] = anchor
         return self.append_block(FigureBlock(**fields))
@@ -385,12 +389,12 @@ class Section(OvaBaseModel):
             paragraph(caption, style="figure_caption"),
         )
 
-    def append_table(self, *, table_ref: str, id: str | None = None, anchor: str | None = None) -> "Section":
+    def append_table(self, *, table_ref: str, id: str | None = None, anchor: str | None = None, page: PageSettings | dict | None = None, pagination: ObjectPagination | dict | None = None) -> "Section":
         """
         Create and append a table block in one step.
         一步创建并追加一个 table 块。
         """
-        return self.append_block(TableBlock(id=id, anchor=anchor, tableRef=table_ref))
+        return self.append_block(TableBlock(id=id, anchor=anchor, tableRef=table_ref, **{k: v for k, v in dict(page=page, pagination=pagination).items() if v is not None}))
 
     def append_math(self, *, latex: str, id: str | None = None, anchor: str | None = None) -> "Section":
         """
@@ -405,6 +409,27 @@ class Section(OvaBaseModel):
         追加一个已经构造好的 callout 块。
         """
         return self.append_block(callout)
+
+    def append_object_with_captions(
+        self, block: ImageBlock | ChartBlock | TableBlock | FigureBlock, *,
+        before: str | None = None, after: str | None = None,
+        before_layout: BlockLayout | dict | None = None,
+        after_layout: BlockLayout | dict | None = None,
+    ) -> "Section":
+        """Append an explicit v1.6 object group without changing legacy caption helpers."""
+        from .helpers import caption_block
+        if not isinstance(block, (ImageBlock, ChartBlock, TableBlock, FigureBlock)):
+            raise ValueError("Explicit caption groups require an image, chart, table or figure.")
+        if not block.id or not block.id.strip():
+            raise ValueError("Explicit caption groups require a non-empty object id.")
+        style = "table_caption" if isinstance(block, TableBlock) else "figure_caption"
+        blocks = []
+        if before is not None:
+            blocks.append(caption_block(before, target_ref=block.id, position="before", style=style, layout=before_layout))
+        blocks.append(block)
+        if after is not None:
+            blocks.append(caption_block(after, target_ref=block.id, position="after", style=style, layout=after_layout))
+        return self.append_blocks(*blocks)
 
     def append_image_with_caption(
         self,
@@ -500,6 +525,7 @@ class Section(OvaBaseModel):
         navigation: SectionNavigation | dict | None = None,
         pagination: SectionPagination | dict | None = None,
         presentation: SectionPresentation | dict | None = None,
+        page: PageSettings | dict | None = None,
         append: bool = True,
     ) -> "Section":
         """
@@ -520,6 +546,7 @@ class Section(OvaBaseModel):
             navigation=navigation,
             pagination=pagination,
             presentation=presentation,
+            **({"page": page} if page is not None else {}),
         )
         if append:
             self.append_subsection(child)
